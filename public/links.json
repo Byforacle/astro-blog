@@ -5,34 +5,47 @@
       "desc": "Common links included in circle friends",
       "link_list": [
         {
-          "name": "Arthals' ink",
-          "intro": "所见高山远木，阔云流风；所幸岁月盈余，了无拘束",
-          "link": "https://arthals.ink/",
-          "avatar": "https://cdn.arthals.ink/Arthals.png"
+          "name": "MoonlitSyntax",
+          "intro": "莫因诗卷愁成谶, 春鸟秋虫自作声",
+          "link": "https://dionysus.zip/",
+          "avatar": "https://avatars.githubusercontent.com/u/130264291?v=4"
         },
         {
-          "name": "CWorld Site",
-          "intro": "求知若愚，虚怀若谷",
-          "link": "https://cworld0.com/",
-          "avatar": "https://cravatar.cn/avatar/1ffe42aa45a6b1444a786b1f32dfa8aa?s=200"
+          "name": "SCHNIE.zero",
+          "intro": "第九边缘",
+          "link": "https://www.sch-nie.com/",
+          "avatar": "https://picbed.sch-nie.com/social/zero.jpg"
+        },
+        {
+          "name": "Celery",
+          "intro": "种赛博蔬菜，品百味报错",
+          "link": "https://rikacelery.github.io/",
+          "avatar": "https://rikacelery.github.io/img/avatar_hu_54fa2e4d38dbe97a.jpg"
+        },
+        {
+          "name": "Chidaic",
+          "intro": "陪着我在有梦的地方",
+          "link": "https://chidaic.github.io/chidaic/",
+          "avatar": "https://s2.loli.net/2023/08/31/rp69yfMTuGHs3lw.jpg"
         }
       ]
     },
     {
       "id_name": "inactive-links",
       "desc": "Inactive or rule-breaking friends",
-      "link_list": []
+      "link_list": [
+        {
+          "name": "Jinqi Wu",
+          "intro": "Master Student @ NJU",
+          "link": "https://creating001.github.io/",
+          "avatar": "https://creating001.github.io/assets/imgs/favicon.ico"
+        }
+      ]
     },
     {
       "id_name": "special-links",
       "desc": "Other special links",
       "link_list": [
-        {
-          "name": "虫洞",
-          "intro": "随机前往十年之约的成员博客",
-          "link": "https://www.foreverblog.cn/go.html",
-          "avatar": "/images/wormhole.png"
-        },
         {
           "name": "开往",
           "intro": "随机前往开往的成员博客",
