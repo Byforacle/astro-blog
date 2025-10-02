@@ -7,7 +7,7 @@ export const theme: ThemeUserConfig = {
   /** Will be used in index page & copyright declaration */
   author: 'Orac1e',
   /** Description metadata for your website. Can be used in page metadata. */
-  description: 'Stay hungry, stay foolish',
+  description: 'Writing the journey, sharing the mind',
   /** The default favicon for your site which should be a path to an image in the `public/` directory. */
   favicon: '/favicon/favicon.ico',
   /** Specify the default language for this site. */
@@ -116,8 +116,8 @@ export const integ: IntegrationUserConfig = {
     applyTip: [
       { name: 'Name', val: theme.title },
       { name: 'Desc', val: theme.description || 'Null' },
-      { name: 'Link', val: 'https://astro-pure.js.org/' },
-      { name: 'Avatar', val: 'https://astro-pure.js.org/favicon/favicon.ico' }
+      { name: 'Link', val: 'https://orac1e.me/' },
+      { name: 'Avatar', val: 'https://orac1e.me/favicon/favicon.ico' }
     ]
   },
   // Enable page search function
@@ -154,7 +154,7 @@ export const integ: IntegrationUserConfig = {
   waline: {
     enable: true,
     // Server service link
-    server: 'https://astro-theme-pure-waline.arthals.ink/',
+    server: 'https://waline.orac1e.me/',
     // Refer https://waline.js.org/en/guide/features/emoji.html
     emoji: ['bmoji', 'weibo'],
     // Refer https://waline.js.org/en/reference/client/props.html
