@@ -5,71 +5,72 @@ import Substats from '@/components/about/Substats.astro'
 import ToolSection from '@/components/about/ToolSection.astro'
 
 const headings = [
+  { depth: 2, slug: 'education', text: 'Education' },
   { depth: 2, slug: 'hobbies', text: 'Hobbies' },
   { depth: 2, slug: 'tools', text: 'Tools' },
-  { depth: 2, slug: 'social-networks', text: 'Social Networks' },
-  { depth: 2, slug: 'gossips', text: 'Gossips' },
   { depth: 2, slug: 'about-blog', text: 'About Blog' }
 ]
 ---
 
 <PageLayout title='About' {headings} comment>
-  <p>Developer / Designer</p>
+  <p><b>Master Student / Developer</b></p>
   <p>
-    Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea id. Usu ei regione indoctum
-    dissentiunt, cu meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit mel, at eum oratio
-    possit voluptatum.
+    Hello! I am pursuing my Master’s degree in School of Cyber Science and Engineering, SEU , advised by Prof. <a href='https://jpdz.github.io/pengjiang/' target='_blank'>Jiang Peng</a>. My research focus is on system security.
   </p>
   <p>
-    My motto: Stay hungry, Stay foolish. <Spoiler>这里可以夹私货，比如为什么要演奏春日影！</Spoiler>
+    I'm passionate about artificial intelligence and cybersecurity. Here I share my life and notes<br><b>welcome to visit!</b>
   </p>
+  <Substats
+    stats={[
+      {
+        platform: 'GitHub',
+        icon: 'github',
+        link: 'https://github.com/Byforacle',
+        text: 'followers',
+        api: 'github/Byforacle'
+      },
+      {
+        platform: 'Steam',
+        icon: 'steam',
+        color: '#50769d',
+        link: 'https://steamcommunity.com/profiles/76561198434371970/',
+        text: 'games',
+        api: 'steamgames/76561198434371970'
+      }
+    ]}
+  />
   <Button title='Sponsor Me' class='w-fit' href='/projects#sponsorship' variant='ahead' />
+
+  {/* education */}
+  <h2 id='education'>Education</h2>
+  <Timeline
+    events={[
+      {
+        date: '2022-09',
+        content:
+          '吉林大学，网络空间安全，本科'
+      },
+      {
+        date: '2026-09',
+        content:
+          '东南大学，网络空间安全，硕士'
+      }
+    ]}
+  />
 
   {/* general-talk */}
   <h2 id='hobbies'>Hobbies</h2>
   <ul>
-    <li>Lorem ipsum dolor sit amet, vidit suscipit at mei.</li>
+    <li>游戏🎮，各种领域都会尝试<Spoiler>，最近比较喜欢类魂和类银😋</Spoiler></li>
     <li>
-      Quem denique mea id. Usu ei regione indoctum dissentiunt, cu meliore fuisset mei, vel quod
-      voluptua ne.
+      冻鳗作品<Spoiler>，最近看的比较少，但是老二次元</Spoiler>
     </li>
-    <li>Ex dicat impedit mel, at eum oratio possit voluptatum.</li>
-    <li>Impetus fuisset ullamcorper pri cu, his posse iisque ad, aliquam honestatis usu id.</li>
+    <li>户外运动(🏃，🏸)，旅行✈️</li>
   </ul>
 
   {/* tools */}
   <h2 id='tools'>Tools</h2>
-  <p>Current support tools as follow:</p>
-  <ToolSection
-    class='mb-5'
-    title='Design'
-    tools={[
-      {
-        name: 'Photoshop',
-        description: 'Picture Editing',
-        href: 'https://www.adobe.com/products/photoshop',
-        icon: import('@/assets/tools/photoshop.svg?raw')
-      },
-      {
-        name: 'Illustrator',
-        description: 'Vector Drawing',
-        href: 'https://www.adobe.com/products/illustrator',
-        icon: import('@/assets/tools/illustrator.svg?raw')
-      },
-      {
-        name: 'After Effects',
-        description: 'Motion Graphics',
-        href: 'https://www.adobe.com/products/aftereffects',
-        icon: import('@/assets/tools/aftereffects.svg?raw')
-      },
-      {
-        name: 'Premiere Pro',
-        description: 'Video Editing',
-        href: 'https://www.adobe.com/products/premiere',
-        icon: import('@/assets/tools/premiere.svg?raw')
-      }
-    ]}
-  />
+  <p>Used tools as follows:</p>
   <ToolSection
     class='mb-5'
     title='Productivity'
@@ -79,18 +80,6 @@ const headings = [
         description: 'Browser',
         href: 'https://www.google.com/chrome/',
         icon: import('@/assets/tools/chrome.svg?raw')
-      },
-      {
-        name: 'Firefox',
-        description: 'Browser',
-        href: 'https://www.mozilla.org/en-US/firefox',
-        icon: import('@/assets/tools/firefox.svg?raw')
-      },
-      {
-        name: 'Notion',
-        description: 'Note Taking',
-        href: 'https://www.notion.so/',
-        icon: import('@/assets/tools/notion.svg?raw')
       },
       {
         name: 'Typora',
@@ -111,16 +100,10 @@ const headings = [
         icon: import('@/assets/tools/vscode.svg?raw')
       },
       {
-        name: 'Neovim',
+        name: 'Intellij Idea',
         description: 'IDE',
-        href: 'https://neovim.io/',
-        icon: import('@/assets/tools/neovim.svg?raw')
-      },
-      {
-        name: 'Sublime Text',
-        description: 'IDE',
-        href: 'https://www.sublimetext.com/',
-        icon: import('@/assets/tools/sublime.svg?raw')
+        href: 'https://www.jetbrains.com/zh-cn/idea/',
+        icon: import('@/assets/tools/idea_new.svg?raw')
       }
     ]}
   />
@@ -129,10 +112,10 @@ const headings = [
     title='Environment'
     tools={[
       {
-        name: 'Arch Linux',
+        name: 'Kali Linux',
         description: 'Linux Distribution',
-        href: 'https://archlinux.org/',
-        icon: import('@/assets/tools/archlinux.svg?raw')
+        href: 'https://www.kali.org/',
+        icon: import('@/assets/tools/kali.svg?raw')
       },
       {
         name: 'Ubuntu 24.04 LTS',
@@ -141,7 +124,7 @@ const headings = [
         icon: import('@/assets/tools/ubuntu.svg?raw')
       },
       {
-        name: 'MacOS Tahoe',
+        name: 'MacOS',
         description: 'MacBook Air',
         href: 'https://www.apple.com/macos/',
         icon: import('@/assets/tools/apple.svg?raw')
@@ -155,55 +138,13 @@ const headings = [
     ]}
   />
 
-  {/* social-networks */}
-  <h2 id='social-networks'>Social Networks</h2>
-  <p>
-    Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea id. Usu ei regione indoctum
-    dissentiunt, cu meliore fuisset mei, vel quod voluptua ne.
-  </p>
-  <Substats
-    stats={[
-      {
-        platform: 'GitHub',
-        icon: 'github',
-        link: 'https://github.com/cworld1',
-        text: 'followers',
-        api: 'github/cworld1'
-      },
-      {
-        platform: 'Telegram',
-        icon: 'telegram',
-        color: '#2ca5e0',
-        link: 'https://t.me/cworld0_cn',
-        text: 'subscribers',
-        api: 'telegram/cworld0_cn'
-      },
-      {
-        platform: 'Weibo',
-        icon: 'weibo',
-        color: '#e71f19',
-        link: 'https://weibo.com/cworld0',
-        text: 'followers',
-        api: 'weibo/5501674056'
-      },
-      {
-        platform: 'Steam',
-        icon: 'steam',
-        color: '#50769d',
-        link: 'https://steamcommunity.com/id/cworld',
-        text: 'games',
-        api: 'steamgames/76561199021278120'
-      }
-    ]}
-  />
-
-  {/* gossips */}
+  <!-- {/* gossips */}
   <h2 id='gossips'>Gossips</h2>
   <Collapse title='Lorem ipsum'>
     Lorem ipsum dolor sit amet, vidit suscipit at mei. Quem denique mea id. Usu ei regione indoctum
     dissentiunt, cu meliore fuisset mei, vel quod voluptua ne. Ex dicat impedit mel, at eum oratio
     possit voluptatum.
-  </Collapse>
+  </Collapse> -->
 
   {/* about-blog */}
   <h2 id='about-blog'>About Blog</h2>
@@ -211,18 +152,18 @@ const headings = [
   <Timeline
     events={[
       {
-        date: '2024-04-29',
+        date: '2025-09-28',
+        content:
+          'Website migration to a new domain <a href="https://orac1e.me/" target="_blank">orac1e.me</a>'
+      },
+      {
+        date: '2025-10-02',
         content:
           'Website refactored using <a href="https://astro.build/" target="_blank">Astro</a> and <a href="https://github.com/srleom/astro-theme-resume" target="_blank">Astro Theme Resume</a>'
       },
       {
-        date: '2024-07-26',
-        content:
-          'Website abstracted as a theme and published on <a href="https://github.com/cworld1/astro-theme-pure"target="_blank">Github</a>'
-      },
-      {
-        date: '2024-07-27',
-        content: 'Began writing website docs'
+        date: '2025-10-03',
+        content: 'Configure <a href="https://dash.cloudflare.com/" target="_blank">Cloudflare</a> CDN Acceleration'
       }
     ]}
   />
@@ -231,7 +172,7 @@ const headings = [
     technical support provided by the following excellent projects/service providers:
   </p>
   <ul>
-    <li>Domain: <a href='#' target='_blank'>Vercel</a></li>
+    <li>Domain: <a href='#' target='_blank'>Aliyun</a></li>
     <li>
       Framework & Theme: <a href='https://astro.build/' target='_blank'>Astro</a> + <a
         href='https://github.com/cworld1/astro-theme-pure'
@@ -241,15 +182,9 @@ const headings = [
     <li>
       Site hosting: <a href='https://vercel.com/' target='_blank'>Vercel</a>
     </li>
-    <li>
-      CI/CD: <a href='https://vercel.com/workflow' target='_blank'>Vercel Workflow</a>
-    </li>
     <!-- <li>Resources speedup: <a href='https://cdn.cbd.int/' target='_blank'>CBD CDN</a></li> -->
-    <li>Comment system: <a href='https://waline.js.org' target='_blank'>Waline</a></li>
-    <li>
-      Visits: <a href='https://supabase.com/' target='_blank'>Supabase</a> +
-      <a href='https://waline.js.org/' target='_blank'>Waline</a>
-    </li>
+    <li>Comment system: <a href='https://supabase.com/' target='_blank'>Supabase</a> +
+      <a href='https://waline.js.org/' target='_blank'>Waline</a></li>
     <li>
       Other statistics: <a href='https://github.com/spencerwooo/substats' target='_blank'
         >Substats</a

@@ -51,6 +51,12 @@
           "intro": "随机前往开往的成员博客",
           "link": "https://www.travellings.cn/go.html",
           "avatar": "https://www.travellings.cn/assets/travelling.png"
+        },
+        {
+          "name": "Astro Theme Pure",
+          "intro": "Stay hungry, stay foolish",
+          "link": "https://astro-pure.js.org/",
+          "avatar": "https://astro-pure.js.org/favicon/favicon.ico"
         }
       ]
     }
