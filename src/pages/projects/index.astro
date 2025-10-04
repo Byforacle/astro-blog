@@ -39,8 +39,8 @@ const headings = [
   <ProjectSection
     projects={[
       {
-        name: '🕸️ Astro-Blog',
-        description: 'A simple, clean but powerful blog theme build by astro.',
+        name: '🕸️ Orac1e の Blog',
+        description: 'My own Blog Site based on Astro and Pure theme.',
         links: [
           { type: 'github', href: 'https://github.com/Byforacle/astro-blog' },
           { type: 'site', href: 'https://orac1e.me' },
@@ -49,9 +49,37 @@ const headings = [
             href: 'https://astro-pure.js.org/docs'
           }
         ]
+      },
+      {
+        name: '🚀 OneDrive Share',
+        description: 'Showcase, share, preview, and download files inside your OneDrive with onedrive-cf-index-ng',
+        links: [
+          { type: 'github', href: 'https://github.com/Byforacle/my_onedrive' },
+          { type: 'site', href: 'https://pan.orac1e.me' }
+        ]
       }
     ]}
   />
+  <Collapse title='Privated projects'>
+    <ProjectSection
+      projects={[
+        {
+          name: '✍️ Waline Comment System',
+          description: 'A backend comment system derived from Valine.',
+          links: [
+            { type: 'site', href: 'https://waline.orac1e.me' }
+          ]
+        },
+        {
+          name: '📊 UptimeFlare',
+          description: 'A more advanced, serverless, and free uptime monitoring & status page solution',
+          links: [
+            { type: 'site', href: 'https://status.orac1e.me' }
+          ]
+        }
+      ]}
+    />
+  </Collapse>
 
   <h2 id='programs'>Programs</h2>
   <ProjectSection
