@@ -36,11 +36,12 @@ const typographyConfig = {
       position: 'relative',
       overflow: 'hidden',
       'border-width': '1px',
-      'border-left': 'inherit',
       'border-radius': 'var(--radius)',
       'padding-inline': '1.6rem',
       'box-shadow': '0 5px 0 ' + bgMuted,
-      ...(typographyCustom.blockquoteStyle === 'normal' && { 'font-style': 'normal' })
+      'margin-top': '1rem',
+      'margin-bottom': '1rem',
+      'line-height': '1.8'
     },
     'blockquote::after': {
       color: fgMuted,
