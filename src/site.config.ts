@@ -62,8 +62,8 @@ export const theme: ThemeUserConfig = {
     links: [
       // Registration link
       {
-        title: 'Moe ICP 114514',
-        link: 'https://icp.gov.moe/?keyword=114514',
+        title: '萌ICP备20253051号',
+        link: 'https://icp.gov.moe/?keyword=20253051',
         style: 'text-sm' // Uno/TW CSS class
       },
       {
@@ -71,15 +71,15 @@ export const theme: ThemeUserConfig = {
         link: 'https://www.travellings.cn/go.html',
         style: 'text-sm'
       },
-      // Privacy Policy link
       {
-        title: 'Site Policy',
-        link: '/terms/list',
-        pos: 2 // position set to 2 will be appended to copyright line
+        title: 'Contact Me',
+        link: 'mailto:baoyf.jlu@gmail.com',
+        style: 'text-sm',
+        pos: 2
       }
     ],
     /** Enable displaying a “Astro & Pure theme powered” link in your site’s footer. */
-    credits: true,
+    credits: false,
     /** Optional details about the social media accounts for this site. */
     social: { github: 'https://github.com/Byforacle/astro-blog' }
   },
