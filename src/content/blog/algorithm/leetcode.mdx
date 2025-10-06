@@ -1,0 +1,616 @@
+---
+title: "leetcode刷题笔记"
+publishDate: 2023-9-17
+description: '现在回头看看原来我只坚持了两周吗'
+tags:
+  - Algorithm
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062346080.jpg', inferSize: true, color: '#150372ff' }
+language: '简中'
+draft: false
+comment: true
+---
+大四回头看算法依然是周赛两题水平，以后再努力吧
+![image-20251006225803934](https://image777.oss-cn-beijing.aliyuncs.com/img/202510062258003.png)
+
+## Week1
+
+### 1. 两数之和
+
+暴力枚举可过，时间复杂度$O(n^2)$
+
+哈希表：思路为遍历数组，判断当前元素前有无元素与其之和等于target，而哈希表查找元素的时间复杂度为$O(1)$，我们可以每当遍历一个元素而找不到与其之和满足要求的元素时，将其存入哈希表以便后续查找，这样即可将算法总时间复杂度优化到$O(n)$
+
+> tips：C++语法中自带两个哈希表数据结构，分别为有序map(底层为红黑树实现)，查找时间复杂度为$\log_{2}{n}$，而无序哈希表unordered_map时间复杂度为$O(1)$，本题用后者
+
+题解：
+```c++
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        vector<int> res; // 存放两数的下标
+        unordered_map<int,int> hash; // 哈希表
+        for(int i=0;i<nums.size();i++)
+        {
+            int r=target-nums[i];//计算与当前元素相加为target的值
+            if(hash.count(r)) //若找到目标元素，将两数下标存入
+            {
+                res.push_back(hash[r]);
+                res.push_back(i);
+            }
+            hash[nums[i]]=i;
+        }
+        return res;
+    }
+};
+```
+
+### 2. 两数相加
+
+示例：
+
+```
+输入：l1 = [2,4,3], l2 = [5,6,4]
+输出：[7,0,8]
+解释：342 + 465 = 807.
+```
+
+给出数据以**链表**形式**倒序**存储，从个位依次运算即可（注意细节）
+
+```c++
+/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* Newhead=new ListNode(-1);//新建存放结果链表的哨兵头节点
+        ListNode* cur=Newhead;//记录返回链表当前节点位置
+        int t=0;//储存进位
+        while(l1||l2||t)//当l1、l2没有遍历完或进位不为0时，继续循环
+        {
+            if(l1) //当l1没遍历完时
+            {
+                t+=l1->val;
+                l1=l1->next;
+            }
+            if(l2) //当l2没遍历完时
+            {
+                t+=l2->val;
+                l2=l2->next;
+            }
+            cur->next=new ListNode(t%10);
+            t/=10;
+            cur=cur->next;
+
+        }
+        return Newhead->next;//返回哨兵节点的下一个
+
+    }
+};
+```
+
+### 3. 无重复字符的最长子串
+
+初见可能比较难，先了解一下双指针算法和滑动窗口算法
+
+**基本思路**：要找出给定字符串`s`中不含重复字符的最长子串。基本思路肯定是遍历所有子串，并找出符合条件的。我们以字串尾字符为基准进行遍历，若暴力遍历时间复杂度为$O(n^2)$
+
+**优化办法**：假设尾节点为$j$时，无重复字符最长子串头节点为$i$，当我们遍历尾节点为$j+1$的所有子串时，满足条件的头节点$i'$仅可能出现在$i$或其右侧，这样使两个指针遍历时“不走回头路”，类似滑动窗口，可将算法时间复杂度优化至$O(n)$
+
+**其他细节**：我们可以用哈希表来维护指针$i$、$j$之间元素出现的个数，便于判断其间有无重复元素，每次$i$指针向前移动一次，将其存入哈希表，若有重复元素则定为$i$指向元素值，$j$向前移动至该元素仅出现一次即可
+
+```c++
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        unordered_map<char,int> hash;//哈希表存放i、j间字符出现个数
+        int i=0;//左指针
+        int res=0;//保存结果
+        for(int j=0;j<s.size();j++)
+        {
+            hash[s[j]]++;//对应字符的出现次数加1
+            while(hash[s[j]]>1)//当有重复字符
+            {
+                hash[s[i++]]--;//左指针移动，对应字符出现次数减1
+            }
+            res=max(res,j-i+1);
+        }
+        return res;
+    }
+};
+```
+
+### 4. 寻找两个正序数组的中位数
+
+> 中位数：有序数组元素个数为奇数时，中位数为最中间的数，若元素个数为偶数时，中位数为中间两个数的平均数
+
+**朴素算法**：将两个数组合并，`sort`排序后遍历寻找中位数，时间复杂度为$O(n\log_{}{n})$，不满足题目要求
+
+**优化**：本质上我们需要找到两数组排序后第$k=\frac{m+n}{2})$小的数，我们可以从题目要求的时间复杂度入手$O(\log(m+n))$，尝试二分的思想。
+
+（若A、B数组的元素个数均大于$\frac{k}{2}$时）各取A、B数组中第$\frac{k}{2}$个元素，若A中所取元素小于B中所取元素，即A中元素取少了，B中元素取多了，则A中前$\frac{k}{2}$个元素必定在要取中位数前（换句话说中位数不可能出现在这些元素中），我们可以不再考虑这些元素。反之也成立，由此可将k的规模减少一半，在剩下的数据中寻找第$k-\frac{k}{2}$小的元素，将其作为新的k值继续递归即可。
+
+（若A、B数组的元素个数有一个小于$\frac{k}{2}$时，不可能全部小于）那取小数组的最后一个元素与大数组的$\frac{k}{2}$个元素，若前者小于后者，则中位数不可能出在前一个数组中，即中位数为大数组的第$k-m$个数，若后者小于前者，则后数组前$\frac{k}{2}$个元素中不存在中位数。删去前$\frac{k}{2}$个元素即可。
+
+**时间复杂度**：$k=\frac{m+n}{2})$，每次递归k的规模减小一半，则时间复杂度为$O(\log(m+n))$
+
+**注意**：考虑数组越界问题，`find()`函数实现时确保前一个数组一定小于后一个数组，这样可以避免很多边界问题
+
+```c++
+class Solution {
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        int total=nums1.size()+nums2.size();
+        if(total%2==0)//m+n为偶数，中位数为中间两数平均
+        {
+            int left=findknumber(nums1,0,nums2,0,total/2);//中位左数
+            int right=findknumber(nums1,0,nums2,0,total/2+1);//中位右数
+            return (left+right)/2.0;//注意细节，返回浮点数
+        }
+        else return findknumber(nums1,0,nums2,0,total/2+1);
+    }
+//自定义递归函数findknumber
+//含义为寻找从下标i开始的nums1数组和从下标为j开始的nums2数组合并后第k大的数
+    int findknumber(vector<int>& nums1, int i, vector<int>& nums2, int j,int k)
+    {
+        //确保nums1长度小于nums2，便于判断边界
+        if(nums1.size()-i>nums2.size()-j) return findknumber(nums2,j,nums1,i,k);
+        //当短数组遍历完时(注意细节)
+        if(nums1.size()==i) return nums2[j-1+k];
+        //当k为1时，正常情况的递归出口
+        if(k==1) return min(nums1[i],nums2[j]);
+        //正常递归情况
+        int si=min(i+k/2,int(nums1.size())); //考虑短数组长度小于k/2 
+        int sj=j+k/2;
+        if(nums1[si-1]>nums2[sj-1])//因si、sj保存的是第几个数，需-1
+        {
+            return findknumber(nums1,i,nums2,sj,k-(sj-j));//舍弃nums2前半段
+        }
+        else
+        {
+            return findknumber(nums1,si,nums2,j,k-(si-i));//舍弃nums1前半段
+        }
+    }
+
+};
+```
+
+> 有一种利用二分非递归的做法，可将时间复杂度优化到$O(\log(min(m,n)))$，但细节处较为繁琐，待我学学再做补充
+
+### 5. 最长回文子串
+
+经典题目，做法很多，有[Manacher算法](https://zhuanlan.zhihu.com/p/80323989)时间复杂度可优化到$O(n)$，但该算法几乎只可解决此类问题，并不实用，字符串哈希搭配二分$O(n\log_{}{n})$（以后补充）
+
+因为该题给出的数据量较小，此处我们选择一种便于理解的$O(n^2)$的算法，此题用DP也可过但需要额外的空间复杂度
+
+**基本思路**：回文串指左右对称的字符串，大体分为奇数型和偶数型，遍历整个字符串，选取中间节点$i$，若为奇数型，从$\left[i-1,i+1\right]$ 向左右寻找，直到遇到不同字符或数组边界，若为偶数型，从$\left[i,i+1\right]$ 向左右寻找即可
+
+```c++
+class Solution {
+public:
+    string longestPalindrome(string s) {
+        string res; //储存回文子串
+        for(int i=0;i<s.size();i++) //遍历中间点
+        {
+            //奇数回文串
+            int l=i-1;
+            int r=i+1;
+            while(l>=0 && r<=s.size() && s[l]==s[r])//出界或字符不匹配退出循环
+            {
+                l--;
+                r++;
+            }
+            if(res.size()<r-l-1) res=s.substr(l+1,r-l-1);//储存最长回文串
+            //偶数回文串
+            l=i;
+            r=i+1;
+            while(l>=0 && r<=s.size() && s[l]==s[r])
+            {
+                l--;
+                r++;
+            }
+            if(res.size()<r-l-1) res=s.substr(l+1,r-l-1);
+        }
+        return res;
+    }
+};
+```
+
+### 6. N 字形变换
+
+样例：`s=PAYPALISHIRING numRows=3`
+
+```log
+P   A   H   N
+A P L S I I G
+Y   I   R
+
+# PAHNAPLSIIGYIR
+```
+
+本质即为找规律，第一行和最后一行可看成一个等差数列，中间行可看为两个等差数列，注意首项和公差之间的规律即可（注意当n==1，公差为0会进入死循环，需要特殊判断）
+
+```log
+1          11          21          31
+2       10 12       20 22       30 32
+3     9    13     19   23     29   33
+4   8      14   18     24   28     34
+5 7        15 17       25 27       35
+6          16          26          36
+```
+
+以数字字符串为例，便于找到规律。所有等差数列公差为$2n-2$，除第一行与最后一行，两等差数列首项之差为$2n-2-i$（i为行头元素）
+
+```c++
+class Solution {
+public:
+    string convert(string s, int numRows) {
+        string res;//保存结果
+        if(numRows==1) return s;//特殊判断
+        for(int i=0;i<numRows;i++)//遍历每行
+        {
+            if(i==0||i==numRows-1)//首行或末行
+            {
+                for(int j=i;j<s.size();j+=2*numRows-2)//等差数列
+                {
+                    res+=s[j];
+                }
+            }
+            else
+            {
+                //两个等差数列首项j、k
+                for(int j=i,k=2*numRows-2-i;j<s.size()||k<s.size();j+=2*numRows-2,k+=2*numRows-2)
+                {
+                    if(j<s.size()) res+=s[j];//注意顺序
+                    if(k<s.size()) res+=s[k];
+                }
+            }
+        }
+        return res;
+    }
+};
+```
+
+###  7. 整数反转
+
+> 注意题目要求：如果反转后整数超过 32 位的有符号整数的范围 $\left[-2^31,2^31-1\right]$ ，就返回 0。
+>
+> 假设环境不允许存储 64 位整数（有符号或无符号）。即不使用longlong类型存放数据
+
+将数据存入字符串中，用字符串内置方法可过，这里用数学方法
+
+基本思路：思路非常简单，每次通过模10运算取出最后一位与上次保留结果的十倍相加（秦九韶算法），此方法对负数依然成立，根本原因为C++中的取模运算与数学中不同，负数取模仍返回负数，这对我们的算法有利
+
+不限制longlong型：
+```c++
+class Solution {
+public:
+    int reverse(int x) {
+        long long r=0;//保存结果，初始值为0
+        while(x)
+        {
+            r=r*10+x%10;
+            x /= 10;
+        }
+        if(r>INT_MAX) return 0;//INT_MAX为常量，int型最大值
+        if(r<INT_MIN) return 0;
+        return r;
+    }
+};
+```
+
+如果限制只能使用`int`类型存储的话，我们要再循环内判断是否超过范围。假设`r`为正数时，想判断`10*r+x%10>INT_MAX`，直接判断会爆int，我们根据数学方法变形为`r>((INT_MAX-x%10))/10`即可，负数同理
+
+```c++
+class Solution {
+public:
+    int reverse(int x) {
+        int r=0;//保存结果，初始值为0
+        while(x)
+        {
+            if(r>0&&r>(INT_MAX-x%10)/10) return 0;
+            if(r<0&&r<(INT_MIN-x%10)/10) return 0;
+            r=r*10+x%10;
+            x /= 10;
+        }
+        return r;
+    }
+};
+```
+
+### 8. 字符串转换整数 (atoi)
+
+典型的模拟题，需要自己模拟`atoi`函数，这题要求很多，按需求一步一步来
+
+思路比较常规，和上一题一样（秦九韶算法），一位位读取即可
+
+不限制`long long`类型的写法：
+```c++
+class Solution {
+public:
+    int myAtoi(string s) {
+        int k=0;//用来记录当前遍历到字符串元素的下表
+        while(k<s.size()&&s[k]==' ') k++;//去除字符串前面的空格
+        if(k==s.size()) return 0;//特殊判断，防止字符串仅包含空格或为空，导致越界
+
+        int minus =1;//保存符号，默认为正
+        if(s[k]=='-') 
+        {
+            minus=-1;//更改符号
+            k++;
+        }
+        else if(s[k]=='+') k++;
+        
+        long long res=0;//储存结果
+        while(k<s.size()&&s[k]>='0'&&s[k]<='9')//储存数据
+        {
+            res=res*10+(s[k]-'0');//秦九韶算法
+            k++;
+            if(res>INT_MAX) break;//越界提前退出循环，防止爆long long
+        }
+
+        res *= minus;//带上符号
+        if(res>INT_MAX) return INT_MAX;//判断是否越界
+        if(res<INT_MIN) return INT_MIN;
+
+        return res;
+    }
+};
+```
+
+如果限制只能使用`int`类型，我们只需要在存数时改变越界的判断即可，这里有一个**坑**点，在while循环中我们存放的是整数的绝对值，而int类型的最小值为`-2147483648`，最大值为`2147483647`，这就导致恰好为最小值时我们无法将其绝对值存入，需要特殊判断
+
+```c++
+class Solution {
+public:
+    int myAtoi(string s) {
+        int k=0;//用来记录当前遍历到字符串元素的下表
+        while(k<s.size()&&s[k]==' ') k++;//去除字符串前面的空格
+        if(k==s.size()) return 0;//特殊判断，防止字符串仅包含空格或为空，导致越界
+
+        int minus =1;//保存符号，默认为正
+        if(s[k]=='-') 
+        {
+            minus=-1;//更改符号
+            k++;
+        }
+        else if(s[k]=='+') k++;
+        
+        int res=0;//储存结果
+        while(k<s.size()&&s[k]>='0'&&s[k]<='9')//储存数据
+        {
+            if(minus>0&&res>(INT_MAX-(s[k]-'0'))/10) return INT_MAX;//正数越界判断
+            if(minus<0&&-res<(INT_MIN+(s[k]-'0'))/10) return INT_MIN;
+            if(-res*10-(s[k]-'0')==INT_MIN) return INT_MIN;//特殊判断最小值
+            res=res*10+(s[k]-'0');//秦九韶算法
+            k++;
+        }
+
+        res *= minus;//带上符号
+
+        return res;
+    }
+};
+```
+
+### 9. 回文数
+
+简单题做法很多
+
+**转换成字符串**：看反转后与之前是否相同（`rbegin()`、`rend()`反向迭代器）
+
+```c++
+class Solution {
+public:
+    bool isPalindrome(int x) {
+        string s=to_string(x);//转化为字符串
+        return s==string(s.rbegin(),s.rend());//反转看与原串是否相等
+    }
+};
+```
+
+或者可以用第七题中整数反转思想反转（负数可直接特判为`false`）
+
+### 10. 正则表达式匹配
+很喜欢一条评论——这不仅是我刷的第十道题，也是我人生中的一道坎
+
+这种两个字符串匹配的问题通常可以使用DP（动态规划来解决），我们来分析一下，两个字符串的DP问题我们通常用二维数组存储
+
+![图嫖的其他题解](https://s2.loli.net/2023/09/25/71B4ekO9jqJspDT.png)
+
+> 注意：本题中`*`代表匹配零个或多个前面的那一个元素，和正常的正则语法不同，这里看了半天😈
+
+时间复杂度分析：这里按照图中黑字的状态转移方程，更新状态时间复杂度为$O(n^2)$，枚举`*`匹配的字符个数时间复杂度为$O(n)$，总时间复杂度为$O(n^3)$，需要进行优化
+
+我们可以列出`f(i-1,j)`的状态转移方程，发现其中的共用部分，用其状态来更新`f(i,j)`的状态，可将枚举阶段的时间复杂度优化为$O(n)$，最终状态方程如以上红字（优化方式类似于完全背包）
+
+```c++
+class Solution {
+public:
+    bool isMatch(string s, string p) {
+        int n = s.size(), m = p.size();
+        s = ' ' + s, p = ' ' + p; //使字符串下标从1开始
+
+        vector<vector<bool>> f(n + 1, vector<bool> (m + 1));//创建二维数组
+        f[0][0] = true;//初始化状态
+
+        for (int i = 0; i <= n; i ++) //f(0,j)可能成功匹配，i从0开始
+            for (int j = 1; j <= m; j ++)//f(i,0)无意义
+            {
+                // if (j + 1 <= m && p[j + 1] == '*') continue;
+                if (i && p[j] != '*') //状态转移需要用到i - 1, 所以需要保证i > 0
+                {
+                    f[i][j] = f[i - 1][j - 1] && (s[i] == p[j] || p[j] == '.');
+                }
+                else if (p[j] == '*')
+                {
+                    f[i][j] = f[i][j - 2] ||(i && f[i - 1][j] && (s[i] == p[j - 1] || p[j - 1] == '.'));
+                }
+            }
+
+        return f[n][m];
+    }
+};
+// a***abc是谁整出来的测试用例???? 
+```
+
+## Week2
+
+### 11. 盛最多水的容器
+
+这道题没找到合适的算法可以解决orz，暴力遍历时间复杂度$O(n^2)$，看了大佬的题解可以用单调栈+二分达到$O(n\log_{}{n})$。（~~还不会以后补过~~）
+
+不妨从数学角度理解(贪心)，找到盛水容器的最优解，先说结论，利用双指针扫描数组，`i`、`j`分别指向数组的首尾，若左边界的高度大于右边界，则`j--`，反之则`i++`，直到两指针相遇，每次迭代更新最大值，即可找到最优解，时间复杂度可优化到$O(n)$（思路较为巧妙，建议背过）
+
+难点在于证明该做法的正误：在指针逼近的过程中，必定出现一边指针先到达最优解边界的情况，这里假设左边界先到达，此时预期最优解的边界坐标小于当前右指针`j`。利用反证法，假设左边界高度小于等于右边界高度，预期解的容水量必定小于当前，矛盾，故左边界的高度大于右边界，右指针左移，必定能得到最优解
+
+![证明](https://s2.loli.net/2023/10/25/6sUNRwkKp3c8fuy.png)
+
+```c++
+class Solution {
+public:
+    int maxArea(vector<int>& height) {
+        int res=0;//保存最大值
+        for(int i=0,j=height.size()-1;i<j;)//双指针逼近，直到相遇
+        {
+            res=max(min(height[i],height[j])*(j-i),res);//迭代更新
+            if(height[i]<height[j]) i++;
+            else j--;
+        }
+        return res;
+    }
+};
+```
+
+### 12. 整数转罗马数字
+
+水题，因为数据量仅为1-3999，打表都能过，为了显得不那么业余，浅找一下规律
+
+```log
+1 ->I    4 ->IV    5 ->V    9 ->IX
+10->X    40->XL    50->L    90->XC
+100->C   400->CD   500->D   900->CM
+1000->M
+```
+
+记录一下特殊情况，若大于特殊值在后面补`I、X、C、M`即可
+
+```c++
+class Solution {
+public:
+    string intToRoman(int num) {
+        int values[]={//特殊值
+            1000,
+            900,500,400,100,
+            90,50,40,10,
+            9,5,4,1
+        };
+        string str[]={//特殊值对应的罗马数字
+            "M",
+            "CM","D","CD","C",
+            "XC","L","XL","X",
+            "IX","V","IV","I"
+        };
+
+        string result;
+        for(int i=0;i<13;i++)
+        {
+            while(num>=values[i])
+            {
+                num-=values[i];
+                result+=str[i];
+            }
+        }
+        return result;
+    }
+};
+```
+
+### 13. 罗马数字转整数
+
+是上一题的逆运算，直接将各罗马数字的值相加即可，注意要特殊判断如果前面的罗马数字代表的值小于后面，要减去前面罗马数字的值
+
+```c++
+class Solution {
+public:
+    int romanToInt(string s) {
+        unordered_map<char,int> hash;
+        hash['I']=1;
+        hash['V']=5;
+        hash['X']=10;
+        hash['L']=50;
+        hash['C']=100;
+        hash['D']=500;
+        hash['M']=1000;
+
+        int res=0;
+        for(int i=0;i<s.size();i++)
+        {
+            if(i+1<s.size() && hash[s[i]]<hash[s[i+1]])//特殊判断
+                res-=hash[s[i]];
+            else
+                res+=hash[s[i]];
+        }
+        return res;
+    }
+};
+```
+
+### 14. 最长公共前缀
+
+简单题，就是循环枚举每个字符串的每个字母，直到前缀超过某一字符串的长度或有字母不匹配输出结果即可
+
+```c++
+class Solution {
+public:
+    string longestCommonPrefix(vector<string>& strs) {
+        string res;
+
+        if(!strs.size()) return res;//若传入的字符串数组为空,直接返回
+        for(int i=0;;i++){//遍历每一个字母、
+            if(i>=strs[0].size()) return res;//前缀超过第一个字符串长度
+            char ch=strs[0][i];
+            for(int j=1;j<strs.size();j++){//遍历每一个字符串
+                if(i>=strs[j].size()||ch!=strs[j][i])//若超过某一字符串长度或字符不匹配
+                    return res;
+            }
+            res+=ch;
+        }
+    }
+};
+```
+
+### 15. 三数之和
+
+双指针算法，要求数组有序所以先排序，假设指针`i、j、k`指向的值依次增大，枚举`i`的位置，`j、k`指针使用双指针算法，暴力遍历时间复杂度为$O(n^2)$ ，找到第一个`j`指针位置和其对应的`k`指针，使得刚好满足`num[i]+num[j]+num[k]>=0`，因为有序，`j`向前遍历，`k`指针只能向后寻找，将时间复杂度优化为$O(n)$
+
+```c++
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        vector<vector<int>> res;
+        sort(nums.begin(),nums.end());//排序
+        for(int i=0;i<nums.size();i++)
+        {
+            if(i&&nums[i]==nums[i-1]) continue;//去除重复三元组
+            for(int j=i+1,k=nums.size()-1;j<k;j++)//枚举i指针位置
+            {
+                if(j>i+1&&nums[j]==nums[j-1]) continue;//去除重复三元组
+                while(j<k-1&&nums[i]+nums[j]+nums[k-1]>=0) k--;
+                if(nums[i]+nums[j]+nums[k]==0) 
+                {
+                    res.push_back({nums[i],nums[j],nums[k]});
+                }
+            }
+        }
+        return res;
+    }
+};
+```

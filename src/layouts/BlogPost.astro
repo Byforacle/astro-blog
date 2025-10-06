@@ -10,6 +10,7 @@ import { ArticleBottom, Copyright, Hero, TOC } from 'astro-pure/components/pages
 import PageLayout from '@/layouts/ContentLayout.astro'
 import { Comment, PageInfo } from '@/components/waline'
 import { integ } from '@/site-config'
+import PasswordProtected from '@/components/PasswordProtected.astro'
 
 interface Props {
   post: CollectionEntry<'blog'>
@@ -32,7 +33,8 @@ const {
   title,
   updatedDate,
   draft: isDraft,
-  comment: enableComment
+  comment: enableComment,
+  password
 } = data
 
 const socialImage = heroImage
@@ -57,7 +59,15 @@ const primaryColor = data.heroImage?.color ?? 'hsl(var(--primary) / var(--un-tex
     </Fragment>
   </Hero>
 
-  <slot />
+  {password ? (
+    <PasswordProtected password={password}>
+      <slot />
+    </PasswordProtected>
+  ) : (
+    <>
+      <slot />
+    </>
+  )}
 
   <Fragment slot='bottom'>
     {/* Copyright */}

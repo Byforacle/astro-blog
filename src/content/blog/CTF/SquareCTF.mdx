@@ -1,0 +1,44 @@
+---
+title: "SquareCTF web题解"
+publishDate: 2023-11-24
+description: '国外举办的，当做练习'
+tags:
+  - Web
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062336313.jpg', inferSize: true, color: '#c62184ff' }
+language: '简中'
+draft: false
+comment: true
+---
+## sandbox
+
+`cat flag.txt`无回显，过滤空格用`<`代替
+
+![1](https://s2.loli.net/2023/11/24/BIGh1uX7A9LNH4J.png)
+
+## Be The Admin
+
+cookie身份认证，改为admin的base64即可，注意出于安全性考虑cookie中不能出现`=`，base64中`=`用于占位不影响解密，故删除即可
+
+![2](https://s2.loli.net/2023/11/24/Xt3hpdqaFjIMe1c.png)
+
+## Just Go Around
+
+`xxe`+内网探测
+
+看源码发现`/post`路由，提交查询跳转到`/accept`，发现可用`postXml`参数xxe，先读本地文件
+
+![31](https://s2.loli.net/2023/11/24/LVG14bqUMKADTef.png)
+
+本地没找到flag文件，要找内网ip，用http访问内网拿flag，然后就是各种读文件找线索
+
+翻了好多好多层之后在`/JustGoAround/src/main/resources/application.properties`找到一个端口号`spring.datasource.url=http://${ELASTIC_HOST:db}:9200`，读`/etc/hosts`找到一个ip`172.21.0.3`
+
+直接访问发现不对，多试试找到`172.21.0.2`
+
+payload:
+
+```xml
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><!DOCTYPE ANY [<!ENTITY foo SYSTEM "http://172.21.0.2:9200/_search?q=*">]><post author="CTF" id="0" title="122"><message>&foo;</message></post>
+```
+
+![32](https://s2.loli.net/2023/11/24/bkAafJ4giBScw83.png)
