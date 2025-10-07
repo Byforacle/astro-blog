@@ -6,16 +6,247 @@ tags:
   - blog
 heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202510062359196.png', inferSize: true, color: '#0e6c09ff' }
 language: '简中'
-draft: true
+draft: false
 comment: true
 ---
+import { Aside, Spoiler, Steps } from 'astro-pure/user'
+import { GithubCard } from 'astro-pure/advanced'
+
+国庆期间经过一番折腾，将原`Hexo`上的博客迁移到`Astro`上了，这里记录一下
+
+## 迁移过程
+本网站依赖以下优秀项目的技术支持：
+<GithubCard repo='cworld1/astro-theme-pure' />
+
+<GithubCard repo='walinejs/waline' />
+
+<GithubCard repo='lyc8503/UptimeFlare' />
+
+<GithubCard repo='lyc8503/onedrive-cf-index-ng' />
+
+得益于优秀的开源项目和详尽的文档，在迁移时并未遇到什么阻碍，以下主要记录一些较为麻烦或新添加的功能。
 
 ## Aliyun自建图床
+因为此网站托管在[Vercel](https://vercel.com/)上，本地存储图片可能加载速度较慢，之前试过各种第三方图床经常崩掉跑路
+
+所以这里通过阿里云OSS存储服务+`PicGo`实现自建图床<Spoiler>，再也不用担心丢图片了(?</Spoiler>，对于个人博客来说，选用量计费充十几块钱备用即可
+
+1. 在官网开启[OSS存储服务](https://www.aliyun.com/product/oss)
+2. 创建Bucket
+![image1](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071043127.png)
+3. `在对象存储`->`Bucket列表`->`[你的Bucket名]`->`概览`中找到访问端口备用
+![image2](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071048303.png)
+4. 在`在对象存储`->`Bucket列表`->`[你的Bucket名]`->`读写权限`中修改为公共读
+![image3](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071052722.png)
+5. 右上角头像->`AccessKey`->`RAM访问控制`创建用户，勾选使用永久AccessKey访问，记录`ID`和`Secret`备用，配置OSS访问权限
+6. 下载`PicGO`图床并按文档配置
+<GithubCard repo='Molunerfinn/PicGo' />
+7. 之后在Typora中配置自动图片上传
+![image-20251007121454446](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071214470.png)
 
 ## waline + Supabase
+[waline](https://waline.js.org/)的配置文档已经十分详细，此主题的集成也已经很完善。但推荐绑定的数据库服务`LeanCloud`好像已不支持未备案域名，这里用`Supabase`代替，类似
+
+1. 进入[supabase](https://supabase.com/)官网新建项目
+![image-4](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071226504.png)
+2. 导入`PostgreSQL`的[waline.pgsql](https://github.com/walinejs/waline/blob/main/assets/waline.pgsql)创建好表和表结构
+```sql
+
+CREATE SEQUENCE wl_comment_seq;
+
+CREATE TABLE wl_comment (
+  id int check (id > 0) NOT NULL DEFAULT NEXTVAL ('wl_comment_seq'),
+  user_id int DEFAULT NULL,
+  comment text,
+  insertedAt timestamp(0) without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ip varchar(100) DEFAULT '',
+  link varchar(255) DEFAULT NULL,
+  mail varchar(255) DEFAULT NULL,
+  nick varchar(255) DEFAULT NULL,
+  pid int DEFAULT NULL,
+  rid int DEFAULT NULL,
+  sticky numeric DEFAULT NULL,
+  status varchar(50) NOT NULL DEFAULT '',
+  "like" int DEFAULT NULL,
+  ua text,
+  url varchar(255) DEFAULT NULL,
+  createdAt timestamp(0) without time zone NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt timestamp(0) without time zone NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ;
+
+
+CREATE SEQUENCE wl_counter_seq;
+
+CREATE TABLE wl_counter (
+  id int check (id > 0) NOT NULL DEFAULT NEXTVAL ('wl_counter_seq'),
+  time int DEFAULT NULL,
+  reaction0 int DEFAULT NULL,
+  reaction1 int DEFAULT NULL,
+  reaction2 int DEFAULT NULL,
+  reaction3 int DEFAULT NULL,
+  reaction4 int DEFAULT NULL,
+  reaction5 int DEFAULT NULL,
+  reaction6 int DEFAULT NULL,
+  reaction7 int DEFAULT NULL,
+  reaction8 int DEFAULT NULL,
+  url varchar(255) NOT NULL DEFAULT '',
+  createdAt timestamp(0) without time zone NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt timestamp(0) without time zone NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ;
+
+
+CREATE SEQUENCE wl_users_seq;
+
+CREATE TABLE wl_users (
+  id int check (id > 0) NOT NULL DEFAULT NEXTVAL ('wl_users_seq'),
+  display_name varchar(255) NOT NULL DEFAULT '',
+  email varchar(255) NOT NULL DEFAULT '',
+  password varchar(255) NOT NULL DEFAULT '',
+  type varchar(50) NOT NULL DEFAULT '',
+  label varchar(255) DEFAULT NULL,
+  url varchar(255) DEFAULT NULL,
+  avatar varchar(255) DEFAULT NULL,
+  github varchar(255) DEFAULT NULL,
+  twitter varchar(255) DEFAULT NULL,
+  facebook varchar(255) DEFAULT NULL,
+  google varchar(255) DEFAULT NULL,
+  weibo varchar(255) DEFAULT NULL,
+  qq varchar(255) DEFAULT NULL,
+  "2fa" varchar(32) DEFAULT NULL,
+  createdAt timestamp(0) without time zone NULL DEFAULT CURRENT_TIMESTAMP,
+  updatedAt timestamp(0) without time zone NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id)
+) ;
+```
+3. 按文档或下图设置好环境变量，Waline 会自动根据你配置的环境变量切换到对应的数据存储服务。
+![image-20251007123208187](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071232209.png)
+<Aside type='caution' title='注意!'>这里配置的Host是以`aws`开头的IPv4地址，IPv6可能无法解析</Aside>
 
 ## Cloudflare CDN加速
+因为国内厂商的CDN加速都需要域名备案，这里使用Cloudflare代替
+![img](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071239128.webp)
+正常注册`Cloudflare`绑定域名即可，将DNS服务器改为Cloudflare提供的
+> 可以参考[这篇博客](https://for-tiger.com/cloudflare-setup-tutorial-for-cdn-acceleration/)，细节不再赘述
 
 ## 文章加密功能
+为主题添加一个文章加密功能
+> 参考[How To Blog 02: Astro❤️Password](https://blog.mmf.moe/post/blog-02-password/)
 
-## 其他Bug
+`./src/content/content.config.ts`
+```js title="content.config.ts"
+      tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
+      language: z.string().optional(),
+      draft: z.boolean().default(false),
+      // Special fields
+      comment: z.boolean().default(true),
+      password: z.coerce.string().optional(), // [!code ++]
+    })
+})
+```
+
+`./src/utils/encrypt.ts`
+```js title="encrypt.ts"
+// 加密函数
+export async function encrypt(text: string, password: string): Promise<string> {
+  const key = password.length >= 16 ? password.slice(0, 16) : password.padEnd(16, '0');
+  const iv = crypto.getRandomValues(new Uint8Array(16));
+  
+  const keyBuffer = new TextEncoder().encode(key);
+  const textBuffer = new TextEncoder().encode(text);
+  
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBuffer,
+    { name: 'AES-CBC', length: 128 },
+    false,
+    ['encrypt']
+  );
+  
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-CBC', iv },
+    cryptoKey,
+    textBuffer
+  );
+  
+  const combined = new Uint8Array(iv.length + encrypted.byteLength);
+  combined.set(iv);
+  combined.set(new Uint8Array(encrypted), iv.length);
+  
+  // 处理大数据时避免调用栈溢出
+  let binary = '';
+  for (let i = 0; i < combined.length; i++) {
+    binary += String.fromCharCode(combined[i]);
+  }
+  return btoa(binary);
+}
+
+// 解密函数
+export async function decrypt(encryptedData: string, password: string): Promise<string> {
+  const key = password.length >= 16 ? password.slice(0, 16) : password.padEnd(16, '0');
+  
+  // 解码 base64 字符串到 Uint8Array
+  const binaryString = atob(encryptedData);
+  const combinedData = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    combinedData[i] = binaryString.charCodeAt(i);
+  }
+  
+  const iv = combinedData.slice(0, 16);
+  const encrypted = combinedData.slice(16);
+  
+  const keyBuffer = new TextEncoder().encode(key);
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    keyBuffer,
+    { name: 'AES-CBC', length: 128 },
+    false,
+    ['decrypt']
+  );
+  
+  const decryptedData = await crypto.subtle.decrypt(
+    { name: 'AES-CBC', iv },
+    cryptoKey,
+    encrypted
+  );
+  
+  return new TextDecoder().decode(decryptedData);
+}
+```
+
+`./src/components/PasswordProtected.astro`
+> 过长，可查看[PasswordProtected.astro](https://github.com/Byforacle/astro-blog/blob/main/src/components/PasswordProtected.astro)
+
+`./src/layouts/BlogPost.astro`
+```astro title="BlogPost.astro"
+  <Hero {data} {remarkPluginFrontmatter} slot='header'>
+    <Fragment slot='description'>
+      {!isDraft && enableComment && <PageInfo comment class='mt-1' />}
+    </Fragment>
+  </Hero>
+  <slot /> <!-- [!code --] -->
+  {password ? (
+    <PasswordProtected password={password}> 
+      <slot /> 
+    </PasswordProtected> 
+  ) : (
+    <>
+      <slot />
+    </>
+  )} 
+```
+
+*示例：* <Spoiler>CSS太难了</Spoiler>
+![image-20251007133654200](https://image777.oss-cn-beijing.aliyuncs.com/img/202510071336229.png)
+
+
+## 其他问题
+
+**一些Bug:**
+
+<Steps>
+1. [waline](waline.orac1e.me)经`Cloudflare`代理不显示评论者IP
+2. 文章内容过短时出现阅读进度为负数
+3. 加密文章解锁后，大纲导航功能失效
+</Steps>
