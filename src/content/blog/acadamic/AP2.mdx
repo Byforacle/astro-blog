@@ -1,0 +1,893 @@
+---
+title: 'What is AP2？' # (Required, max 60)
+description: 'AP2协议是什么？为什么需要？如何工作？' # (Required, 10 to 160)
+publishDate: '2025-11-3' # (Required, Date)
+tags:
+  - Academic # (Also can write format like next line)
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202511050016883.jpg', inferSize: true, color: '#e3b22dff' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+import { Aside } from 'astro-pure/user'
+import { Steps } from 'astro-pure/user'
+import { GithubCard } from 'astro-pure/advanced'
+
+智能体支付协议 (**Agent Payments Protocol，AP2**)是一个面向新兴代理经济的开放协议，该协议旨在为开发者、商户及支付行业提供安全可靠且互通互连的Agent商业解决方案。该协议作为开源的Agent2Agent（A2A）协议的扩展模块提供。
+
+> 使用 **[ADK](https://google.github.io/adk-docs/)** *（或任何框架）* 构建代理，配备 **[MCP](https://modelcontextprotocol.io/)** *（或任何工具）* ，通过 **[A2A](https://a2a-protocol.org/)** 进行协作，并使用 **AP2** 通过 gen AI 代理保障支付安全。
+
+## 什么是Function calling?
+
+**Agent**：端到端（智能感知，决策，调用工具）解决问题
+
+LLM只输出文本数据，缺乏工具运行的环境。OpenAI提出*Function calling(also known as **tool calling**)*—一种强大而灵活的方式来与外部系统交互，并访问训练数据之外的数据。
+
+### Function calling demo
+
+```python title="main.py"
+from rich.pretty import pprint
+from openai import OpenAI
+client = OpenAI(api_key="🤫", base_url="https://api.deepseek.com")
+
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[
+        {"role": "user", "content": "9.11 - 9.9 = ?, Just tell me the answer."}
+    ],
+    stream=False
+)
+
+pprint(response)
+print("=" * 100)
+print(response.choices[0].message.content)
+```
+
+![image-20251103201143848](https://image777.oss-cn-beijing.aliyuncs.com/img/202511032011506.png)
+
+```python
+def subtraction(number1, number2): # [!code ++]
+    return number1 - number2 # [!code ++]
+
+subtract_tool_description = { # [!code ++]
+    "type": "function", # [!code ++]
+    "function": { # [!code ++]
+        "name": "subtraction", # [!code ++]
+        "description": "number1减去number2", # [!code ++]
+        "parameters": { # [!code ++]
+            "type": "object", # [!code ++]
+            "properties": { # [!code ++]
+                "number1": {"type": "number"}, # [!code ++]
+                "number2": {"type": "number"} # [!code ++]
+            }, # [!code ++]
+            "required": ["number1", "number2"] # [!code ++]
+        } # [!code ++]
+    } # [!code ++]
+} # [!code ++]
+
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    tools=[subtract_tool_description], # [!code ++]
+    messages=[
+        {"role": "user", "content": "9.11 - 9.9 = ?, Just tell me the answer."}
+    ],
+    stream=False
+)
+```
+
+![image-20251103203036486](https://image777.oss-cn-beijing.aliyuncs.com/img/202511032030514.png)
+
+> 模型训练时加入特殊标识的预料，使推理时返回正确格式的json
+
+```python
+if response.choices[0].message.tool_calls:
+    messages.append(response.choices[0].message)
+    
+    for tool_call in response.choices[0].message.tool_calls:
+        args = json.loads(tool_call.function.arguments)
+        result = subtraction(**args)
+        messages.append({"role": "tool", "tool_call_id": tool_call.id, "content": str(result)})
+    
+    response = client.chat.completions.create(model="deepseek-chat", tools=tools, messages=messages)
+
+print(response.choices[0].message.content)
+```
+
+![image-20251103203916457](https://image777.oss-cn-beijing.aliyuncs.com/img/202511032039501.png)
+
+## 什么是MCP？
+
+MCP 是一个开放协议，它为应用程序向 LLM 提供上下文的方式进行了标准化。你可以将 MCP 想象成 AI 应用程序的 USB-C 接口。就像 USB-C 为设备连接各种外设和配件提供了标准化的方式一样，MCP 为 AI 模型连接各种数据源和工具提供了标准化的接口。
+
+<img src="https://image777.oss-cn-beijing.aliyuncs.com/img/202511032052765.png" alt="image-20251103205220730" style="zoom:60%;" />
+
+<Aside type="tip">
+MCP 确保工具可靠可用、可发现和可执行，而无需自定义集成所有内容，即插即用。
+</Aside>
+
+<img src="https://www.dailydoseofds.com/content/images/2025/04/function-calling-and-MCP-2.gif" alt="区别" style="zoom:70%;" />
+
+### MCP demo
+以`Claude Desktop`做Agent Client, 搭建Weather MCPserver
+```python title="server.py"
+import json
+import os
+import httpx
+from dotenv import load_dotenv
+from typing import Any
+from mcp.server.fastmcp import FastMCP
+
+load_dotenv()
+
+# 初始化 MCP 服务器
+mcp = FastMCP("WeatherServer")
+
+# OpenWeather API 配置
+OPENWEATHER_API_BASE = "https://api.openweathermap.org/data/2.5/weather"
+API_KEY = os.getenv("API_KEY")
+USER_AGENT = "weather-app/1.0"
+
+
+async def fetch_weather(city: str) -> dict[str, Any] | None:
+    """
+    从 OpenWeather API 获取天气信息。
+    :param city: 城市名称（需使用英文，如 Beijing）
+    :return: 天气数据字典；若出错返回包含 error 信息的字典
+    """
+    params = {
+        "q": city,
+        "appid": API_KEY,
+        "units": "metric",
+        "lang": "zh_cn"
+    }
+    headers = {"User-Agent": USER_AGENT}
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                OPENWEATHER_API_BASE,
+                params=params,
+                headers=headers,
+                timeout=30.0
+            )
+            response.raise_for_status()
+            return response.json()  # 返回字典类型
+        except httpx.HTTPStatusError as e:
+            return {"error": f"HTTP 错误: {e.response.status_code}"}
+        except Exception as e:
+            return {"error": f"请求失败: {str(e)}"}
+
+
+def format_weather(data: dict[str, Any] | str) -> str:
+    """
+    将天气数据格式化为易读文本。
+    :param data: 天气数据（可以是字典或 JSON 字符串）
+    :return: 格式化后的天气信息字符串
+    """
+    # 如果传入的是字符串，则先转换为字典
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except Exception as e:
+            return f"无法解析天气数据: {e}"
+    
+    # 如果数据中包含错误信息，直接返回错误提示
+    if "error" in data:
+        return f"⚠️ {data['error']}"
+    
+    # 提取数据时做容错处理
+    city = data.get("name", "未知")
+    country = data.get("sys", {}).get("country", "未知")
+    temp = data.get("main", {}).get("temp", "N/A")
+    humidity = data.get("main", {}).get("humidity", "N/A")
+    wind_speed = data.get("wind", {}).get("speed", "N/A")
+    # weather 可能为空列表，因此用 [0] 前先提供默认字典
+    weather_list = data.get("weather", [{}])
+    description = weather_list[0].get("description", "未知")
+    
+    return (
+        f"🌍 {city}, {country}\n"
+        f"🌡 温度: {temp}°C\n"
+        f"💧 湿度: {humidity}%\n"
+        f"🌬 风速: {wind_speed} m/s\n"
+        f"🌤 天气: {description}\n"
+    )
+
+
+@mcp.tool()
+async def query_weather(city: str) -> str:
+    """
+    输入指定城市的英文名称，返回今日天气查询结果。
+    :param city: 城市名称（需使用英文）
+    :return: 格式化后的天气信息
+    """
+    data = await fetch_weather(city)
+    return format_weather(data)
+
+
+mcp.run(transport='stdio')
+```
+配置`~/Library/Application Support/Claude/claude_desktop_config.json`
+```json title="claude_desktop_config.json"
+{
+  "mcpServers": {
+    "WeatherServer": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/byf/protocol/MCP",
+        "run",
+        "server.py"
+      ]
+    }
+  }
+}
+```
+![image-20251103224236814](https://image777.oss-cn-beijing.aliyuncs.com/img/202511032242849.png)
+```log
+2025-11-03T14:15:22.750Z [info] [WeatherServer] Initializing server...
+2025-11-03T14:15:22.757Z [info] [WeatherServer] Using MCP server command: /opt/homebrew/bin/uv with args and path: {
+  args: [
+    '--directory',
+    '/Users/byf/protocol/MCP',
+    'run',
+    'server.py',
+    [length]: 4
+  ],
+  paths: [
+    '/usr/local/bin',
+    '/opt/homebrew/bin',
+    '/usr/bin',
+    '/usr/bin',
+    '/bin',
+    '/usr/sbin',
+    '/sbin',
+    [length]: 7
+  ]
+}
+2025-11-03T14:15:22.758Z [info] [WeatherServer] Server started and connected successfully
+2025-11-03T14:15:22.777Z [info] [WeatherServer] Message from client: {"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"claude-ai","version":"0.1.0"}},"jsonrpc":"2.0","id":0}
+2025-11-03T14:15:23.206Z [info] [WeatherServer] Message from server: {"jsonrpc":"2.0","id":0,"result":{"protocolVersion":"2025-06-18","capabilities":{"experimental":{},"prompts":{"listChanged":false},"resources":{"subscribe":false,"listChanged":false},"tools":{"listChanged":false}},"serverInfo":{"name":"WeatherServer","version":"1.20.0"}}}
+2025-11-03T14:15:23.207Z [info] [WeatherServer] Message from client: {"method":"notifications/initialized","jsonrpc":"2.0"}
+2025-11-03T14:15:23.207Z [info] [WeatherServer] Message from client: {"method":"tools/list","params":{},"jsonrpc":"2.0","id":1}
+2025-11-03T14:15:23.207Z [info] [WeatherServer] Message from client: {"method":"prompts/list","params":{},"jsonrpc":"2.0","id":2}
+2025-11-03T14:15:23.207Z [info] [WeatherServer] Message from client: {"method":"resources/list","params":{},"jsonrpc":"2.0","id":3}
+2025-11-03T14:15:23.210Z [info] [WeatherServer] Message from server: {"jsonrpc":"2.0","id":1,"result":{"tools":[{"name":"query_weather","description":"\n输入指定城市的英文名称，返回今日天气查询结果。\n:param city: 城市名称（需使用英文）\n:return: 格式化后的天气信息\n","inputSchema":{"properties":{"city":{"title":"City","type":"string"}},"required":["city"],"title":"query_weatherArguments","type":"object"},"outputSchema":{"properties":{"result":{"title":"Result","type":"string"}},"required":["result"],"title":"query_weatherOutput","type":"object"}}]}}
+2025-11-03T14:15:23.211Z [info] [WeatherServer] Message from server: {"jsonrpc":"2.0","id":2,"result":{"prompts":[]}}
+2025-11-03T14:15:23.211Z [info] [WeatherServer] Message from server: {"jsonrpc":"2.0","id":3,"result":{"resources":[]}}
+```
+![image-20251103222909057](https://image777.oss-cn-beijing.aliyuncs.com/img/202511032229085.png)
+```log
+2025-11-03T14:42:20.342Z [info] [WeatherServer] Message from client: {"method":"tools/call","params":{"name":"query_weather","arguments":{"city":"Beijing"}},"jsonrpc":"2.0","id":4}
+2025-11-03T14:42:20.964Z [info] [WeatherServer] Message from server: {"jsonrpc":"2.0","id":4,"result":{"content":[{"type":"text","text":"🌍 Beijing, CN\n🌡 温度: 4.94°C\n💧 湿度: 44%\n🌬 风速: 0.48 m/s\n🌤 天气: 晴\n"}],"structuredContent":{"result":"🌍 Beijing, CN\n🌡 温度: 4.94°C\n💧 湿度: 44%\n🌬 风速: 0.48 m/s\n🌤 天气: 晴\n"},"isError":false}}
+```
+## 什么是A2A？
+开发Agent的框架有很多，例如`LangChain`、`Crewai`、`LlamaIndex`、`ADK`等，A2A作为一种开放标准，旨在实现 AI Agent之间的无缝通信和协作。
+
+![image-20251104101950005](https://image777.oss-cn-beijing.aliyuncs.com/img/202511041019049.png)
+<Steps>
+
+1. 互操作性：将基于不同平台（LangGraph、CrewAI、Semantic Kernel、自定义解决方案）构建的代理连接起来，创建强大的复合型人工智能系统。
+2. 复杂工作流程：使代理能够委派子任务、交换信息和协调行动，从而解决单个代理无法解决的复杂问题。
+3. 安全且不透明：代理之间无需共享内部内存、工具或专有逻辑即可进行交互，从而确保安全性并保护知识产权。
+</Steps>
+
+### A2A demo
+<GithubCard repo='a2aproject/a2a-samples' />
+
+基于`Jsonrpc2.0`和`http`协议实现客户端和服务端通信
+
+每个Agent提供`Agent Skills`（描述了智能体可以执行的特定能力或功能）和`Agent Cards`（暴露在`/.well-known/agent-card.json`端点）
+
+```python
+skill = AgentSkill(
+    id='hello_world',
+    name='Returns hello world',
+    description='just returns hello world',
+    tags=['hello world'],
+    examples=['hi', 'hello world'],
+)
+
+# This will be the public-facing agent card
+public_agent_card = AgentCard(
+    name='Hello World Agent',
+    description='Just a hello world agent',
+    url='http://localhost:9999/',
+    version='1.0.0',
+    default_input_modes=['text'],
+    default_output_modes=['text'],
+    capabilities=AgentCapabilities(streaming=True),
+    skills=[skill],  # Only the basic skill for the public card
+    supports_authenticated_extended_card=True,
+)
+```
+A2A Python SDK 提供了一个抽象基类`a2a.server.agent_execution.AgentExecutor`, 继承并实现Agent功能
+
+客户端通过创建`A2ACardResolver`实例与服务端交互
+
+```python
+base_url = 'http://localhost:9999'
+
+async with httpx.AsyncClient() as httpx_client:
+    # Initialize A2ACardResolver
+    resolver = A2ACardResolver(
+        httpx_client=httpx_client,
+        base_url=base_url,
+        # agent_card_path uses default, extended_agent_card_path also uses default
+    )
+
+send_message_payload: dict[str, Any] = {
+    'message': {
+        'role': 'user',
+        'parts': [
+            {'kind': 'text', 'text': 'how much is 10 USD in INR?'}
+        ],
+        'messageId': uuid4().hex,
+    },
+}
+request = SendMessageRequest(
+    id=str(uuid4()), params=MessageSendParams(**send_message_payload)
+)
+```
+
+![image-20251104110607468](https://image777.oss-cn-beijing.aliyuncs.com/img/202511041106526.png)
+
+Agent 卡片发现（GET)   >    功能调用（POST）
+
+```log
+INFO:__main__:Attempting to fetch public agent card from: http://localhost:9999/.well-known/agent-card.json
+INFO:httpx:HTTP Request: GET http://localhost:9999/.well-known/agent-card.json "HTTP/1.1 200 OK"
+INFO:a2a.client.card_resolver:Successfully fetched agent card data from http://localhost:9999/.well-known/agent-card.json: {'capabilities': {'streaming': True}, 'defaultInputModes': ['text'], 'defaultOutputModes': ['text'], 'description': 'Just a hello world agent', 'name': 'Hello World Agent', 'preferredTransport': 'JSONRPC', 'protocolVersion': '0.3.0', 'skills': [{'description': 'just returns hello world', 'examples': ['hi', 'hello world'], 'id': 'hello_world', 'name': 'Returns hello world', 'tags': ['hello world']}], 'supportsAuthenticatedExtendedCard': True, 'url': 'http://localhost:9999/', 'version': '1.0.0'}
+INFO:__main__:Successfully fetched public agent card:
+INFO:__main__:{
+  "capabilities": {
+    "streaming": true
+  },
+  "defaultInputModes": [
+    "text"
+  ],
+  "defaultOutputModes": [
+    "text"
+  ],
+  "description": "Just a hello world agent",
+  "name": "Hello World Agent",
+  "preferredTransport": "JSONRPC",
+  "protocolVersion": "0.3.0",
+  "skills": [
+    {
+      "description": "just returns hello world",
+      "examples": [
+        "hi",
+        "hello world"
+      ],
+      "id": "hello_world",
+      "name": "Returns hello world",
+      "tags": [
+        "hello world"
+      ]
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": true,
+  "url": "http://localhost:9999/",
+  "version": "1.0.0"
+}
+INFO:__main__:
+Using PUBLIC agent card for client initialization (default).
+INFO:__main__:
+Public card supports authenticated extended card. Attempting to fetch from: http://localhost:9999/agent/authenticatedExtendedCard
+INFO:httpx:HTTP Request: GET http://localhost:9999/agent/authenticatedExtendedCard "HTTP/1.1 200 OK"
+INFO:a2a.client.card_resolver:Successfully fetched agent card data from http://localhost:9999/agent/authenticatedExtendedCard: {'capabilities': {'streaming': True}, 'defaultInputModes': ['text'], 'defaultOutputModes': ['text'], 'description': 'The full-featured hello world agent for authenticated users.', 'name': 'Hello World Agent - Extended Edition', 'preferredTransport': 'JSONRPC', 'protocolVersion': '0.3.0', 'skills': [{'description': 'just returns hello world', 'examples': ['hi', 'hello world'], 'id': 'hello_world', 'name': 'Returns hello world', 'tags': ['hello world']}, {'description': 'A more enthusiastic greeting, only for authenticated users.', 'examples': ['super hi', 'give me a super hello'], 'id': 'super_hello_world', 'name': 'Returns a SUPER Hello World', 'tags': ['hello world', 'super', 'extended']}], 'supportsAuthenticatedExtendedCard': True, 'url': 'http://localhost:9999/', 'version': '1.0.1'}
+INFO:__main__:Successfully fetched authenticated extended agent card:
+INFO:__main__:{
+  "capabilities": {
+    "streaming": true
+  },
+  "defaultInputModes": [
+    "text"
+  ],
+  "defaultOutputModes": [
+    "text"
+  ],
+  "description": "The full-featured hello world agent for authenticated users.",
+  "name": "Hello World Agent - Extended Edition",
+  "preferredTransport": "JSONRPC",
+  "protocolVersion": "0.3.0",
+  "skills": [
+    {
+      "description": "just returns hello world",
+      "examples": [
+        "hi",
+        "hello world"
+      ],
+      "id": "hello_world",
+      "name": "Returns hello world",
+      "tags": [
+        "hello world"
+      ]
+    },
+    {
+      "description": "A more enthusiastic greeting, only for authenticated users.",
+      "examples": [
+        "super hi",
+        "give me a super hello"
+      ],
+      "id": "super_hello_world",
+      "name": "Returns a SUPER Hello World",
+      "tags": [
+        "hello world",
+        "super",
+        "extended"
+      ]
+    }
+  ],
+  "supportsAuthenticatedExtendedCard": true,
+  "url": "http://localhost:9999/",
+  "version": "1.0.1"
+}
+INFO:__main__:
+Using AUTHENTICATED EXTENDED agent card for client initialization.
+/Users/byf/protocol/a2a-samples/samples/python/agents/helloworld/test_client.py:105: DeprecationWarning: A2AClient is deprecated and will be removed in a future version. Use ClientFactory to create a client with a JSON-RPC transport.
+  client = A2AClient(
+INFO:__main__:A2AClient initialized.
+INFO:httpx:HTTP Request: POST http://localhost:9999/ "HTTP/1.1 200 OK"
+{'id': 'f5311fd5-2fd7-44fd-8665-24181c6d7a20', 'jsonrpc': '2.0', 'result': {'kind': 'message', 'messageId': '14152c5a-74ef-4e1a-a6b8-603d125c229b', 'parts': [{'kind': 'text', 'text': 'Hello World'}], 'role': 'agent'}}
+INFO:httpx:HTTP Request: POST http://localhost:9999/ "HTTP/1.1 200 OK"
+{'id': '0ab0f29f-540b-4f3b-a583-71fc930382a7', 'jsonrpc': '2.0', 'result': {'kind': 'message', 'messageId': '36636649-25f0-4ad2-be34-70a195d45502', 'parts': [{'kind': 'text', 'text': 'Hello World'}], 'role': 'agent'}}
+```
+
+## 什么是AP2
+
+**A2A 和 MCP** 为 AI 代理提供了基础的通信和交互层，使它们能够连接和执行任务。**AP2 以这些层为基础，添加了专门的安全支付扩展** 
+
+当今的支付系统假设人类直接在受信任的网站上点击“购买”。当自主代理发起支付时，这个核心假设被打破，导致当前系统无法回答的关键问题：
+
+<Steps>
+
+1. **授权：** 我们如何验证用户是否为代理授予特定购买的特定权限？
+2. **真实性：** 商家如何确保代理的请求准确反映用户的真实意图，而不会出现错误或人工智能“幻觉”？
+3. **问责：** 如果发生欺诈或不正确的交易，谁应该负责——用户、代理的开发者、商家还是发卡机构？
+</Steps>
+
+### 机制
+**Role-Based Architecture**
+
+用户 ：将付款任务委派给代理的个人。
+
+用户代理 （UA） / 购物代理 （SA）： 与用户交互的 AI 表面（例如 Gemini、ChatGPT）。它了解用户的需求，构建购物车，并获得用户的授权。
+
+凭证提供者 （CP）： 安全管理用户支付凭证和方法的专门实体（例如数字钱包）。
+
+商家端点 （ME）： 代表商家作的界面或代理，用于展示产品和协商购物车。
+
+商户支付处理器端点 （MPP）： 为支付网络构建最终交易授权消息的实体。
+
+网络和发卡机构 ：支付网络和颁发用户支付凭证的金融机构。
+
+**可验证的数字凭证 （VDC）**
+
+1. 实时购买 (Human Present)
+
+> 「帮我找双新的白色跑鞋」
+
+用户的请求会被记录在初始`意向授权`中。这为整个交易流程中的交互提供了可审计的背景信息。当 Agent 将用户想要的鞋子放在购物车中后，由商家生成并由用户进行加密签名，将创建商品明细与价格的防篡改记录，确保所见即所付。
+![image-20251104160254123](https://image777.oss-cn-beijing.aliyuncs.com/img/202511041602154.png)
+<img src="https://ap2-protocol.org/assets/GMSCoreDPCScreen-future.png" alt="示例" style="zoom: 33%;" />
+
+[生命周期](https://ap2-protocol.org/topics/life-of-a-transaction/#human-present-transaction)
+
+2.委托购买（Human Not Present）
+
+> 「演唱会门票一经发售立即购买」
+
+由购物代理提前生成凭证并由用户签名，授予代理在定义的约束内行事的权限。该授权书详细规定了参与规则 —— 价格限制、时间安排和其他条件。它将作为可验证的预授权凭证，一旦满足用户的具体条件，Agent 便可自动为用户生成购物车授权书。
+<img src="https://image777.oss-cn-beijing.aliyuncs.com/img/202511041609780.png"/>
+
+<Aside type="tip">
+与用户在场流程的区别：
+1. 意图捕获 ：用户不是批准最终购物车，而是批准代理对其意图的理解。
+2. 共享意图授权：此授权包括用户目标的自然语言描述，与商家共享，然后商家可以决定他们是否可以满足请求。
+3. 商家可以强制用户确认 ：如果商家不确定他们是否有能力根据意向授权完成请求，他们可以要求用户返回会话以确认详细信息。
+</Aside>
+
+
+3. 付款授权
+独立的VDC，与支付网络和发卡机构共享。
+
+目的是提供交易的可见性，帮助网络和发卡机构建立信任并评估风险。它包含人工智能代理是否参与以及交易模式（有人在场或无人在场）的信号。
+
+### AP2 demo
+
+<GithubCard repo='google-agentic-commerce/AP2' />
+
+![image-20251104185918048](https://image777.oss-cn-beijing.aliyuncs.com/img/202511041859081.png)
+包含四个主要Agent，`shopping Agent`（与用户交互）、`CredentialsProvider`（提供凭证）、`MerchantAgent`（提供商品）、`merchant_payment_processor_agent`
+
+![image-20251104183110736](https://image777.oss-cn-beijing.aliyuncs.com/img/202511041831774.png)
+
+主Agent部分日志，查看交互细节
+```log
+CredentialsProvider listening on http://localhost:8002
+merchant_payment_processor_agent listening on http://localhost:8003
+MerchantAgent listening on http://localhost:8001
+
+
+
+
+---------- New Agent Request Received---------
+GET http://localhost:8001/a2a/merchant_agent/.well-known/agent-card.json
+
+
+[Request Body]
+<empty>
+
+
+[Response Body]
+{"capabilities":{"extensions":[{"description":"Supports the Agent Payments Protocol.","required":true,"uri":"https://github.com/google-agentic-commerce/ap2/v1"},{"description":"Supports the Sample Card Network payment method extension","required":true,"uri":"https://sample-card-network.github.io/paymentmethod/types/v1"}]},"defaultInputModes":["json"],"defaultOutputModes":["json"],"description":"A sales assistant agent for a merchant.","name":"MerchantAgent","preferredTransport":"JSONRPC","protocolVersion":"0.3.0","skills":[{"description":"Searches the merchant's catalog based on a shopping intent & returns a cart containing the top results.","id":"search_catalog","name":"Search Catalog","tags":["merchant","search","catalog"]}],"url":"http://localhost:8001/a2a/merchant_agent","version":"1.0.0"}
+
+
+
+
+---------- New Agent Request Received---------
+POST http://localhost:8001/a2a/merchant_agent
+
+
+[Request Body]
+{'id': '8d19c85a-53d6-4216-a280-9cf16868392d', 'jsonrpc': '2.0', 'method': 'message/send', 'params': {'configuration': {'acceptedOutputModes': [], 'blocking': True}, 'message': {'kind': 'message', 'messageId': 'b3526bfb92174b618bf2a98e5c8a26c0', 'parts': [{'kind': 'text', 'text': "Find products that match the user's IntentMandate."}, {'data': {'ap2.mandates.IntentMandate': {'user_cart_confirmation_required': True, 'natural_language_description': 'a coffee maker', 'merchants': [], 'skus': [], 'requires_refundability': True, 'intent_expiry': '2025-11-05T09:58:02.506702+00:00'}}, 'kind': 'data'}, {'data': {'risk_data': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...fake_risk_data'}, 'kind': 'data'}, {'data': {'shopping_agent_id': 'trusted_shopping_agent'}, 'kind': 'data'}], 'role': 'agent'}}}
+
+[Extension Header]
+X-A2A-Extensions: https://github.com/google-agentic-commerce/ap2/v1
+
+
+[Request Instructions]
+["Find products that match the user's IntentMandate."]
+
+
+[An Intent Mandate was in the request Data]
+{'user_cart_confirmation_required': True, 'natural_language_description': 'a coffee maker', 'merchants': [], 'skus': [], 'requires_refundability': True, 'intent_expiry': '2025-11-05T09:58:02.506702+00:00'}
+
+
+[Data Part: risk_data] 
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...fake_risk_data
+
+
+[Data Part: shopping_agent_id] 
+trusted_shopping_agent
+
+
+[Response Body]
+{"id":"8d19c85a-53d6-4216-a280-9cf16868392d","jsonrpc":"2.0","result":{"artifacts":[{"artifactId":"b1e19438-44e7-4a66-8b72-ed5ad468b843","parts":[{"data":{"ap2.mandates.CartMandate":{"contents":{"id":"cart_1","user_cart_confirmation_required":true,"payment_request":{"method_data":[{"supported_methods":"CARD","data":{"network":["mastercard","paypal","amex"]}}],"details":{"id":"order_1","display_items":[{"label":"Drip coffee maker","amount":{"currency":"USD","value":49.99},"pending":null,"refund_period":30}],"shipping_options":null,"modifiers":null,"total":{"label":"Total","amount":{"currency":"USD","value":49.99},"pending":null,"refund_period":30}},"options":{"request_payer_name":false,"request_payer_email":false,"request_payer_phone":false,"request_shipping":true,"shipping_type":null},"shipping_address":null},"cart_expiry":"2025-11-04T10:28:56.878832+00:00","merchant_name":"Generic Merchant"},"merchant_authorization":null}},"kind":"data"}]},{"artifactId":"b4977f03-c0fa-43ec-84d7-69e10b9832be","parts":[{"data":{"ap2.mandates.CartMandate":{"contents":{"id":"cart_2","user_cart_confirmation_required":true,"payment_request":{"method_data":[{"supported_methods":"CARD","data":{"network":["mastercard","paypal","amex"]}}],"details":{"id":"order_2","display_items":[{"label":"Single-serve coffee machine","amount":{"currency":"USD","value":89.0},"pending":false,"refund_period":30}],"shipping_options":null,"modifiers":null,"total":{"label":"Total","amount":{"currency":"USD","value":89.0},"pending":null,"refund_period":30}},"options":{"request_payer_name":false,"request_payer_email":false,"request_payer_phone":false,"request_shipping":true,"shipping_type":null},"shipping_address":null},"cart_expiry":"2025-11-04T10:28:56.878832+00:00","merchant_name":"Generic Merchant"},"merchant_authorization":null}},"kind":"data"}]},{"artifactId":"06e333b4-896b-4db7-a43e-d853e18a6b85","parts":[{"data":{"ap2.mandates.CartMandate":{"contents":{"id":"cart_3","user_cart_confirmation_required":true,"payment_request":{"method_data":[{"supported_methods":"CARD","data":{"network":["mastercard","paypal","amex"]}}],"details":{"id":"order_3","display_items":[{"label":"Pour-over coffee system","amount":{"currency":"USD","value":35.5},"pending":null,"refund_period":14}],"shipping_options":null,"modifiers":null,"total":{"label":"Total","amount":{"currency":"USD","value":35.5},"pending":null,"refund_period":30}},"options":{"request_payer_name":false,"request_payer_email":false,"request_payer_phone":false,"request_shipping":true,"shipping_type":null},"shipping_address":null},"cart_expiry":"2025-11-04T10:28:56.878832+00:00","merchant_name":"Generic Merchant"},"merchant_authorization":null}},"kind":"data"}]}],"contextId":"c2dba1b7-36a7-4727-87b3-031df46a4e9e","history":[{"contextId":"c2dba1b7-36a7-4727-87b3-031df46a4e9e","kind":"message","messageId":"b3526bfb92174b618bf2a98e5c8a26c0","parts":[{"kind":"text","text":"Find products that match the user's IntentMandate."},{"data":{"ap2.mandates.IntentMandate":{"user_cart_confirmation_required":true,"natural_language_description":"a coffee maker","merchants":[],"skus":[],"requires_refundability":true,"intent_expiry":"2025-11-05T09:58:02.506702+00:00"}},"kind":"data"},{"data":{"risk_data":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...fake_risk_data"},"kind":"data"},{"data":{"shopping_agent_id":"trusted_shopping_agent"},"kind":"data"}],"role":"agent","taskId":"2dd9352b-b8e3-448e-8cae-2873b1c459f3"}],"id":"2dd9352b-b8e3-448e-8cae-2873b1c459f3","kind":"task","status":{"state":"completed","timestamp":"2025-11-04T09:58:56.883469+00:00"}}}
+
+
+
+
+---------- New Agent Request Received---------
+GET http://localhost:8001/a2a/merchant_agent/.well-known/agent-card.json
+
+
+[Request Body]
+<empty>
+
+
+[Response Body]
+{"capabilities":{"extensions":[{"description":"Supports the Agent Payments Protocol.","required":true,"uri":"https://github.com/google-agentic-commerce/ap2/v1"},{"description":"Supports the Sample Card Network payment method extension","required":true,"uri":"https://sample-card-network.github.io/paymentmethod/types/v1"}]},"defaultInputModes":["json"],"defaultOutputModes":["json"],"description":"A sales assistant agent for a merchant.","name":"MerchantAgent","preferredTransport":"JSONRPC","protocolVersion":"0.3.0","skills":[{"description":"Searches the merchant's catalog based on a shopping intent & returns a cart containing the top results.","id":"search_catalog","name":"Search Catalog","tags":["merchant","search","catalog"]}],"url":"http://localhost:8001/a2a/merchant_agent","version":"1.0.0"}
+
+
+
+
+---------- New Agent Request Received---------
+POST http://localhost:8001/a2a/merchant_agent
+
+
+[Request Body]
+{'id': 'fab0d460-978f-470f-a126-8756f08a05bc', 'jsonrpc': '2.0', 'method': 'message/send', 'params': {'configuration': {'acceptedOutputModes': [], 'blocking': True}, 'message': {'contextId': 'c2dba1b7-36a7-4727-87b3-031df46a4e9e', 'kind': 'message', 'messageId': 'a0fdcf95dab344af870c1b87d4287c45', 'parts': [{'kind': 'text', 'text': "Update the cart with the user's shipping address."}, {'data': {'cart_id': 'cart_1'}, 'kind': 'data'}, {'data': {'shipping_address': {'city': 'Colorado Springs', 'region': 'Colorado', 'address_line': ['562 Berry Street'], 'postal_code': '80904'}}, 'kind': 'data'}, {'data': {'shopping_agent_id': 'trusted_shopping_agent'}, 'kind': 'data'}], 'role': 'agent'}}}
+
+[Extension Header]
+X-A2A-Extensions: https://github.com/google-agentic-commerce/ap2/v1
+
+
+[Request Instructions]
+["Update the cart with the user's shipping address."]
+
+
+[Data Part: cart_id] 
+cart_1
+
+
+[Data Part: shipping_address] 
+{'city': 'Colorado Springs', 'region': 'Colorado', 'address_line': ['562 Berry Street'], 'postal_code': '80904'}
+
+
+[Data Part: shopping_agent_id] 
+trusted_shopping_agent
+
+
+[Response Body]
+{"id":"fab0d460-978f-470f-a126-8756f08a05bc","jsonrpc":"2.0","result":{"artifacts":[{"artifactId":"ce7f4866-42ab-4b0a-81b9-92c9e9f95c56","parts":[{"data":{"ap2.mandates.CartMandate":{"contents":{"id":"cart_1","user_cart_confirmation_required":true,"payment_request":{"method_data":[{"supported_methods":"CARD","data":{"network":["mastercard","paypal","amex"]}}],"details":{"id":"order_1","display_items":[{"label":"Drip coffee maker","amount":{"currency":"USD","value":53.49},"pending":null,"refund_period":30},{"label":"Shipping","amount":{"currency":"USD","value":2.0},"pending":null,"refund_period":30},{"label":"Tax","amount":{"currency":"USD","value":1.5},"pending":null,"refund_period":30}],"shipping_options":null,"modifiers":null,"total":{"label":"Total","amount":{"currency":"USD","value":53.49},"pending":null,"refund_period":30}},"options":{"request_payer_name":false,"request_payer_email":false,"request_payer_phone":false,"request_shipping":true,"shipping_type":null},"shipping_address":{"city":"Colorado Springs","country":null,"dependent_locality":null,"organization":null,"phone_number":null,"postal_code":"80904","recipient":null,"region":"Colorado","sorting_code":null,"address_line":["562 Berry Street"]}},"cart_expiry":"2025-11-04T10:28:56.878832+00:00","merchant_name":"Generic Merchant"},"merchant_authorization":"eyJhbGciOiJSUzI1NiIsImtpZIwMjQwOTA..."}},"kind":"data"},{"data":{"risk_data":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...fake_risk_data"},"kind":"data"}]}],"contextId":"c2dba1b7-36a7-4727-87b3-031df46a4e9e","history":[{"contextId":"c2dba1b7-36a7-4727-87b3-031df46a4e9e","kind":"message","messageId":"a0fdcf95dab344af870c1b87d4287c45","parts":[{"kind":"text","text":"Update the cart with the user's shipping address."},{"data":{"cart_id":"cart_1"},"kind":"data"},{"data":{"shipping_address":{"city":"Colorado Springs","region":"Colorado","address_line":["562 Berry Street"],"postal_code":"80904"}},"kind":"data"},{"data":{"shopping_agent_id":"trusted_shopping_agent"},"kind":"data"}],"role":"agent","taskId":"b8090fb7-8b38-4552-a5f9-3fabab266483"}],"id":"b8090fb7-8b38-4552-a5f9-3fabab266483","kind":"task","status":{"state":"completed","timestamp":"2025-11-04T10:04:38.324489+00:00"}}}
+
+
+
+
+---------- New Agent Request Received---------
+GET http://localhost:8002/a2a/credentials_provider/.well-known/agent-card.json
+
+
+[Request Body]
+<empty>
+
+
+[Response Body]
+{"capabilities":{"extensions":[{"description":"Supports the Agent Payments Protocol.","required":true,"uri":"https://github.com/google-agentic-commerce/ap2/v1"},{"description":"Supports the Sample Card Network payment method extension","required":true,"uri":"https://sample-card-network.github.io/paymentmethod/types/v1"}]},"defaultInputModes":["text/plain"],"defaultOutputModes":["application/json"],"description":"An agent that holds a user's payment credentials.","name":"CredentialsProvider","preferredTransport":"JSONRPC","protocolVersion":"0.3.0","skills":[{"description":"Initiates a payment with the correct payment processor.","id":"initiate_payment","name":"Initiate Payment","tags":["payments"]},{"description":"Provides a list of eligible payment methods for a particular purchase.","id":"get_eligible_payment_methods","name":"Get Eligible Payment Methods","tags":["eligible","payment","methods"]},{"description":"Fetches the shipping address from a user's wallet.","id":"get_account_shipping_address","name":"Get Shipping Address","tags":["account","shipping"]}],"url":"http://localhost:8002/a2a/credentials_provider","version":"1.0.0"}
+
+
+
+
+---------- New Agent Request Received---------
+POST http://localhost:8002/a2a/credentials_provider
+
+
+[Request Body]
+{'id': '91b5a7de-0c92-4164-a4b2-e99a5595987c', 'jsonrpc': '2.0', 'method': 'message/send', 'params': {'configuration': {'acceptedOutputModes': [], 'blocking': True}, 'message': {'contextId': 'c2dba1b7-36a7-4727-87b3-031df46a4e9e', 'kind': 'message', 'messageId': 'f79087c80749404bbe5bff84b5c96fee', 'parts': [{'kind': 'text', 'text': "Get a filtered list of the user's payment methods."}, {'data': {'user_email': 'baoyf.jlu@gmail.com'}, 'kind': 'data'}, {'data': {'payment_request.PaymentMethodData': {'supported_methods': 'CARD', 'data': {'network': ['mastercard', 'paypal', 'amex']}}}, 'kind': 'data'}], 'role': 'agent'}}}
+
+[Extension Header]
+X-A2A-Extensions: https://github.com/google-agentic-commerce/ap2/v1
+
+
+[Request Instructions]
+["Get a filtered list of the user's payment methods."]
+
+
+[Data Part: user_email] 
+baoyf.jlu@gmail.com
+
+
+[Data Part: payment_request.PaymentMethodData] 
+{'supported_methods': 'CARD', 'data': {'network': ['mastercard', 'paypal', 'amex']}}
+
+
+[Response Body]
+{"id":"91b5a7de-0c92-4164-a4b2-e99a5595987c","jsonrpc":"2.0","result":{"artifacts":[{"artifactId":"caf579c9-ea28-4787-afcd-dad334448344","parts":[{"data":{"payment_method_aliases":[]},"kind":"data"}]}],"contextId":"c2dba1b7-36a7-4727-87b3-031df46a4e9e","history":[{"contextId":"c2dba1b7-36a7-4727-87b3-031df46a4e9e","kind":"message","messageId":"f79087c80749404bbe5bff84b5c96fee","parts":[{"kind":"text","text":"Get a filtered list of the user's payment methods."},{"data":{"user_email":"baoyf.jlu@gmail.com"},"kind":"data"},{"data":{"payment_request.PaymentMethodData":{"supported_methods":"CARD","data":{"network":["mastercard","paypal","amex"]}}},"kind":"data"}],"role":"agent","taskId":"1f8cb70e-e657-4e1c-868e-3f0d8008b838"}],"id":"1f8cb70e-e657-4e1c-868e-3f0d8008b838","kind":"task","status":{"state":"completed","timestamp":"2025-11-04T10:08:16.749007+00:00"}}}
+```
+
+最终凭证状态
+```json
+{
+  "intent_mandate": {
+    "user_cart_confirmation_required": true,
+    "natural_language_description": "a coffee maker",
+    "merchants": [],
+    "skus": [],
+    "requires_refundability": true,
+    "intent_expiry": "2025-11-05T09:58:02.506702+00:00",
+    "risk_data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...fake_risk_data",
+    "shopping_context_id": "c2dba1b7-36a7-4727-87b3-031df46a4e9e",
+    "cart_mandates": [
+      {
+        "contents": {
+          "id": "cart_1",
+          "user_cart_confirmation_required": true,
+          "payment_request": {
+            "method_data": [
+              {
+                "supported_methods": "CARD",
+                "data": {
+                  "network": ["mastercard", "paypal", "amex"]
+                }
+              }
+            ],
+            "details": {
+              "id": "order_1",
+              "display_items": [
+                {
+                  "label": "Drip coffee maker",
+                  "amount": {
+                    "currency": "USD",
+                    "value": 49.99
+                  },
+                  "refund_period": 30
+                }
+              ],
+              "total": {
+                "label": "Total",
+                "amount": {
+                  "currency": "USD",
+                  "value": 49.99
+                },
+                "refund_period": 30
+              }
+            },
+            "options": {
+              "request_payer_name": false,
+              "request_payer_email": false,
+              "request_payer_phone": false,
+              "request_shipping": true
+            }
+          },
+          "cart_expiry": "2025-11-04T10:28:56.878832+00:00",
+          "merchant_name": "Generic Merchant"
+        }
+      },
+      {
+        "contents": {
+          "id": "cart_2",
+          "user_cart_confirmation_required": true,
+          "payment_request": {
+            "method_data": [
+              {
+                "supported_methods": "CARD",
+                "data": {
+                  "network": ["mastercard", "paypal", "amex"]
+                }
+              }
+            ],
+            "details": {
+              "id": "order_2",
+              "display_items": [
+                {
+                  "label": "Single-serve coffee machine",
+                  "amount": {
+                    "currency": "USD",
+                    "value": 89
+                  },
+                  "refund_period": 30
+                }
+              ],
+              "total": {
+                "label": "Total",
+                "amount": {
+                  "currency": "USD",
+                  "value": 89
+                },
+                "refund_period": 30
+              }
+            },
+            "options": {
+              "request_payer_name": false,
+              "request_payer_email": false,
+              "request_payer_phone": false,
+              "request_shipping": true
+            }
+          },
+          "cart_expiry": "2025-11-04T10:28:56.878832+00:00",
+          "merchant_name": "Generic Merchant"
+        }
+      },
+      {
+        "contents": {
+          "id": "cart_3",
+          "user_cart_confirmation_required": true,
+          "payment_request": {
+            "method_data": [
+              {
+                "supported_methods": "CARD",
+                "data": {
+                  "network": ["mastercard", "paypal", "amex"]
+                }
+              }
+            ],
+            "details": {
+              "id": "order_3",
+              "display_items": [
+                {
+                  "label": "Pour-over coffee system",
+                  "amount": {
+                    "currency": "USD",
+                    "value": 35.5
+                  },
+                  "refund_period": 14
+                }
+              ],
+              "total": {
+                "label": "Total",
+                "amount": {
+                  "currency": "USD",
+                  "value": 35.5
+                },
+                "refund_period": 30
+              }
+            },
+            "options": {
+              "request_payer_name": false,
+              "request_payer_email": false,
+              "request_payer_phone": false,
+              "request_shipping": true
+            }
+          },
+          "cart_expiry": "2025-11-04T10:28:56.878832+00:00",
+          "merchant_name": "Generic Merchant"
+        }
+      }
+    ],
+    "chosen_cart_id": "cart_1",
+    "cart_mandate": {
+      "contents": {
+        "id": "cart_1",
+        "user_cart_confirmation_required": true,
+        "payment_request": {
+          "method_data": [
+            {
+              "supported_methods": "CARD",
+              "data": {
+                "network": ["mastercard", "paypal", "amex"]
+              }
+            }
+          ],
+          "details": {
+            "id": "order_1",
+            "display_items": [
+              {
+                "label": "Drip coffee maker",
+                "amount": {
+                  "currency": "USD",
+                  "value": 53.49
+                },
+                "refund_period": 30
+              },
+              {
+                "label": "Shipping",
+                "amount": {
+                  "currency": "USD",
+                  "value": 2
+                },
+                "refund_period": 30
+              },
+              {
+                "label": "Tax",
+                "amount": {
+                  "currency": "USD",
+                  "value": 1.5
+                },
+                "refund_period": 30
+              }
+            ],
+            "total": {
+              "label": "Total",
+              "amount": {
+                "currency": "USD",
+                "value": 53.49
+              },
+              "refund_period": 30
+            }
+          },
+          "options": {
+            "request_payer_name": false,
+            "request_payer_email": false,
+            "request_payer_phone": false,
+            "request_shipping": true
+          }
+        },
+        "shipping_address": {
+          "city": "Colorado Springs",
+          "region": "Colorado",
+          "address_line": ["562 Berry Street"],
+          "postal_code": "80904"
+        },
+        "cart_expiry": "2025-11-04T10:28:56.878832+00:00",
+        "merchant_name": "Generic Merchant"
+      }
+    },
+    "merchant_authorization": "eyJhbGciOiJSUzI1NiIsImtpZIwMjQwOTA...",
+    "shipping_address": {
+      "city": "Colorado Springs",
+      "region": "Colorado",
+      "address_line": ["562 Berry Street"],
+      "postal_code": "80904"
+    }
+  }
+}
+
+```
+## 参考
+
+[「AI助手」真来了？谷歌牵头推进Agent支付协议AP2](https://mp.weixin.qq.com/s/hIcWM2dlYK1mL2pPqLCvWQ)
+
+[Function Calling、MCP和A2A的核心原理与区别](https://www.bilibili.com/video/BV1XFhPzoEBx/?spm_id_from=333.337.search-card.all.click&vd_source=2979ee43e62e9592a095de5a11b26d9a)
+
+[Function calling & MCP for LLMs](https://www.dailydoseofds.com/p/function-calling-mcp-for-llms/)
+
+[Model Context Protocol (MCP)](https://mcp-docs.cn/introduction)
+
+[OpenAI Platform — Function calling](https://platform.openai.com/docs/guides/function-calling)
+
+[A2A Protocol](https://a2a-protocol.org/latest/)
+
+[AP2 - Agent Payments Protocol Documentation](https://ap2-protocol.org/)
+
