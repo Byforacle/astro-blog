@@ -1,0 +1,773 @@
+---
+title: 'Agent安全论文调研' # (Required, max 60)
+description: '发表于顶会的Agent安全相关论文统计' # (Required, 10 to 160)
+publishDate: '2026-7-30' # (Required, Date)
+tags:
+  - Agent # (Also can write format like next line)
+heroImage: { src: 'https://image777.oss-cn-beijing.aliyuncs.com/img/202607300147994.png', inferSize: true, color: 'rgb(45, 93, 227)' }
+draft: false # (set true will only show in development)
+language: '简中' # (String as you like)
+comment: true # (set false will disable comment, even if you've enabled it in site-config)
+---
+import { Aside } from 'astro-pure/user'
+
+<Aside type="tip">
+统计范围覆盖安全四大(S&P、USENIX Security、CCS、NDSS)、软工顶会(ICSE、FSE)、AI 顶会(ICLR、ICML、NeurIPS)
+共 **481 篇**论文,统计截至 2026-07-27。
+</Aside>
+
+![wallhaven-9o91yw](https://image777.oss-cn-beijing.aliyuncs.com/img/202607300147994.png)
+
+# 顶会 LLM Agent 安全与 MCP 安全论文全集(2023–2026)
+
+> 覆盖安全四大(S&P、USENIX Security、CCS、NDSS)、软工顶会(ICSE、FSE)、AI 顶会(ICLR、ICML、NeurIPS)
+> 共 **481 篇**论文,统计截至 2026-07-27。
+
+## 统计概览
+
+**按会议**
+
+| 会议 | 篇数 | 会议 | 篇数 |
+|---|---|---|---|
+| S&P | 30 | USENIX Security | 52 |
+| CCS | 25 | NDSS | 16 |
+| ICSE | 6 | FSE | 10 |
+| ICLR | 92 | ICML | 166 |
+| NeurIPS | 84 |  |  |
+| **合计** | **481** | | |
+
+**按年份**:2023 年 7 篇 · 2024 年 45 篇 · 2025 年 163 篇 · 2026 年 266 篇
+
+**按相关度**:核心 206 篇 · 相关 275 篇
+
+**按主题分类**
+
+| 代号 | 分类 | 篇数 | 代号 | 分类 | 篇数 |
+|---|---|---|---|---|---|
+| A1 | 提示注入攻击(Prompt Injection) | 26 | A2 | 工具与插件攻击(Tool / Plugin Attacks) | 8 |
+| A3 | 记忆与知识投毒(Memory / RAG Poisoning) | 28 | A4 | Agent 后门与模型层攻击(Backdoor) | 12 |
+| A5 | 多智能体系统攻击(Multi-Agent Attacks) | 11 | A6 | MCP 与 Agent 协议安全(MCP / Agent Protocols) | 12 |
+| A7 | GUI / Web / 浏览器 / 移动 Agent 安全 | 18 | A8 | 具身智能与机器人 Agent 安全(Embodied / VLA) | 11 |
+| A9 | 代码 Agent 与软件工程 Agent 安全 | 18 | A10 | Agent 隐私风险(Privacy) | 34 |
+| D1 | 注入检测与防御(Injection Defense) | 22 | D2 | 运行时防护与系统架构(沙箱 / 隔离 / 权限 / 信息流) | 22 |
+| D3 | Agentic Guardrail 与运行时监控 | 29 | D4 | 投毒 / 后门的检测与净化 | 11 |
+| D5 | 形式化方法与可验证安全 | 8 | E1 | Agent 安全与风险评测基准(Benchmarks) | 60 |
+| E2 | 网络安全能力评测(CTF / 漏洞利用 / 渗透) | 22 | E3 | Agent 生态测量研究(App Store / 插件 / MCP 生态) | 12 |
+| F1 | 攻击性 Agent(自主渗透与自动化利用) | 25 | F2 | 防御性 Agent(检测 / 取证 / 响应) | 13 |
+| G1 | AI Control 与监督(Sabotage / Scheming / Monitoring) | 33 | G2 | Agent 欺骗、操纵与共谋 | 17 |
+| G3 | Agent 身份、溯源与水印 | 10 | G4 | Agentic 场景越狱与有害行为 | 7 |
+| G5 | 综述与立场论文(SoK / Survey / Position) | 12 |  |  |  |
+
+> 说明:一篇论文只归入一个主分类。攻击类(A)、防御类(D)、评测与测量类(E)、Agent 作为攻防主体(F)、治理与行为安全类(G)。
+
+## 三、论文列表(按主题分类)
+
+### A1. 提示注入攻击(Prompt Injection) (26 篇)
+
+- **[Fun-tuning: Characterizing the Vulnerability of Proprietary LLMs to Optimization-Based Prompt Injection Attacks via the Fine-Tuning Interface](https://doi.org/10.1109/SP61157.2025.00121)** — 利用 Gemini 微调接口返回的 loss 类信息做贪心离散优化,为闭源 LLM 生成 prompt injection,成功率 65%–82%。 `S&P 2025` `核心`
+- **[Hijacking Large Audio-Language Models via Context-Agnostic and Imperceptible Auditory Prompt Injection](https://doi.org/10.1109/SP63933.2026.00214)** — AudioHijack 用采样梯度估计与混响卷积生成不可感知对抗音频,对 13 个音频 LLM 实现上下文无关的听觉 prompt injection。 `S&P 2026` `相关`
+- **[When AI Meets the Web: Prompt Injection Risks in Third-Party AI Chatbot Plugins](https://doi.org/10.1109/SP63933.2026.00062)** — 测量 17 个第三方 chatbot 插件与上万网站,发现 8 个不校验对话历史使直接注入效果提升 3–8 倍,15 个混入不可信内容引入间接注入。 `S&P 2026` `核心`
+- **[Context Contamination in LLM Analysis of Network Security Logs: Poison with Passive Prompt Injection and Mitigation Evaluation](https://www.usenix.org/conference/usenixsecurity26/presentation/karanjai)** — 将 prompt injection 载荷植入外部可控日志字段并持久化,待分析师查询时被动触发,并用含 2,569 条对抗样本的 LogInject 基准评测三个生产 LLM 与缓解方案。 `USENIX Security 2026` `相关`
+- **[MUZZLE: Adaptive Agentic Red-Teaming of Web Agents Against Indirect Prompt Injection Attacks](https://www.usenix.org/conference/usenixsecurity26/presentation/syros)** — 自动化 agentic red-teaming 框架 MUZZLE,依据 Web agent 执行轨迹定位高显著性注入面并自适应生成上下文相关恶意指令,在 4 个 Web 应用上发现 44 个新攻击。 `USENIX Security 2026` `核心`
+- **[Overcoming the Retrieval Barrier: Indirect Prompt Injection in the Wild for LLM Systems](https://www.usenix.org/conference/usenixsecurity26/presentation/chang-hongyan)** — 把间接注入拆成保证被检索命中的 trigger 片段与攻击片段,黑盒下近 100% 被检索,单封投毒邮件即可让 GPT-4o 外泄 SSH 密钥。 `USENIX Security 2026` `核心`
+- **[The Attacker Moves Second: Stronger Adaptive Attacks Bypass Defenses Against LLM Jailbreaks and Prompt Injections](https://www.usenix.org/conference/usenixsecurity26/presentation/nasr)** — 论证防御须以自适应攻击者评测,通过调优梯度下降、强化学习、随机搜索与人工引导探索,以超 90% 成功率攻破 12 种越狱与 prompt injection 防御。 `USENIX Security 2026` `相关`
+- **[When AIOps Become "AI Oops": Subverting LLM-driven IT Operations via Telemetry Manipulation](https://www.usenix.org/conference/usenixsecurity26/presentation/pasquini)** — 首次分析 AIOps 安全:用错误诱导请求注入伪造 telemetry 使运维 agent 做出破坏基础设施的动作,并以 AIOpsShield 净化遥测数据防御。 `USENIX Security 2026` `核心`
+- **[Optimization-based Prompt Injection Attack to LLM-as-a-Judge](https://doi.org/10.1145/3658644.3690291)** — 面向 LLM-as-a-Judge 的优化式提示注入,用梯度方法生成注入序列使目标回答无论候选如何都被选中,并击穿三类已知检测防御。 `CCS 2024` `相关`
+- **[PLeak: Prompt Leaking Attacks against Large Language Model Applications](https://doi.org/10.1145/3658644.3670370)** — 闭盒提示泄露攻击,按系统提示前缀逐段增量优化对抗查询,在 Poe 等真实 LLM 应用上高效还原其机密 system prompt。 `CCS 2024` `相关`
+- **[ObliInjection: Order-Oblivious Prompt Injection Attack to LLM Agents with Multi-source Data](https://www.ndss-symposium.org/ndss-paper/obliinjection-order-oblivious-prompt-injection-attack-to-llm-agents-with-multi-source-data/)** — 针对多来源输入的 agent 提出 order-oblivious 损失与 orderGCG 优化,使污染片段无论排在何处都能劫持任务,只污染 1 个片段即生效。 `NDSS 2026` `核心`
+- **[Prompt-to-SQL Injections in LLM-Integrated Web Applications: Risks and Defenses](https://doi.org/10.1109/ICSE55347.2025.00007)** — 刻画 LangChain/LlamaIndex 网页应用中的 prompt-to-SQL 注入变体,在 7 个 LLM 与 5 个真实应用验证漏洞,并给出四种可集成的防御。 `ICSE 2025` `相关`
+- **[Tensor Trust: Interpretable Prompt Injection Attacks from an Online Game](https://openreview.net/forum?id=fsW7wJGLBd)** — 通过在线游戏收集 56 万条人类 prompt injection 攻击与 11.8 万条提示级防御,构建 prompt 提取与劫持两类抗性基准并验证其对真实应用的可迁移性。 `ICLR 2024` `相关`
+- **[Eia: Environmental Injection Attack on Generalist Web Agents for Privacy Leakage](https://openreview.net/forum?id=xMOLUzo2Lk)** — 提出环境注入攻击 EIA,在真实网页中植入自适应恶意内容诱使通用 web agent 泄露用户 PII,窃取指定隐私项成功率达 70% 且难以检测。 `ICLR 2025` `核心`
+- **[Follow My Instruction and Spill the Beans: Scalable Data Extraction from Retrieval-Augmented Generation Systems](https://openreview.net/forum?id=Y4aWwRh25b)** — 利用指令跟随特性以 prompt injection 逐字提取 RAG 数据库内容,对 25 个定制 GPTs 两次查询内近乎必然泄露,位置偏置消除可显著缓解。 `ICLR 2025` `相关`
+- **[ChatInject: Abusing Chat Templates for Prompt Injection in LLM Agents](https://openreview.net/forum?id=WVhgFSKniL)** — 把恶意载荷伪装成模型原生 chat template 并用多轮对话铺垫,在 AgentDojo 上将注入成功率由 5.18% 提到 32.05%,现有 prompt 防御基本失效。 `ICLR 2026` `核心`
+- **[RedTeamCUA: Realistic Adversarial Testing of Computer-Use Agents in Hybrid Web-OS Environments](https://openreview.net/forum?id=yWwrgcBoK3)** — 构建 VM 加 Docker 的混合 web-OS 沙箱与 864 例基准,红队测试 computer-use agent 的 indirect prompt injection,端到端成功率最高达五成。 `ICLR 2026` `核心`
+- **[VPI-Bench: Visual Prompt Injection Attacks for Computer-Use Agents](https://openreview.net/forum?id=UMauKu2azg)** — 在五个常用平台构造 306 个视觉嵌入恶意提示的交互式测试页,黑盒评测 computer-use 与浏览器 agent,最高受骗率达 100%。 `ICLR 2026` `核心`
+- **[UDora: A Unified Red Teaming Framework against LLM Agents by Dynamically Hijacking Their Own Reasoning](https://proceedings.mlr.press/v267/zhang25cl.html)** — 在 agent 推理轨迹中自动定位最优插入点并迭代优化对抗扰动,动态劫持其推理过程,诱导 agent 执行指定恶意动作或调用恶意工具。 `ICML 2025` `核心`
+- **[Does AI Reviewer See the Full Picture? Attacking and Defending Multimodal Peer Review](https://openreview.net/forum?id=l8RBjihPFk)** — 针对多模态 AI 审稿提出 PaperGuard,含黑盒 prompt injection 与文本 GCG、图像 PGD 白盒扰动攻击,并用分块嵌入检索定位并消除恶意指令。 `ICML 2026` `相关`
+- **[It's a TRAP! Task-Redirecting Agent Persuasion Benchmark for Web Agents](https://openreview.net/forum?id=Smk4fl6Q9E)** — 提出 TRAP 基准,把社会工程说服话术嵌入高保真克隆网页界面实施 prompt injection,使六个前沿模型的 web agent 平均 25% 任务被劫持改道。 `ICML 2026` `核心`
+- **[OTora: A Unified Red Teaming Framework for Reasoning-Level Denial-of-Service in LLM Agents](https://openreview.net/forum?id=n6smFKXQWg)** — 提出推理层拒绝服务红队框架 OTora,先优化触发器诱导冗余工具调用,再用遗传搜索放大过度思考,推理 token 增至 10 倍而任务准确率不变。 `ICML 2026` `核心`
+- **[Prompt Injection as Role Confusion](https://openreview.net/forum?id=Lm3DQDyIsI)** — 用 role probe 证明 prompt injection 源于角色表征混淆——注入文本占据被模仿可信角色的表示空间,并提出 CoT Forgery 攻击取得 60% 成功率。 `ICML 2026` `核心`
+- **[Rapid Poison: Practical Poisoning Attacks Against the Rapid Response Framework](https://openreview.net/forum?id=hvI3Syn2U7)** — 用 prompt injection 把毒样本注入 Rapid Response 越狱分类器的合成训练流水线,1% 投毒率即可制造定向误报与概念级后门绕过。 `ICML 2026` `相关`
+- **[Dataset and Lessons Learned from the 2024 SaTML LLM Capture-the-Flag Competition](https://openreview.net/forum?id=WUWHVN4gxk)** — 复盘 SaTML 2024 LLM 夺旗赛的 prompt injection 攻防两阶段,所有防御均至少被攻破一次,并开源 13.7 万条多轮攻击对话数据集。 `NeurIPS 2024` `相关`
+- **[TRAP: Targeted Redirecting of Agentic Preferences](https://openreview.net/forum?id=X51kYnijag)** — 用扩散模型在视觉-语言嵌入空间做语义注入,生成视觉自然的对抗图像,无需模型内部访问即可定向操纵 agentic VLM 的选择偏好。 `NeurIPS 2025` `相关`
+
+### A2. 工具与插件攻击(Tool / Plugin Attacks) (8 篇)
+
+- **[Make Agent Defeat Agent: Automatic Detection of Taint-Style Vulnerabilities in LLM-based Agents](https://www.usenix.org/conference/usenixsecurity25/presentation/liu-fengyu)** — AgentFuzz 以 LLM 生成种子并做定向灰盒模糊测试,挖掘 LLM agent 的 taint-style 漏洞,20 个开源 agent 中发现 34 个高危 0-day。 `USENIX Security 2025` `核心`
+- **[Autonomy Comes with Costs: Detecting Denial-of-Service Vulnerabilities Caused by Resource Abusing in LLM-based Agents](https://www.usenix.org/conference/usenixsecurity26/presentation/luo)** — 首次系统研究 LLM agent 的资源生命周期缺陷,用定向灰盒 fuzzing 生成耗资源提示,在 20 个开源 agent 中挖出 36 个 DoS 零日漏洞。 `USENIX Security 2026` `核心`
+- **[Demystifying RCE Vulnerabilities in LLM-Integrated Apps](https://doi.org/10.1145/3658644.3690338)** — 静态分析 11 个 LLM 应用框架的代码执行调用链并用提示注入触发利用,发现 20 个 RCE 类漏洞、11 个 CVE,成功攻陷 17 个真实应用。 `CCS 2024` `核心`
+- **[Les Dissonances: Cross-Tool Harvesting and Polluting in Pool-of-Tools Empowered LLM Agents](https://www.ndss-symposium.org/ndss-paper/les-dissonances-cross-tool-harvesting-and-polluting-in-pool-of-tools-empowered-llm-agents/)** — 系统分析多工具 agent 的任务控制流,提出跨工具窃取与污染攻击 XTHP,并用动态扫描工具 Chord 发现 66 个真实工具中 75% 可被利用。 `NDSS 2026` `核心`
+- **[Prompt Injection Attack to Tool Selection in LLM Agents](https://www.ndss-symposium.org/ndss-paper/prompt-injection-attack-to-tool-selection-in-llm-agents/)** — 以两阶段优化生成恶意工具文档并投放到工具库,在 no-box 场景劫持 agent 的工具检索与选择,并证明 StruQ、SecAlign 等防御失效。 `NDSS 2026` `核心`
+- **[Adversarial Search Engine Optimization for Large Language Models](https://openreview.net/forum?id=hkdqxN3c7t)** — 提出 Preference Manipulation Attack,用精心构造的网页内容与插件文档操纵 LLM 的第三方内容选择以抬高攻击者产品,在 Bing、Perplexity 与 GPT-4 插件上生效。 `ICLR 2025` `相关`
+- **[Sponge Tool Attack: Stealthy Denial-of-Efficiency against Tool-Augmented Agentic Reasoning](https://openreview.net/forum?id=g9fZTb53kL)** — 在仅能改写输入 prompt 的条件下,用多 agent 协作生成语义保真的改写,使 tool-augmented agent 的推理轨迹冗长绕远,制造隐蔽的算力耗尽攻击。 `ICML 2026` `核心`
+- **[Attractive Metadata Attack: Inducing LLM Agents to Invoke Malicious Tools](http://papers.nips.cc/paper_files/paper/2025/hash/ee46288ab2aaf5c6e53aebebe719712c-Abstract-Conference.html)** — 提出 Attractive Metadata Attack,黑盒迭代优化生成诱人工具元数据诱导 agent 优先选择恶意工具,成功率 81%-95% 且可绕过 MCP 选择协议。 `NeurIPS 2025` `核心`
+
+### A3. 记忆与知识投毒(Memory / RAG Poisoning) (28 篇)
+
+- **[Adversarial Hubness in Multi-Modal Retrieval](https://doi.org/10.1109/SP63933.2026.00158)** — 构造 adversarial hub,使单张图片被 25000 条查询中的 2.1 万条检索为 top-1,实现多模态 RAG 向量库的通用检索投毒,现有 hubness 缓解手段失效。 `S&P 2026` `相关`
+- **[GraphRAG under Fire](https://sp2026.ieee-security.org/accepted-papers.html)** — GragPoison 利用知识图谱共享关系构造投毒文本,通过关系注入、关系增强与叙事伪装同时攻陷 GraphRAG 的多个查询,成功率达 98%。 `S&P 2026` `相关`
+- **[Fact-Saboteurs: A Taxonomy of Evidence Manipulation Attacks against Fact-Verification Systems](https://www.usenix.org/conference/usenixsecurity23/presentation/abdelnabi)** — 提出针对检索式事实核查系统的证据操纵攻击分类,通过伪装关键证据或投放贴合声明的误导证据大幅拉低核查准确率。 `USENIX Security 2023` `相关`
+- **[Machine Against the RAG: Jamming Retrieval-Augmented Generation with Blocker Documents](https://www.usenix.org/conference/usenixsecurity25/presentation/shafran)** — 向 RAG 知识库注入单篇 blocker 文档即可让系统拒答特定查询,用黑盒优化生成且无需知晓嵌入模型与后端 LLM。 `USENIX Security 2025` `相关`
+- **[PoisonedRAG: Knowledge Corruption Attacks to Retrieval-Augmented Generation of Large Language Models](https://www.usenix.org/conference/usenixsecurity25/presentation/zou-poisonedrag)** — 首次提出 RAG 知识库投毒攻击,把恶意文本构造转为优化问题,每个目标问题仅注入 5 条文本即可让 LLM 输出攻击者指定答案,成功率约 90%。 `USENIX Security 2025` `相关`
+- **[Topic-FlipRAG: Topic-Orientated Adversarial Opinion Manipulation Attacks to Retrieval-Augmented Generation Models](https://www.usenix.org/conference/usenixsecurity25/presentation/gong-yuyang)** — 两阶段主题级 RAG 投毒攻击,结合对抗排序与语义级扰动,使模型在整类相关查询上系统性翻转立场,现有缓解手段难以拦截。 `USENIX Security 2025` `相关`
+- **[BadGraph: Structural Knowledge Isolation Attacks against Graph Retrieval-Augmented Generation](https://www.usenix.org/conference/usenixsecurity26/presentation/yan-leiming)** — 面向 Graph Retrieval-Augmented Generation 的结构性知识隔离攻击 BadGraph,通过操纵知识图谱结构使目标知识在检索阶段被隔离,进而扭曲生成结果。 `USENIX Security 2026` `相关`
+- **[Confundo: Learning to Generate Robust Poison for Practical RAG Systems](https://www.usenix.org/conference/usenixsecurity26/presentation/hu-haoyang)** — learning-to-poison 框架 Confundo 微调 LLM 作为投毒生成器,抵抗内容分块与查询漂移,可篡改事实、诱导偏见并触发幻觉,亦可反向保护网页内容。 `USENIX Security 2026` `相关`
+- **[FragFuse: Bypassing Access Control of Large Language Model Agents via Memory-Based Query Fragmentation and Fusion](https://www.usenix.org/conference/usenixsecurity26/presentation/rao)** — 将违规内容拆分为良性片段写入 agent 长期记忆,再经检索融合重建攻击查询以绕过访问控制,三种机制下平均绕过率 86.3%。 `USENIX Security 2026` `核心`
+- **[FlippedRAG: Black-Box Opinion Manipulation Adversarial Attacks to Retrieval-Augmented Generation Models](https://doi.org/10.1145/3719027.3765023)** — 通过枚举查询逆向出代理检索器,再据其构造毒化触发文档,黑盒下让 RAG 在争议话题上平均立场翻转 50%,并改变 20% 用户认知。 `CCS 2025` `相关`
+- **[GASLITEing the Retrieval: Exploring Vulnerabilities in Dense Embedding-based Search](https://doi.org/10.1145/3719027.3765095)** — 系统刻画稠密向量检索在语料投毒下的最坏情况,用梯度式方法生成对抗段落大规模劫持检索结果,威胁其上的 RAG 与 agent 系统。 `CCS 2025` `相关`
+- **[ImportSnare: Directed 'Code Manual' Hijacking in Retrieval-Augmented Code Generation](https://doi.org/10.1145/3719027.3765161)** — 投毒代码手册劫持检索增强代码生成,用位置感知 beam search 抬升毒文档排名并以多语言诱导让 LLM 推荐恶意依赖,0.01% 投毒率即生效。 `CCS 2025` `相关`
+- **[Cache Me, Catch You: Cache Related Security Threats in LLM Serving Frameworks](https://www.ndss-symposium.org/ndss-paper/cache-me-catch-you-cache-related-security-threats-in-llm-serving-frameworks/)** — 剖析 vLLM/SGLang/GPTCache 等推理框架的缓存攻击面,提出 prefix cache 碰撞与 semantic fuzzy poisoning 等六类攻击,可投递恶意内容并绕过审核。 `NDSS 2026` `相关`
+- **[When Cache Poisoning Meets LLM Systems: Semantic Cache Poisoning and Its Countermeasures](https://www.ndss-symposium.org/ndss-paper/when-cache-poisoning-meets-llm-systems-semantic-cache-poisoning-and-its-countermeasures/)** — 首次揭示 LLM 服务的 semantic cache 可被投毒:注入构造缓存条目让其他用户收到攻击者指定回答,在三大公有云验证并提出新防御。 `NDSS 2026` `相关`
+- **[Human-Imperceptible Retrieval Poisoning Attacks in LLM-Powered Applications](https://doi.org/10.1145/3663529.3663786)** — 利用 LLM 应用框架的文档解析缺陷构造与正常文件视觉无异的投毒文档,在 RAG 检索阶段诱导应用输出错误响应,实验中误导率 88.33%、真实应用 66.67%。 `FSE 2024` `相关`
+- **[BadJudge: Backdoor Vulnerabilities of LLM-As-A-Judge](https://openreview.net/forum?id=eC2a2IndIt)** — 对 LLM-as-a-Judge 评估器投毒植入后门,仅污染 1% 训练数据即可使攻击者得分翻三倍,并提出模型融合将攻击成功率降至近零。 `ICLR 2025` `相关`
+- **[On the Vulnerability of Applying Retrieval-Augmented Generation within Knowledge-Intensive Application Domains](https://openreview.net/forum?id=SOMDiaGoil)** — 在 225 种语料-检索器-查询组合上验证医疗问答 RAG 可被通用投毒文档精准召回,并据查询与毒文档 embedding 偏移规律提出检测式防御。 `ICML 2025` `相关`
+- **[PoisonedEye: Knowledge Poisoning Attack on Retrieval-Augmented Generation based Large Vision-Language Models](https://proceedings.mlr.press/v267/zhang25da.html)** — 首个针对视觉-语言 RAG 系统的知识投毒攻击,仅注入单个毒样本即可操纵目标查询的生成结果,并可扩展到整类查询的投毒。 `ICML 2025` `相关`
+- **["Someone Hid It!": Query-Agnostic Black-Box Attacks on LLM-Based Retrieval](https://openreview.net/forum?id=bzmt9wJ6uW)** — 提出 query 无关的黑盒检索攻击,用零样本代理 LLM 以 min-max 对抗学习生成可迁移注入 token,操纵 RAG、dense IR 与 agent memory 中文档的检索排序。 `ICML 2026` `相关`
+- **[Eyes-on-Me: Scalable RAG Poisoning through Transferable Attention-Steering Attractors](https://openreview.net/forum?id=rF1oJAhAZA)** — 把 RAG 投毒文档拆解为可复用的 attention attractor 与 focus region,操纵少数注意力头使 18 组端到端设置攻击成功率从 21.9 升至 57.8。 `ICML 2026` `相关`
+- **[From Similarity to Vulnerability: Key Collision Attack on LLM Semantic Caching](https://openreview.net/forum?id=BQfNL1wahQ)** — 利用语义缓存键的局部性与抗碰撞性冲突发起黑盒 key collision 攻击,86% 命中率劫持 LLM 响应并诱导金融 agent 执行恶意行为。 `ICML 2026` `相关`
+- **[MemIncept: Steering LLM Agents via Cooperative Stealthy Memory Injections](https://openreview.net/forum?id=1YNrlSSRsk)** — 提出 MemIncept 黑盒记忆投毒攻击,用双向进化搜索生成一组看似正常、易被检索且协同生效的查询,合力把 agent 行为导向攻击目标。 `ICML 2026` `核心`
+- **[Persistent Semantic Entities in Tool-Augmented LLM Systems](https://openreview.net/forum?id=zPjmtawzT8)** — 形式化工具增强 agent 中的 Persistent Semantic Entities,在 20 个模型上验证偏好、persona 与指令类污染可跨会话持续并沿多 agent 流水线放大传播。 `ICML 2026` `核心`
+- **[Reranker Helps, but Not Enough: Towards Strong Poisoning Attacks Against Retrieval-Augmented Generation](https://openreview.net/forum?id=Y54eyjHFqJ)** — 提出 P3A 对 RAG 的投毒攻击,先用规则化提示工程构造毒文本,再加约 1% 字符级扰动抬升 reranker 排名,单文档投毒即可高成功率生效。 `ICML 2026` `相关`
+- **[AgentPoison: Red-teaming LLM Agents via Poisoning Memory or Knowledge Bases](http://papers.nips.cc/paper_files/paper/2024/hash/eb113910e9c3f6242541c1652e30dfd6-Abstract-Conference.html)** — AgentPoison 以约束优化把带触发词的实例映射到独特嵌入空间,投毒 agent 长期记忆或 RAG 知识库实现免训练后门,攻破驾驶、QA 与医疗 agent。 `NeurIPS 2024` `核心`
+- **[ClashEval: Quantifying the tug-of-war between an LLM's internal prior and external evidence](https://openreview.net/forum?id=WGoCZl2itU)** — 对 1200 余道题的检索内容注入由细微到明显的错误,发现 LLM 超六成情况下采纳错误检索内容覆盖正确先验,并给出基于置信度的缓解手段。 `NeurIPS 2024` `相关`
+- **[Memory Injection Attacks on LLM Agents via Query-Only Interaction](https://openreview.net/forum?id=QINnsnppv8)** — MINJA 仅通过看似正常的查询交互向 agent 记忆库注入含 bridging steps 的恶意记录,使后续受害用户查询触发恶意推理链。 `NeurIPS 2025` `核心`
+- **[NeuroGenPoisoning: Neuron-Guided Attacks on Retrieval-Augmented Generation of LLM via Genetic Optimization of External Knowledge](https://openreview.net/forum?id=4kTpb8pITI)** — 定位与投毒上下文强相关的 Poison-Responsive Neurons,用遗传算法演化对抗性外部知识,批量生成 RAG 投毒文本达 90% 以上改写成功率。 `NeurIPS 2025` `相关`
+
+### A4. Agent 后门与模型层攻击(Backdoor) (12 篇)
+
+- **[An LLM-Assisted Easy-to-Trigger Backdoor Attack on Code Completion Models: Injecting Disguised Vulnerabilities against Strong Detection](https://www.usenix.org/conference/usenixsecurity24/presentation/yan)** — CodeBreaker 用 GPT-4 变换恶意载荷,把伪装后的漏洞代码注入代码补全模型的微调数据,使投毒样本与生成代码同时绕过强漏洞检测。 `USENIX Security 2024` `相关`
+- **[Instruction Backdoor Attacks Against Customized LLMs](https://www.usenix.org/conference/usenixsecurity24/presentation/zhang-rui)** — 在 GPTs 等定制 LLM 的提示中嵌入词级、句法级与语义级后门指令,无需微调即可在触发器出现时输出攻击者指定结果。 `USENIX Security 2024` `相关`
+- **[Cordyceps: Covert Control Attacks on LLMs via Data Poisoning](https://www.usenix.org/conference/usenixsecurity26/presentation/shao-zedian)** — 提出 Cordyceps 投毒攻击,借语义关联让 LLM 习得隐蔽信息隐藏方案,可编解码任意恶意指令实现隐蔽控制,并绕过后门与提示注入防御。 `USENIX Security 2026` `相关`
+- **[The Philosopher's Stone: Trojaning Plugins of Large Language Models](https://www.ndss-symposium.org/ndss-paper/the-philosophers-stone-trojaning-plugins-of-large-language-models/)** — 提出 POLISHED 与 FUSION 两种投毒方法训练带后门的 LoRA adapter,触发时让 LLM agent 输出攻击者内容甚至调用工具投放恶意软件、发起鱼叉钓鱼。 `NDSS 2025` `核心`
+- **[BadChain: Backdoor Chain-of-Thought Prompting for Large Language Models](https://openreview.net/forum?id=c93SBwz1Ma)** — 在少样本 CoT 示例中插入带触发器的后门推理步骤,无需训练数据或模型参数即可在 4 个 LLM、6 类推理任务上操纵最终答案。 `ICLR 2024` `相关`
+- **[Can We Trust Embodied Agents? Exploring Backdoor Attacks against Embodied LLM-Based Decision-Making Systems](https://openreview.net/forum?id=S1Bv3068Xt)** — 提出 BALD 框架,通过 word injection、scenario manipulation 与 knowledge injection 在自动驾驶与家庭机器人决策链植入后门,词与知识注入成功率近 100%。 `ICLR 2025` `核心`
+- **[BEAT: Visual Backdoor Attacks on VLM-based Embodied Agents via Contrastive Trigger Learning](https://openreview.net/forum?id=OwinX7PI83)** — 提出 BEAT,以环境中的物理物体为触发器向 VLM 具身 agent 植入视觉后门,借对比触发学习锐化判别边界,攻击成功率最高 80% 且保持正常任务性能。 `ICLR 2026` `核心`
+- **[Poison with Style: A Practical Poisoning Attack on Code Large Language Models](https://openreview.net/forum?id=Nyn7GCUhLA)** — 提出 PwS 代码模型投毒攻击,以开发者代码风格作隐蔽触发器微调 CLLM,触发风格下 95% 生成含 CWE-20 漏洞代码而基准性能几乎不降。 `ICML 2026` `相关`
+- **[SkillTrojan: Backdoor Attacks on Skill-Based Agent Systems](https://openreview.net/forum?id=FlnQlvkYR3)** — 把加密 payload 拆分藏进多个看似正常的 agent skill,借 skill 组合在预设触发下重组执行,发布 3000+ 后门 skill 数据集,EHR SQL 上 ASR 达 97.2%。 `ICML 2026` `核心`
+- **[Everyday Object Meets Vision-and-Language Navigation Agent via Backdoor](http://papers.nips.cc/paper_files/paper/2024/hash/58e6c003c9fb3992265005ff6aef1913-Abstract-Conference.html)** — 训练阶段向视觉语言导航 agent 植入以日常物体为触发的 IPR 后门,agent 在未见环境遇到触发物即执行异常导航,正常任务性能与隐蔽性保持良好。 `NeurIPS 2024` `核心`
+- **[Watch Out for Your Agents! Investigating Backdoor Threats to LLM-Based Agents](http://papers.nips.cc/paper_files/paper/2024/hash/b6e9d6f4f3428cd5f3f9e9bbae2cab10-Abstract-Conference.html)** — 首次系统研究 LLM agent 后门,提出可在中间推理步或环境观测中触发的隐蔽后门,在网购与工具调用任务验证且现有文本后门防御难缓解。 `NeurIPS 2024` `核心`
+- **[BadVLA: Towards Backdoor Attacks on Vision-Language-Action Models via Objective-Decoupled Optimization](https://openreview.net/forum?id=rEhVHla9zp)** — 提出首个 VLA 模型后门攻击,用目标解耦优化分离 trigger 表征并条件性触发控制偏移,近 100% 成功率且不损伤干净任务性能。 `NeurIPS 2025` `核心`
+
+### A5. 多智能体系统攻击(Multi-Agent Attacks) (11 篇)
+
+- **[MASLeak: Investigating and Exposing Intellectual Property Leakage Vulnerabilities in Multi-Agent Systems](https://www.usenix.org/conference/usenixsecurity26/presentation/wang-liwen)** — 黑盒下用蠕虫式对抗查询在多智能体系统内传播并回收响应,提取智能体数量、拓扑、system prompt 与工具用法,架构提取成功率约 92%。 `USENIX Security 2026` `核心`
+- **[Breaking and Fixing Defenses Against Control Flow Hijacking in Multi-Agent Systems](https://openreview.net/forum?id=PNU9Rj5RDQ)** — 展示可绕过 LlamaFirewall 等对齐检查的多智能体控制流劫持攻击,并提出 ControlValve,基于控制流完整性与最小权限生成并强制执行许可控制流图。 `ICLR 2026` `核心`
+- **[Measuring and Mitigating Rapport Bias of Large Language Models under Multi-Agent Social Interactions](https://openreview.net/forum?id=gF31wuYdk7)** — 提出 KAIROS 基准,在含专家、噪声人群与对抗同伴的多智能体问答场景中量化 LLM 的 rapport bias 与抗错误信息能力,并以 prompting、SFT 和 GRPO 做缓解。 `ICLR 2026` `相关`
+- **[Opponent Shaping in LLM Agents](https://openreview.net/forum?id=yJoHTqUNry)** — 首次在 LLM agent 上实现 opponent shaping,提出免高阶梯度的 ShapeLLM,在囚徒困境等博弈中把对手引向可利用均衡或促成合作。 `ICLR 2026` `相关`
+- **[When Agents "Misremember" Collectively: Exploring the Mandela Effect in LLM-based Multi-Agent Systems](https://openreview.net/forum?id=yIoMqDes7O)** — 构建 ManBench 用四类任务与五种交互协议量化多智能体系统的集体假记忆传播,并用提示与对齐防御平均削减 74.4%。 `ICLR 2026` `相关`
+- **[Agent Smith: A Single Image Can Jailbreak One Million Multimodal LLM Agents Exponentially Fast](https://proceedings.mlr.press/v235/gu24e.html)** — 把一张对抗图像塞进任一 agent 记忆即可在百万级多模态 agent 群中指数级传染越狱,并给出可证明抑制传播的防御判据。 `ICML 2024` `核心`
+- **[On the Resilience of LLM-Based Multi-Agent Collaboration with Faulty Agents](https://proceedings.mlr.press/v267/huang25ay.html)** — 用 AutoTransform 与 AutoInject 向多智能体系统注入出错 agent 评估不同拓扑结构的韧性,并提出 Challenger 与 Inspector 机制恢复 96% 错误。 `ICML 2025` `核心`
+- **[Architecture Matters for Multi-Agent Security](https://openreview.net/forum?id=Jk4zLorDUx)** — 通过 web agent 网络的分阶段受攻实验,实证分析 agent 角色分配、拓扑与记忆可见性等架构选择如何塑造多智能体系统的攻击面。 `ICML 2026` `核心`
+- **[Emergence of Biased Consensus in Multi-Agent LLM Debates](https://openreview.net/forum?id=5EtByXq4bX)** — 揭示多智能体 LLM 辩论会涌现集体性偏见共识,用社会动力学相变模型刻画从众度与采样噪声阈值,并发现 agent 异质性可抑制该涌现。 `ICML 2026` `相关`
+- **[When Embedding-Based Defenses Fail: Rethinking Safety in LLM-Based Multi-Agent Systems](https://openreview.net/forum?id=j5ibZwkwqF)** — 用 Slow Drift、Benign Wrapper、Chaos Seeding 三类攻击证明基于文本嵌入的恶意 agent 剪枝可被绕过,改用 token 置信度信号剪枝或降权提升 MAS 鲁棒性。 `ICML 2026` `核心`
+- **[AgentBreeder: Mitigating the AI Safety Risks of Multi-Agent Scaffolds via Self-Improvement](http://papers.nips.cc/paper_files/paper/2025/hash/dc2ccde7ee43e5719e08c68e848bd65a-Abstract-Conference.html)** — 提出多目标进化搜索优化多智能体 scaffold,blue 模式提升安全基准 79.4%,red 模式揭示对抗性脆弱 scaffold 随能力优化而涌现的风险。 `NeurIPS 2025` `核心`
+
+### A6. MCP 与 Agent 协议安全(MCP / Agent Protocols) (12 篇)
+
+- **[Demystifying the (In)Security of Oauth-Based Account Linking in Connector Ecosystems](https://doi.org/10.1109/SP63933.2026.00128)** — 剖析 Copilot Studio、Coze、Composio 等 agentic 连接器生态中 OAuth 账号绑定流程的安全缺陷,可被用于账号劫持乃至 AI agent 接管。 `S&P 2026` `核心`
+- **[Parasites in the Toolchain: A Large-Scale Analysis of Attacks on the MCP Ecosystem](https://doi.org/10.1109/SP63933.2026.00154)** — 揭示 MCP 寄生工具链攻击:恶意指令藏于外部数据源,串联多个合法工具完成隐私外泄,并普查 1360 个 server 的 12230 个工具。 `S&P 2026` `核心`
+- **[Model Context Protocol (MCP): Landscape, Security Threats, and Future Research Directions](https://doi.org/10.1145/3796519)** — 梳理 MCP server 四阶段生命周期与 16 项关键活动,按四类攻击者构建含 16 个威胁场景的分类法,配以真实案例并给出分阶段防护建议。 `FSE 2026` `核心`
+- **[A2ASecBench: A Protocol-Aware Security Benchmark for Agent-to-Agent Multi-Agent Systems](https://openreview.net/forum?id=LfdFnakqGJ)** — 给出 A2A 协议供应链与协议逻辑两类威胁分类及六种具体攻击,构建首个 A2A 安全基准 A2ASecBench,在旅行、医疗、金融演示中攻击普遍绕过默认防护。 `ICLR 2026` `核心`
+- **[MCP Security Bench (MSB): Benchmarking Attacks Against Model Context Protocol in LLM Agents](https://openreview.net/forum?id=irxxkFMrry)** — 提出 MSB,涵盖名称冲突、工具描述内 prompt injection 等 12 类 MCP 攻击,以真实工具在 405 个工具上生成 2000 个攻击实例评测 9 个 agent。 `ICLR 2026` `核心`
+- **[MCP-SafetyBench: A Benchmark for Safety Evaluation of Large Language Models with Real-World MCP Servers](https://openreview.net/forum?id=7XYjeL46co)** — 基于真实 MCP server 构建覆盖浏览器、金融等五域、服务端/宿主/用户侧 20 类攻击的多轮跨服务器安全基准,评测主流开闭源 LLM。 `ICLR 2026` `核心`
+- **[ComplexMCP: Evaluation of LLM Agents in Dynamic, Interdependent, and Large-Scale Tool Sandbox](https://openreview.net/forum?id=3u1M9wokD7)** — 基于 MCP 搭建 7 个有状态沙箱、300+ 相互依赖工具的 benchmark,注入动态环境状态与 API 故障,顶级模型成功率不足 60%。 `ICML 2026` `相关`
+- **[Position: Collaborative Agentic AI Needs Interoperability Across Ecosystems](https://icml.cc/virtual/2026/poster/67223)** — 立场论文,主张协作式 agentic AI 须以最小标准实现跨生态互操作,提出含消息传递、交互、状态管理与发现四要素的 Web of Agents 架构。 `ICML 2026` `相关`
+- **[Position: Let's Build a Trustworthy Model Context Protocol!](https://icml.cc/virtual/2026/poster/67253)** — 以欧盟可信 AI 准则审视 MCP,指出其作为 agent-工具接口是天然的信任执行点,识别关键挑战并提出协议层可信机制的改进方案。 `ICML 2026` `核心`
+- **[Position: Robust AI Personalization Will Require a Human Context Protocol](https://icml.cc/virtual/2026/poster/67175)** — 立场论文,主张个性化需要用户自治的 Human Context Protocol 跨 AI 系统承载偏好,支持可移植、范围受限访问与撤销,并给出原型。 `ICML 2026` `相关`
+- **[ProtocolBench: Which LLM MultiAgent Protocol to Choose?](https://openreview.net/forum?id=GZRiXE2zBe)** — 提出 ProtocolBench 从任务成功率、延迟、通信开销与故障风暴恢复四维比较 A2A、ACP、ANP、Agora 等协议,并给出约束感知的协议路由器。 `ICML 2026` `相关`
+- **[SOPE: Situation-Aware and Statistically Indistinguishable Privacy Exfiltration for MCP-enabled Agents](https://openreview.net/forum?id=Ra0pui9HXF)** — 把良性 MCP server 改造成隐私窃取变体,按工具使用场景嵌入探测指令并用代码级改动实现 zero-click 外传,324 个真实 server 绕过九种防御。 `ICML 2026` `核心`
+
+### A7. GUI / Web / 浏览器 / 移动 Agent 安全 (18 篇)
+
+- **[Investigating the Impact of Dark Patterns on LLM-Based Web Agents](https://doi.org/10.1109/SP63933.2026.00042)** — 用 LiteAgent 与 TrickyArena 测评 6 个 web agent 面对电商等站点 dark pattern 的表现,单个暗模式平均 41% 会诱使 agent 误决策。 `S&P 2026` `核心`
+- **[Site Isolation is Dead: How Site Isolation is Broken in Agentic Browsers and Extensions](https://doi.org/10.1109/SP63933.2026.00241)** — 揭示 agentic 浏览器与扩展盲信 IPC,被攻陷渲染进程可伪造消息迫使 agent 执行跨站操作,打破 site isolation 并给出护栏补丁。 `S&P 2026` `核心`
+- **[WebCloak: Characterizing and Mitigating Threats From LLM-Driven Web Agents as Intelligent Scrapers](https://doi.org/10.1109/SP63933.2026.00025)** — 刻画 LLM web agent 充当智能爬虫的威胁并建 LLMCrawlBench,用动态结构混淆与语义迷宫把抓取召回率从 88.7% 压到 0%。 `S&P 2026` `核心`
+- **[MATE: Policy-Aware Security Auditing for Mobile Agents via Synthesis-Driven Trajectory Learning](https://www.usenix.org/conference/usenixsecurity26/presentation/jiang-changyue)** — 面向移动 agent 的策略感知安全审计框架 MATE,以合成驱动的轨迹学习建模执行过程,检测违反安全策略的 agent 行为。 `USENIX Security 2026` `核心`
+- **[Aligned LLMs Are Not Aligned Browser Agents](https://openreview.net/forum?id=NsFZZU9gvk)** — 提出 BrowserART 红队工具集,用 100 个浏览器有害行为证明聊天场景的安全拒绝无法迁移到 browser agent,GPT-4o agent 执行了 98 项有害行为。 `ICLR 2025` `核心`
+- **[Dissecting Adversarial Robustness of Multimodal LM Agents](https://openreview.net/forum?id=YauQYh2k1g)** — 在 VisualWebArena 上构造 200 个对抗任务并提出 ARE 图化鲁棒性框架,对单张图像的微小扰动即可劫持多模态 web agent,成功率最高 67%。 `ICLR 2025` `核心`
+- **[GhostEI-Bench: Do Mobile Agent Resilience to Environmental Injection in Dynamic On-Device Environments?](https://openreview.net/forum?id=2zi9z2geAO)** — 提出 GhostEI-Bench,在可执行 Android 模拟器中注入伪造通知与欺骗浮层污染移动 GUI agent 视觉感知,并用 judge LLM 定位失效环节。 `ICLR 2026` `核心`
+- **[How Dark Patterns Manipulate Web Agents](https://openreview.net/forum?id=G7Dan0L7ho)** — 构建含 850 个 dark pattern 网页任务的 DECEPTICON,发现欺骗性 UI 在超 70% 任务中把 web agent 轨迹导向恶意结果,且模型越强越易中招。 `ICLR 2026` `核心`
+- **[Spatial CAPTCHA: Generatively Benchmarking Spatial Reasoning for Human-Machine Differentiation](https://openreview.net/forum?id=8LAc5kzjhz)** — 提出 Spatial CAPTCHA,利用人机空间推理差距程序化生成需心理旋转与遮挡推理的验证题,在 Spatial-CAPTCHA-Bench 上 10 个 MLLM 最佳 Pass@1 仅 31.0%,远逊于人类。 `ICLR 2026` `相关`
+- **[AdvAgent: Controllable Blackbox Red-teaming on Web Agents](https://proceedings.mlr.press/v267/xu25m.html)** — 用强化学习按黑盒反馈训练对抗 prompter,生成隐蔽可控的对抗提示劫持 GPT-4 系 web agent,现有提示级防御几乎失效。 `ICML 2025` `核心`
+- **[AgentHijack: Benchmarking Computer Use Agent Robustness to Common Environment Corruptions](https://openreview.net/forum?id=0H5Im3Xvuf)** — 构建弹窗、分辨率变化等 9 类可配置环境扰动评测 computer-use agent 的鲁棒性,并提出带环境检查 onlooker 的增强 agent 框架。 `ICML 2026` `相关`
+- **[Next-Gen CAPTCHAs: Leveraging the Cognitive Gap for Scalable and Diverse GUI-Agent Defense](https://openreview.net/forum?id=wPKGirrtyz)** — 利用人机认知差距设计可近乎无限生成的新一代 CAPTCHA,用交互式动态任务阻挡已能高通过率破解旧验证码的 GUI/computer-use agent。 `ICML 2026` `核心`
+- **[Safe and Scalable Web Agent Learning via Recreated Websites](https://openreview.net/forum?id=x1OLusJLNe)** — VeriEnv 让 LLM 充当环境创建者,把真实网站自动克隆为可执行可验证的沙箱副本,使 web agent 自生成带确定性奖励的任务并安全训练。 `ICML 2026` `相关`
+- **[Visual Persuasion: What Influences Decisions of Vision-Language Models?](https://openreview.net/forum?id=5SZgKeiDGC)** — 把 VLM agent 的图像选择建模为潜在视觉效用,用图像生成模型迭代优化视觉扰动,显著改变前沿模型的点击与购买倾向并自动解释其视觉偏好。 `ICML 2026` `相关`
+- **[When Actions Go Off-Task: Detecting and Correcting Misaligned Actions in Computer-Use Agents](https://openreview.net/forum?id=Q3UQSz4Giw)** — 首次定义 computer-use agent 的偏离动作检测,构建人工标注动作级标签的 MisActBench,并提出执行前拦截并结构化反馈纠错的 DeAction 护栏,ASR 降超九成。 `ICML 2026` `核心`
+- **[When Benign Inputs Lead to Severe Harms: Eliciting Unsafe Unintended Behaviors of Computer-Use Agents](https://openreview.net/forum?id=PbXNvEE0jA)** — AutoElicit 借执行反馈迭代扰动良性指令,自动挖掘 computer-use agent 在无恶意输入下的长尾非预期危害行为,并验证扰动可迁移到多个前沿 CUA。 `ICML 2026` `核心`
+- **[When Search Goes Wrong: Red-Teaming Web-Augmented Large Language Models](https://openreview.net/forum?id=CUURF3uF5M)** — 提出 red-teaming 框架 CREST-Search,用看似无害的搜索 query 诱导 web 搜索增强 LLM 引用有害低可信网页,并构建 WebSearch-Harm 数据集微调红队模型。 `ICML 2026` `核心`
+- **[MIP against Agent: Malicious Image Patches Hijacking Multimodal OS Agents](https://openreview.net/forum?id=ToNRHqX6xq)** — 在桌面壁纸等屏幕区域植入对抗扰动图像补丁 MIP,诱导多模态 OS agent 调用 API 执行数据外泄等恶意操作,可跨提示与界面泛化。 `NeurIPS 2025` `核心`
+
+### A8. 具身智能与机器人 Agent 安全(Embodied / VLA) (11 篇)
+
+- **[VLATest: Testing and Evaluating Vision-Language-Action Models for Robotic Manipulation](https://doi.org/10.1145/3729343)** — 提出 fuzzing 框架自动生成机械臂操作场景,从干扰物、光照、相机位姿与指令变异等维度测试 7 个 VLA 模型,发现其鲁棒性不足以实际部署。 `FSE 2025` `相关`
+- **[BadRobot: Jailbreaking Embodied LLM Agents in the Physical World](https://openreview.net/forum?id=ei3qCntB66)** — 提出 BadRobot,利用语音交互从 LLM 操纵、语言-动作失配与世界知识缺陷三条路径越狱具身 agent,并建立恶意物理动作查询基准验证攻击。 `ICLR 2025` `核心`
+- **[On Robustness of Vision-Language-Action Model against Multi-Modal Perturbations](https://openreview.net/forum?id=cS6xizdYD5)** — 系统评测 VLA 在动作、指令、环境、观测四模态 17 种扰动下的鲁棒性,提出以最坏动作噪声鲁棒优化与多臂老虎机选扰动的 RobustVLA。 `ICLR 2026` `相关`
+- **[SafeAuto: Knowledge-Enhanced Safe Autonomous Driving with Multimodal Foundation Models](https://proceedings.mlr.press/v267/zhang25cm.html)** — 将交通安全法规解析为一阶逻辑规则嵌入 Markov Logic Network,并结合多模态 RAG 检索驾驶经验,提升 MLLM 自动驾驶的决策安全性。 `ICML 2025` `相关`
+- **[EMBGuard: Constructing Hazard-Aware Guardrails for Safe Planning in Embodied Agents](https://openreview.net/forum?id=aoUVQ5d8vf)** — 为具身 agent 提供评估(视觉观测,动作)对的 MLLM 安全护栏,配 15.1K 训练样本与 329 场景测试集,2B/4B 模型媲美 GPT-5.1 且误报更低。 `ICML 2026` `核心`
+- **[Semantic Router: On the Feasibility of Hijacking MLLMs via a Single Adversarial Perturbation](https://openreview.net/forum?id=FjWZrbabBX)** — 提出语义感知通用扰动 SAUP,单张对抗扰动即可按输入语义把自动驾驶、机器人等无状态 MLLM 决策路由到多个攻击者指定目标。 `ICML 2026` `相关`
+- **[TRAP: Hijacking VLA CoT-Reasoning via Adversarial Patches](https://openreview.net/forum?id=zLUPTgV7BI)** — 提出 TRAP 攻击,用可打印的对抗 patch 劫持 VLA 模型的 CoT 推理到动作通路,在不改用户指令的情况下把机器人操作导向攻击者指定的危险行为。 `ICML 2026` `核心`
+- **[Introspective Planning: Aligning Robots' Uncertainty with Inherent Task Ambiguity](https://openreview.net/forum?id=4TlUE0ufiz)** — 检索内省式推理示例来校准 LLM 机器人规划的不确定性,提升指令合规与安全性,结合 conformal prediction 给出统计保证并发布安全移动操作基准。 `NeurIPS 2024` `核心`
+- **[AdvEDM: Fine-grained Adversarial Attack against VLM-based Embodied Agents](http://papers.nips.cc/paper_files/paper/2025/hash/c7722541ce9a91b9db1672ed8e4f5025-Abstract-Conference.html)** — 提出细粒度对抗攻击 AdvEDM,仅篡改 VLM 对少数关键物体的感知,使具身 agent 输出有效但错误的决策,威胁自动驾驶与机器人物理安全。 `NeurIPS 2025` `核心`
+- **[IndustryEQA: Pushing the Frontiers of Embodied Question Answering in Industrial Scenarios](https://openreview.net/forum?id=dViistWyZl)** — IndustryEQA 基于 Isaac Sim 构建工业仓储具身问答基准,含 1344 个问答对与设备安全、人员安全等六类标注,评测具身 agent 的危险场景感知与推理。 `NeurIPS 2025` `核心`
+- **[SafeVLA: Towards Safety Alignment of Vision-Language-Action Model via Constrained Learning](https://openreview.net/forum?id=dt940loCBT)** — 把安全需求建模为 CMDP 约束,主动诱发多样不安全行为并用安全强化学习以 min-max 方式约束 VLA 策略,长程移动操作中安全违规累计代价降低 83.58% 且成功率不降。 `NeurIPS 2025` `核心`
+
+### A9. 代码 Agent 与软件工程 Agent 安全 (18 篇)
+
+- **[Poisoned ChatGPT Finds Work for Idle Hands: Exploring Developers' Coding Practices with Insecure Suggestions from Poisoned AI Models](https://doi.org/10.1109/SP54263.2024.00046)** — 用 238 人问卷加 30 名专业开发者的实验室实验发现,使用被投毒的 ChatGPT 式助手的开发者更易写入不安全代码,且普遍忽视投毒风险、对工具过度信任。 `S&P 2024` `相关`
+- **[TrojanPuzzle: Covertly Poisoning Code-Suggestion Models](https://doi.org/10.1109/SP54263.2024.00140)** — 提出 COVERT 与 TROJANPUZZLE 两种隐蔽投毒:把恶意载荷藏入 docstring 甚至从不显式写出关键片段,绕过静态分析与签名式数据清洗,仍诱导补全模型建议不安全代码。 `S&P 2024` `相关`
+- **[Make a Feint to the East While Attacking in the West: Blinding LLM-Based Code Auditors with Flashboom Attacks](https://doi.org/10.1109/SP61157.2025.00125)** — Crazy-Ivan 向待审代码插入高注意力诱饵片段,把 LLM 代码审计器的注意力从真实漏洞引开,致盲成功率最高 96.3%。 `S&P 2025` `相关`
+- **[Lost at C: A User Study on the Security Implications of Large Language Model Code Assistants](https://www.usenix.org/conference/usenixsecurity23/presentation/sandoval)** — 58 人用户实验考察 LLM 代码助手对开发者手写 C 语言链表代码的安全影响,AI 辅助组严重漏洞率仅比对照组高不超过 10%。 `USENIX Security 2023` `相关`
+- **[We Have a Package for You! A Comprehensive Analysis of Package Hallucinations by Code Generating LLMs](https://www.usenix.org/conference/usenixsecurity25/presentation/spracklen)** — 测量 16 个代码 LLM 的 57.6 万生成样本,商用模型 5.2%、开源 21.7% 出现 package hallucination,20 万余虚构包名可被 slopsquatting 利用。 `USENIX Security 2025` `相关`
+- **[GoodVibe: Security-by-Vibe for LLM-Based Code Generation](https://www.usenix.org/conference/usenixsecurity26/presentation/thang)** — 提出 GoodVibe,用梯度归因定位安全相关神经元并只微调该子空间,在六个模型上把 vibe coding 生成代码的安全性最高提升 2.5 倍。 `USENIX Security 2026` `相关`
+- **[Securing Retrieval-Augmented Code Generation via Contextual Knowledge Injection: A Case for Embedded IoT Applications](https://www.usenix.org/conference/usenixsecurity26/presentation/sun-tong)** — 面向嵌入式 IoT 应用的检索增强代码生成场景,提出注入上下文安全知识以抑制不安全代码生成(官方摘要未公开,据标题保守概括)。 `USENIX Security 2026` `相关`
+- **[Do Users Write More Insecure Code with AI Assistants?](https://doi.org/10.1145/3576915.3623157)** — 首个大规模用户研究显示,使用 codex-davinci-002 助手的参与者写出的代码明显更不安全,却更自信代码安全;越不信任 AI、越反复调整 prompt 的人漏洞更少。 `CCS 2023` `相关`
+- **[Large Language Models for Code: Security Hardening and Adversarial Testing](https://doi.org/10.1145/3576915.3623175)** — 提出 controlled code generation 任务与 SVEN:仅用属性专用连续向量不改模型权重即可把 CodeGen 的安全代码率从 59.1% 提到 92.3%,或对抗性压到 36.8%,功能正确性基本不变。 `CCS 2023` `相关`
+- **[Trust Me, I Know This Function: Hijacking LLM Static Analysis using Bias](https://www.ndss-symposium.org/ndss-paper/trust-me-i-know-this-function-hijacking-llm-static-analysis-using-bias/)** — 利用模型对熟悉编程模式的抽象偏见,自动注入不改变运行行为的 Familiar Pattern Attack 微改动,使 LLM 代码审计漏掉真实缺陷且跨模型跨语言可迁移。 `NDSS 2026` `相关`
+- **[FHE-Coder: Secure Agentic Code Generation for Fully Homomorphic Encryption](https://openreview.net/forum?id=4F1py5vQXm)** — 提出三阶段 agentic 框架 FHE-Coder,以 prompt 形式化、专用 RAG 与自动 Security Verifier 迭代校验,在 10 个 FHE 编程任务上生成功能正确且密码学安全的代码。 `ICLR 2026` `相关`
+- **[BaxBench: Can LLMs Generate Correct and Secure Backends?](https://proceedings.mlr.press/v267/vero25a.html)** — BaxBench 用 392 个后端应用生成任务配测试与端到端 exploit,实测 LLM 代码正确率仅 62%,约半数正确程序仍可被攻破。 `ICML 2025` `相关`
+- **[Black-Box Adversarial Attacks on LLM-Based Code Completion](https://proceedings.mlr.press/v267/jenko25a.html)** — INSEC 在补全输入中注入一段查询优化出的短注释,黑盒诱导 Copilot 等补全引擎多生成约 50% 漏洞代码且不损功能正确性。 `ICML 2025` `相关`
+- **[ProSec: Fortifying Code LLMs with Proactive Security Alignment](https://proceedings.mlr.press/v267/xu25aa.html)** — 从 CWE 合成诱发漏洞的编码场景并生成修复配对,通过偏好学习对 code LLM 做主动安全对齐,使生成代码安全性提升 25%-35%。 `ICML 2025` `相关`
+- **[Is Vibe Coding Safe? Benchmarking Vulnerability of Agent-Generated Code in Real-World Tasks](https://openreview.net/forum?id=qG8g00zRZa)** — 用 200 个真实开源软件工程任务衡量 vibe coding 产出的安全性,Claude 4 Sonnet 功能正确率 47.5% 但仅 8.25% 安全,推理扩展也难以弥补。 `ICML 2026` `核心`
+- **[Just Ask: Curious Code Agents Reveal System Prompts in Frontier LLMs](https://openreview.net/forum?id=qFWLv8bLL2)** — JustAsk 以 UCB 驱动的自演化技能空间,让 code agent 仅靠常规工具交互反复探测,在 41 个黑盒商用模型上近乎完整地恢复隐藏 system prompt。 `ICML 2026` `核心`
+- **[SWE-ABS: Adversarial Benchmark Strengthening Exposes Inflated Success Rates on Test-based Benchmark](https://openreview.net/forum?id=eWzojJ9SGF)** — 提出 SWE-ABS,用覆盖率驱动增强与变异对抗测试强化 SWE-Bench Verified 测试套件,剔除约五分之一语义错误补丁,使榜首 agent 得分大幅下降。 `ICML 2026` `相关`
+- **[RedCode: Risky Code Execution and Generation Benchmark for Code Agents](http://papers.nips.cc/paper_files/paper/2024/hash/bfd082c452dffb450d5a5202b0419205-Abstract-Datasets_and_Benchmarks_Track.html)** — 提出 RedCode 平台,含 4000+ 危险代码执行实例与 160 条有害代码生成 prompt,在真实 Docker 沙箱评测 code agent 识别与拒绝不安全代码。 `NeurIPS 2024` `核心`
+
+### A10. Agent 隐私风险(Privacy) (34 篇)
+
+- **[On the Effectiveness of Prompt Stealing Attacks on In-the-Wild Prompts](https://doi.org/10.1109/SP61157.2025.00120)** — 首次评估 prompt stealing 攻击在真实市场提示词上的效果,用 Text Gradient 迭代优化把 prompt 恢复 METEOR 从 0.207 提升到 0.253。 `S&P 2025` `相关`
+- **[The Person Behind the Sound: Demystifying Audio Private Attribute Profiling Via Multimodal Large Language Models](https://doi.org/10.1109/SP63933.2026.00150)** — 提出 Gifts 多智能体框架,由 LLM 引导音频语言模型从语音推断敏感个人属性,并构建带隐私标注的 AP² 音频基准与防御探索。 `S&P 2026` `相关`
+- **[Big Help or Big Brother? Auditing Tracking, Profiling, and Personalization in Generative AI Assistants](https://www.usenix.org/conference/usenixsecurity25/presentation/vekaria)** — 用提示框架加网络流量分析审计 9 款 GenAI 浏览器助手,发现其上传整页 DOM 与表单输入、推断年龄收入并跨站个性化。 `USENIX Security 2025` `核心`
+- **[Evaluating LLM-based Personal Information Extraction and Countermeasures](https://www.usenix.org/conference/usenixsecurity25/presentation/liu-yupei)** — 系统评测 LLM 从公开个人资料抽取姓名电话等八类隐私信息的攻击能力,并用 prompt injection 作为防护把攻击削弱到传统水平。 `USENIX Security 2025` `相关`
+- **[Malicious LLM-Based Conversational AI Makes Users Reveal Personal Information](https://www.usenix.org/conference/usenixsecurity25/presentation/zhan)** — 构建以不同策略诱导用户吐露隐私的恶意 LLM 聊天机器人,502 人随机对照实验显示社交型策略窃取的个人信息最多且用户感知风险最低。 `USENIX Security 2025` `相关`
+- **[PRSA: Prompt Stealing Attacks against Real-World Prompt Services](https://www.usenix.org/conference/usenixsecurity25/presentation/yang-yong)** — PRSA 仅凭有限输入输出推断 prompt 意图并复刻功能,在 prompt 市场把窃取成功率从 17.8% 提到 46.1%,在 GPT Store 应用从 39% 提到 52%。 `USENIX Security 2025` `相关`
+- **[Connect the Dots: Knowledge Graph–Guided Crawler Attack on Retrieval-Augmented Generation Systems](https://www.usenix.org/conference/usenixsecurity26/presentation/yao-dots)** — 提出 RAGCrawler,把 RAG 知识库窃取建模为自适应随机覆盖问题,用知识图谱调度语义锚点生成非冗余查询,1000 次查询内平均覆盖 66.8% 语料。 `USENIX Security 2026` `相关`
+- **[Five Queries Are Enough: Query-Efficient and Surrogate-Free Membership Inference Attacks on RAG via Entailment](https://www.usenix.org/conference/usenixsecurity26/presentation/nguyen-nguyen)** — 提出 MEntA,用自然语言蕴含衡量响应与候选文档的一致性,仅 5 次非模板查询即完成无影子模型的 RAG 成员推断,AUC 最高 0.991。 `USENIX Security 2026` `相关`
+- **[Network-Level Prompt and Trait Leakage in Local Research Agents](https://www.usenix.org/conference/usenixsecurity26/presentation/jeong)** — 被动网络观察者仅凭 web/research agent 访问的 IP 与时序元数据即可还原七成以上用户 prompt 语义,并推断出多项长期用户画像特征。 `USENIX Security 2026` `核心`
+- **[AirGapAgent: Protecting Privacy-Conscious Conversational Agents](https://doi.org/10.1145/3658644.3690350)** — 以上下文完整性为准则做数据最小化,只向当前任务开放必要个人数据,把第三方应用上下文劫持下的隐私保护率从 45% 提升到 97%。 `CCS 2024` `核心`
+- **[DCMI: A Differential Calibration Membership Inference Attack Against Retrieval-Augmented Generation](https://doi.org/10.1145/3719027.3765103)** — DCMI 利用成员与非成员检索文档在查询扰动下的敏感度差异做差分校准成员推断,对 Flan-T5 RAG 达 97.42% AUC,在 Dify、MaxKB 上领先基线 10-20%。 `CCS 2025` `相关`
+- **[Riddle Me This! Stealthy Membership Inference for Retrieval-Augmented Generation](https://doi.org/10.1145/3719027.3744840)** — Interrogation Attack 构造只有目标文档在场才答得出的自然语言问题,30 次查询即可推断 RAG 知识库成员,隐蔽性比现有方法高约 76 倍。 `CCS 2025` `相关`
+- **[You Can't Steal Nothing: Mitigating Prompt Leakages in LLMs via System Vectors](https://doi.org/10.1145/3719027.3765124)** — 先给出可从 GPT-4o 等商用应用提取 system prompt 的泄露攻击,再用 SysVec 把 system prompt 编码为内部表示向量,从上下文中根除泄露面。 `CCS 2025` `相关`
+- **[Can LLMs Keep a Secret? Testing Privacy Implications of Language Models via Contextual Integrity Theory](https://openreview.net/forum?id=gmg7t8b4s0)** — 提出基于 contextual integrity 理论的四层基准 ConfAIde,评测 LLM 在交互场景下的情境隐私推理,GPT-4 与 ChatGPT 分别有 39% 和 57% 概率不当泄露私密信息。 `ICLR 2024` `相关`
+- **[Fine-Grained Privacy Extraction from Retrieval-Augmented Generation Systems by Exploiting Knowledge Asymmetry](https://openreview.net/forum?id=B6ILMPPKnK)** — 利用 RAG 系统与普通 LLM 的知识不对称分解对抗查询并训练分类器定位隐私片段,单域抽取准确率超 90%、多域超 80%。 `ICLR 2026` `相关`
+- **[Measuring Physical-World Privacy Awareness of Large Language Models: An Evaluation Benchmark](https://openreview.net/forum?id=WSpDZVEGNi)** — 提出 EAPrivacy,用程序化生成的四层场景测具身 agent 的物理世界隐私意识,任务与隐私请求冲突时最高 86% 选择优先完成任务。 `ICLR 2026` `核心`
+- **[Pisces: Cryptography-based Private Retrieval-Augmented Generation with Dual-Path Retrieval](https://openreview.net/forum?id=Re3A6vzCTC)** — 提出密码学 RAG 框架 Pisces,用 oblivious filter 粗筛候选文档、以多实例 labeled PSI 计算 BM25 词频,同时保护用户查询与知识库文档,精度接近明文基线。 `ICLR 2026` `相关`
+- **[Searching for Privacy Risks in LLM Agents via Simulation](https://openreview.net/forum?id=nz4ZqbrBEi)** — 用模拟加并行搜索交替进化 agent 间隐私攻防策略,挖出冒充、伪造同意等套取隐私手法与身份验证状态机式防御。 `ICLR 2026` `核心`
+- **[Silent Leaks: Implicit Knowledge Extraction Attack on RAG Systems](https://openreview.net/forum?id=zfVICPB5Sv)** — IKEA 用锚概念构造外观自然的良性 query 并迭代变异探索嵌入空间,绕过注入检测窃取 RAG 知识库并复刻出替代系统。 `ICLR 2026` `相关`
+- **[VoxPrivacy: A Benchmark for Evaluating Interactional Privacy of Speech Language Models](https://openreview.net/forum?id=GNo1qMqgPD)** — 用 32 小时双语多说话人数据分三级难度评测语音模型的交互式隐私,九个 SLM 在条件隐私判断上多接近随机水平。 `ICLR 2026` `相关`
+- **[Contextualized Privacy Defense for LLM Agents](https://openreview.net/forum?id=b4QtBbSV3X)** — 由 instructor 模型在 agent 多步执行中实时生成情境化隐私指令主动塑造动作,并用 RL 从违规轨迹学习,隐私保护 94.2%、有用性 80.6%。 `ICML 2026` `核心`
+- **[From Weak Cues to Real Identities: Evaluating Inference-Driven De-Anonymization in LLM Agents](https://openreview.net/forum?id=Kux5q1mL1x)** — 提出 InferLink 基准,验证 LLM agent 能串联零散非标识线索与公开证据完成再识别,Netflix 稀疏场景下还原 79.2% 身份、显著超经典匹配。 `ICML 2026` `核心`
+- **[MINIM: Privacy-Aware Minimal View for Agents via Trusted Local Sanitization](https://openreview.net/forum?id=rW2xHmYrZA)** — 提出本地可信代理 MINIM,基于 contextual integrity 给 UI 元素打敏感度与必要性双分,上传前裁剪脱敏,减少 GUI agent 观测中的隐私外泄。 `ICML 2026` `核心`
+- **[PEARL: Differentially Private and Entropy-Aware Regulated Language Generation](https://openreview.net/forum?id=dSRLxMgwxd)** — 提出 PEARL,以 confidence gap 引导的熵感知差分隐私解码在 token 与句子间自适应分配隐私预算,抵御 RAG 场景下的 PII 抽取攻击。 `ICML 2026` `相关`
+- **[PrivAct: Internalizing Contextual Privacy Preservation via Multi-Agent Preference Training](https://openreview.net/forum?id=GWYR0NqMZw)** — 提出 PrivAct 多智能体偏好训练,把上下文隐私偏好内化进 agent 动作生成,替代脆弱的推理时外挂防护,泄露率最多降低 12.32%。 `ICML 2026` `核心`
+- **[Towards Whole-corpus Reconstruction of Heterogeneous RAG Knowledge Bases](https://openreview.net/forum?id=x61zDYEZ91)** — 提出抽取框架 GeoEx,在代理检索模型的 embedding 空间规划查询并做 embedding 反演,以正交查询合成与局部扰动跨域重构异构 RAG 知识库语料。 `ICML 2026` `相关`
+- **[PrivacyLens: Evaluating Privacy Norm Awareness of Language Models in Action](http://papers.nips.cc/paper_files/paper/2024/hash/a2a7e58309d5190082390ff10ff3b2b8-Abstract-Datasets_and_Benchmarks_Track.html)** — 提出 PrivacyLens 框架将隐私种子扩展为 agent 轨迹,多层次评测 LM agent 执行动作时的隐私泄露,发现 GPT-4 泄露率达 25.68%。 `NeurIPS 2024` `核心`
+- **[AgentDAM: Privacy Leakage Evaluation for Autonomous Web Agents](http://papers.nips.cc/paper_files/paper/2025/hash/c9826b9ea5e1b49b256329934a578d83-Abstract-Datasets_and_Benchmarks_Track.html)** — 提出 AgentDAM 基准端到端模拟真实 web 交互,衡量 web agent 是否遵循数据最小化原则,发现 GPT-4/Llama-3/Claude 均易误用不必要的敏感信息。 `NeurIPS 2025` `核心`
+- **[Better Language Model Inversion by Compactly Representing Next-Token Distributions](https://openreview.net/forum?id=FZp6cheXt2)** — 提出 prompt inversion from logprob sequences,利用多步 next-token 概率的低维子空间反演隐藏 prompt 与 system message,精确恢复率提升 2-3.5 倍。 `NeurIPS 2025` `相关`
+- **[CORE: Reducing UI Exposure in Mobile Agents via Collaboration Between Cloud and Local LLMs](https://openreview.net/forum?id=klOr9y9nMU)** — 提出云端-本地 LLM 协作框架 CORE,经布局分块与协同规划决策,在保持任务成功率下最多降低移动 agent 55.6% 的 UI 隐私暴露。 `NeurIPS 2025` `核心`
+- **[Contextual Integrity in LLMs via Reasoning and Reinforcement Learning](http://papers.nips.cc/paper_files/paper/2025/hash/968591afcfe4ba889eccffb6a4ca2d45-Abstract-Conference.html)** — 用推理与强化学习(约 700 样本)训练 agent 遵循语境完整性决定信息披露,显著减少不当泄露并迁移到 PrivacyLens 等基准。 `NeurIPS 2025` `核心`
+- **[InvisibleInk: High-Utility and Low-Cost Text Generation with Differential Privacy](https://openreview.net/forum?id=B4NT8TexNS)** — 把 LLM 采样视为 logits 上的指数机制,仅裁剪敏感部分并从 top-k 私有 token 超集免费采样,为 RAG 长文本生成提供差分隐私且计算成本降低 8 倍。 `NeurIPS 2025` `相关`
+- **[PUO-Bench: A Panel Understanding and Operation Benchmark with A Privacy-Preserving Framework](https://openreview.net/forum?id=JUBogzglgH)** — 提出家电控制面板理解与操作基准 PUO,并设计边缘端解析、云端推理的双阶段框架,避免上传原始视觉数据以缓解隐私风险。 `NeurIPS 2025` `相关`
+- **[Privacy Reasoning in Ambiguous Contexts](https://openreview.net/forum?id=0ZnXGzLcOg)** — 识别上下文歧义是 agent 信息披露决策的关键瓶颈,提出 Camber 框架基于决策理由系统消歧,精确率与召回率分别提升至多 13.3% 和 22.3%。 `NeurIPS 2025` `相关`
+
+### D1. 注入检测与防御(Injection Defense) (22 篇)
+
+- **[DataSentinel: A Game-Theoretic Detection of Prompt Injection Attacks](https://doi.org/10.1109/SP61157.2025.00250)** — 把 prompt injection 检测建模为 minimax 博弈,通过对抗式微调训练检测 LLM,能识别为逃避检测而自适应优化的注入输入。 `S&P 2025` `核心`
+- **[AttnTrace: Contextual Attribution of Prompt Injection and Knowledge Corruption](https://doi.org/10.1109/SP63933.2026.00198)** — AttnTrace 利用 LLM 注意力权重做上下文溯源,高效定位长上下文中被注入的指令与投毒文本,并支持先归因后检测范式。 `S&P 2026` `核心`
+- **[PromptLocate: Localizing Prompt Injection Attacks](https://doi.org/10.1109/SP63933.2026.00105)** — PromptLocate 先把污染数据切成语义片段,再依次识别被注入指令与注入数据的片段,对 8 种已有及 8 种自适应攻击实现取证级定位。 `S&P 2026` `核心`
+- **[StruQ: Defending Against Prompt Injection with Structured Queries](https://www.usenix.org/conference/usenixsecurity25/presentation/chen-sizhe)** — 用结构化查询把指令与数据分成两个通道,并以特制结构化指令微调让模型只服从指令通道,几乎无损效用地抵御 prompt injection。 `USENIX Security 2025` `相关`
+- **[TracLLM: A Generic Framework for Attributing Long Context LLMs](https://www.usenix.org/conference/usenixsecurity25/presentation/wang-yanting)** — 面向长上下文 LLM 的通用溯源框架,用启发式搜索与贡献分数集成定位导致输出的文本片段,可支撑 prompt injection 与投毒的事后取证。 `USENIX Security 2025` `相关`
+- **[AttriGuard: Defeating Indirect Prompt Injection in LLM Agents via Causal Attribution of Tool Invocations](https://www.usenix.org/conference/usenixsecurity26/presentation/he-yu)** — 提出 action-level causal attribution 防御范式,用 shadow replay 与反事实测试判定工具调用是否由不可信观测驱动,静态 indirect prompt injection 下 ASR 降至 0%。 `USENIX Security 2026` `核心`
+- **[SecAlign: Defending Against Prompt Injection with Preference Optimization](https://doi.org/10.1145/3719027.3744836)** — 构造含注入样本的偏好数据集做偏好优化训练,让模型偏好响应原始合法指令,把多种 prompt injection 成功率降到 10% 以下。 `CCS 2025` `核心`
+- **[Attention is All You Need to Defend Against Indirect Prompt Injection Attacks in LLMs](https://www.ndss-symposium.org/ndss-paper/attention-is-all-you-need-to-defend-against-indirect-prompt-injection-attacks-in-llms/)** — 用注意力特征做 token 级 indirect prompt injection 检测与净化,并构建细粒度数据集 FIPI,在 5 个 LLM、6 个数据集上胜过 15 种防御。 `NDSS 2026` `核心`
+- **[TaintP2X: Detecting Taint-Style Prompt-to-Anything Injection Vulnerabilities in LLM-Integrated Applications](https://conf.researchr.org/details/icse-2026/icse-2026-research-track/157/TaintP2X-Detecting-Taint-Style-Prompt-to-Anything-Injection-Vulnerabilities-in-LLM-I)** — 把 LLM 输出建模为污点源做静态污点分析并用 LLM 剪枝误报,检测注入抵达 RCE、SQLi、SSRF 等敏感汇点的漏洞,在 75 个仓库找出 101 条污点路径。 `ICSE 2026` `核心`
+- **[Instructional Segment Embedding: Improving LLM Safety with Instruction Hierarchy](https://openreview.net/forum?id=sjWG7B8dvt)** — 提出 Instructional Segment Embedding,将系统、用户与数据的指令优先级直接编码进 token 嵌入,在指令层级与结构化查询基准上鲁棒准确率提升最高 18.68%。 `ICLR 2025` `相关`
+- **[ASIDE: Architectural Separation of Instructions and Data in Language Models](https://openreview.net/forum?id=C81TnwHiRM)** — 提出 ASIDE,对数据 token 的嵌入施加正交旋转以在架构层分离指令与数据,不增参数即显著提升指令-数据分离度与 prompt injection 鲁棒性。 `ICLR 2026` `相关`
+- **[Goal-Aware Identification and Rectification of Misinformation in Multi-Agent Systems](https://openreview.net/forum?id=6Y9NP1qhoM)** — 提出 MisinfoTask 数据集与免训练的两阶段 ARGUS 防御,在多智能体信息流中目标感知地识别并纠正注入的错误信息,毒性降约 28%。 `ICLR 2026` `核心`
+- **[Gandalf the Red: Adaptive Security for LLMs](https://proceedings.mlr.press/v267/pfister25a.html)** — 提出区分攻击者与正常用户、建模多步交互的 D-SEC 威胁模型,并用 Gandalf 众包红队平台收集 279k 次 prompt 攻击评估防御的安全-可用性权衡。 `ICML 2025` `相关`
+- **[MELON: Provable Defense Against Indirect Prompt Injection Attacks in AI Agents](https://proceedings.mlr.press/v267/zhu25z.html)** — 通过掩蔽用户指令后重执行并对比两次轨迹的工具调用相似度来检测 indirect prompt injection,在 AgentDojo 上兼顾防御率与任务效用。 `ICML 2025` `核心`
+- **[The Illusion of Role Separation: Hidden Shortcuts in LLM Role Learning (and How to Fix Them)](https://openreview.net/forum?id=CAurIUGjkb)** — 发现 prompt injection 防御微调模型靠任务类型与靠近文本开头等捷径区分角色,提出调整 position ID 强化角色边界不变信号以实现稳健的 role separation。 `ICML 2025` `相关`
+- **[AdvEvo-MARL: Shaping Internalized Safety through Adversarial Co-Evolution in Multi-Agent Reinforcement Learning](https://openreview.net/forum?id=5D3ZblXmW2)** — 让攻击者与任务 agent 在多智能体强化学习中对抗共同进化,把安全内化到 agent 自身,无需外部 guard 即将攻击成功率压到 20% 以下。 `ICML 2026` `核心`
+- **[Causal Detection of Multi-Step LLM Agent Attacks](https://openreview.net/forum?id=Kb2m543agS)** — 把多步 prompt injection 检测重构为因果推断,由 agent 轨迹构建带数据依赖与信任传递边的结构因果模型,用 do-calculus 反事实判定并双向切片还原完整攻击链。 `ICML 2026` `核心`
+- **[CausalArmor: Efficient Indirect Prompt Injection Guardrails via Causal Attribution](https://openreview.net/forum?id=fE4urn9hyM)** — 以留一消融归因识别不可信片段压过用户意图的 dominance shift,仅在触发时定向净化并回溯屏蔽被污染 CoT,在 AgentDojo 与 DoomArena 上兼顾安全、效用与延迟。 `ICML 2026` `核心`
+- **[Localize and Neutralize: Gradient-Guided Token Suppression Against Visual Prompt Injection Attack](https://openreview.net/forum?id=TrZGbLwVg5)** — 发现视觉 prompt injection 依赖少量关键 image token,用隐状态梯度范数定位并置零这些 token,将攻击成功率压到接近零且几乎不损模型效用。 `ICML 2026` `相关`
+- **[RedVisor: Reasoning-Aware Prompt Injection Defense via Zero-Copy KV Cache Reuse](https://openreview.net/forum?id=hLLdM61qen)** — 提出 RedVisor,用可插拔适配器先生成定位注入的解释性推理再引导安全回复,并复用 KV cache 消除重复预填充,兼顾检测精度与吞吐。 `ICML 2026` `核心`
+- **[Beyond Oracle: Verifier-Supervision for Instruction Hierarchy in Reasoning and Instruction-Tuned LLMs](https://openreview.net/forum?id=IQ513IX1G5)** — 将可编程校验器嵌入指令冲突样本提供可验证监督,微调强化 system>user 指令层级遵从,提升安全鲁棒性且无需 oracle 标签。 `NeurIPS 2025` `相关`
+- **[Context-Aware Hierarchical Learning: A Two-Step Paradigm towards Safer LLMs](https://openreview.net/forum?id=TCxzqnbyAF)** — 揭示利用 function-calling 的 Tool-Completion Attack 并建同名基准,提出 Context-Aware Hierarchical Learning 平衡语义理解与角色指令层级以抵御攻击。 `NeurIPS 2025` `核心`
+
+### D2. 运行时防护与系统架构(沙箱 / 隔离 / 权限 / 信息流) (22 篇)
+
+- **[Towards Automating Data Access Permissions in AI Agents](https://doi.org/10.1109/SP63933.2026.00018)** — 通过用户研究提炼影响授权决策的上下文因素,训练模型自动预测 AI agent 的数据访问权限,整体准确率 85.1%。 `S&P 2026` `核心`
+- **[Prompt Obfuscation for Large Language Models](https://www.usenix.org/conference/usenixsecurity25/presentation/pape)** — 提出 prompt obfuscation,以功能等价但不可读的表示替换明文 system prompt,八项相似度指标效用持平,并挡住黑盒与白盒去混淆攻击。 `USENIX Security 2025` `相关`
+- **[AgentSentinel: An End-to-End and Real-Time Security Defense Framework for Computer-Use Agents](https://doi.org/10.1145/3719027.3765064)** — 在 computer-use agent 的敏感操作处实时拦截执行,关联任务上下文与系统 trace 做安全审计,配套 60 场景 BadComputerUse 基准。 `CCS 2025` `核心`
+- **[IsolateGPT: An Execution Isolation Architecture for LLM-Based Agentic Systems](https://www.ndss-symposium.org/ndss-paper/isolategpt-an-execution-isolation-architecture-for-llm-based-agentic-systems/)** — 为 LLM app 生态设计执行隔离架构,把第三方 app 的执行与相互交互隔离在独立实例并经用户授权,防住恶意 app 且开销低于 30%。 `NDSS 2025` `核心`
+- **[ACE: A Security Architecture for LLM-Integrated App Systems](https://www.ndss-symposium.org/ndss-paper/ace-a-security-architecture-for-llm-integrated-app-systems/)** — 先对 IsolateGPT 提出新攻击,再用 ACE 架构仅凭可信信息生成抽象计划再映射为具体计划,静态校验信息流约束并在执行期隔离 app 数据与能力。 `NDSS 2026` `核心`
+- **[SAGA: A Security Architecture for Governing AI Agentic Systems](https://www.ndss-symposium.org/ndss-paper/saga-a-security-architecture-for-governing-ai-agentic-systems/)** — 让用户在中心 Provider 注册 agent 并定义访问策略,以密码学派生的访问控制 token 细粒度管控 agent 间通信与委派,性能开销极小。 `NDSS 2026` `核心`
+- **[AgentSpec: Customizable Runtime Enforcement for Safe and Reliable LLM Agents](https://arxiv.org/abs/2503.18666)** — 设计轻量 DSL 用触发器-谓词-执行机制指定 agent 运行时安全规则,阻止 90% 以上不安全代码执行、消除具身危险动作并让自动驾驶全合规。 `ICSE 2026` `核心`
+- **[AgentBound: Securing Execution Boundaries of AI Agents](https://doi.org/10.1145/3808103)** — 为 MCP server 提出类 Android 权限的声明式访问控制与执行引擎,可从源码自动生成策略(准确率 80.9%),在 296 个热门 server 上拦截多数恶意行为。 `FSE 2026` `核心`
+- **[Cut the Crap: An Economical Communication Pipeline for LLM-based Multi-Agent Systems](https://openreview.net/forum?id=LkzuPorQ5L)** — 对多智能体时空消息图做一次性剪枝,剔除冗余与恶意通信,token 开销降低 28.1%~72.8%,并抵御两类 agent 对抗攻击且性能反升。 `ICLR 2025` `相关`
+- **[Robust Function-Calling for On-Device Language Model via Function Masking](https://openreview.net/forum?id=yVQcr4qjD6)** — 提出 Hammer 端侧函数调用模型族,用函数掩码与无关函数增广数据缓解对命名约定的过拟合,提升面对误导性函数名时的调用鲁棒性。 `ICLR 2025` `相关`
+- **[Optimizing Agent Planning for Security and Autonomy](https://openreview.net/forum?id=g0aVCDY3gS)** — 在 information flow control 防御之上引入安全感知规划与更丰富的 HITL 交互,提出 autonomy 指标,在 AgentDojo 与 WASP 上提高免人工审批动作比例且不损任务完成率。 `ICLR 2026` `核心`
+- **[Cowpox: Towards the Immunity of VLM-based Multi-Agent Systems](https://openreview.net/forum?id=5KszXnnkG5)** — 针对可在 VLM 多智能体系统中传染扩散的对抗攻击,分发 cure sample 在暴露前为各 agent 免疫,提升恢复率并给出可证明的鲁棒性保证。 `ICML 2025` `核心`
+- **[G-Designer: Architecting Multi-agent Communication Topologies via Graph Neural Networks](https://openreview.net/forum?id=LpE54NUnmO)** — 用变分图自编码器按任务自适应生成 LLM 多智能体通信拓扑,HumanEval 上 token 消耗最多降 95.33%,面对 agent 对抗攻击准确率仅掉 0.3%。 `ICML 2025` `相关`
+- **[AutoRAS: Learning Robust Agentic Systems with Primitive Representations](https://openreview.net/forum?id=7zTV4dvdGB)** — 把 agentic 系统设计形式化为符号原语序列生成,用执行安全信号与序列级目标优化,自动设计对外部攻击与内部故障均鲁棒的工作流。 `ICML 2026` `核心`
+- **[Beyond Static Endpoints: Tool Programs as an Interface for Flexible Agentic Web Services](https://openreview.net/forum?id=fmwNYkYRN6)** — 将 agent 工具意图编码为可执行 tool program,在 MCP 式服务上以 WebAssembly 沙箱执行多步调用并支持 exactly-once 重放,延迟最高降 53%。 `ICML 2026` `相关`
+- **[Learning When to Act or Refuse: Guarding Agentic Reasoning Models for Safe Multi-Step Tool Use](https://openreview.net/forum?id=Stf5SF4JvR)** — 提出 MOSAIC 后训练框架,把 plan-check-act-or-refuse 循环与拒绝动作显式化,用偏好强化学习降低多步工具调用中的有害行为与隐私泄露。 `ICML 2026` `核心`
+- **[MaMa: A Game-Theoretic Approach for Designing Safe Agentic Systems](https://openreview.net/forum?id=KR6avDABG8)** — 将安全 agentic system 设计建模为 Stackelberg 博弈,元智能体与元对手迭代对抗搜索,自动产出在部分 agent 被攻陷时仍保持安全的系统结构。 `ICML 2026` `核心`
+- **[Think Twice Before You Act: Protecting LLM Agents Against Tool Description Poisoning via Isolated Planning](https://openreview.net/forum?id=jiNw5AgBbw)** — 针对跨工具描述投毒提出 isolated planning:把检测到失配的工具放入隔离清单,切断被投毒描述对后续规划的持续影响,在 AgentDojo 与 ASB 上兼顾降 ASR 与效用。 `ICML 2026` `核心`
+- **[Improving Alignment and Robustness with Circuit Breakers](https://openreview.net/forum?id=IbIB8SBKFV)** — 用表示工程短路产生有害输出的内部表征,抵御未见越狱与图像劫持,并扩展到 AI agent,显著降低其受攻击时的有害动作率。 `NeurIPS 2024` `相关`
+- **[AC-LoRA: (Almost) Training-Free Access Control Aware Multi-Modal LLMs](https://openreview.net/forum?id=bV5is3iodg)** — 为企业 LLM 设计访问控制感知系统,按用户权限与相似度检索合并 per-dataset LoRA adapter,几乎免训练实现强信息隔离保证。 `NeurIPS 2025` `相关`
+- **[DRIFT: Dynamic Rule-Based Defense with Injection Isolation for Securing LLM Agents](http://papers.nips.cc/paper_files/paper/2025/hash/77f3b26c7907aa27b207df9b9d43f29a-Abstract-Conference.html)** — 提出动态规则隔离框架 DRIFT,以 Secure Planner 定最小轨迹、Dynamic Validator 监控偏离、Injection Isolator 屏蔽注入指令,在 AgentDojo/ASB 防注入。 `NeurIPS 2025` `核心`
+- **[STRATUS: A Multi-agent System for Autonomous Reliability Engineering of Modern Clouds](https://openreview.net/forum?id=fYW1PKawwJ)** — 用状态机组织故障检测、诊断、缓解等专职 agent 构成云 SRE 多智能体系统,形式化 Transactional No-Regression 安全规约保障安全探索,缓解成功率提升至少 1.5 倍。 `NeurIPS 2025` `相关`
+
+### D3. Agentic Guardrail 与运行时监控 (29 篇)
+
+- **[Here Comes the AI Worm: Preventing the Propagation of Adversarial Self-Replicating Prompts Within GenAI Ecosystems](https://doi.org/10.1145/3719027.3765196)** — 针对 Morris-II 式自复制提示蠕虫在 GenAI 生态中跨应用传播的问题,提出 Virtual Donkey 护栏,真阳率 1.0、假阳率 0.015 且低延迟。 `CCS 2025` `核心`
+- **[Monitoring Latent World States in Language Models with Propositional Probes](https://openreview.net/forum?id=0yvZm2AjUr)** — 用命题探针从激活中解码模型内部世界状态,在 prompt injection、backdoor 与性别偏见下解码仍保持忠实,可作为不忠行为的监控信号。 `ICLR 2025` `相关`
+- **[Aegis: Automated Error Generation and Identification for Multi-Agent Systems](https://openreview.net/forum?id=zqcYoxXiN3)** — 提出 Aegis,用 LLM 操纵器向成功轨迹自适应注入情境相关故障,生成 9533 条带故障 agent 与错误模式标注的多智能体轨迹用于错误归因训练。 `ICLR 2026` `相关`
+- **[AgenTracer: Who Is Inducing Failure in the LLM Agentic Systems?](https://openreview.net/forum?id=l05DseqvuD)** — 提出 AgenTracer,通过反事实回放与程序化故障注入标注失败多智能体轨迹,训练 8B 故障溯源模型定位出错 agent 与步骤,超越大型闭源模型 18%。 `ICLR 2026` `相关`
+- **[Building a Foundational Guardrail for General Agentic Systems via Synthetic Data](https://openreview.net/forum?id=M47SWYubR5)** — 用 AuraGen 合成带标注风险的 agent 轨迹训练执行前护栏模型 Safiron,在计划阶段识别并解释风险类型,并发布 Pre-Exec Bench 评测跨规划器泛化。 `ICLR 2026` `核心`
+- **[Monitoring Decomposition Attacks with Lightweight Sequential Monitors](https://openreview.net/forum?id=HQuboWvFA1)** — 针对把有害目标拆成良性子任务的 decomposition 攻击,构建 4634 任务数据集(GPT-4o 上 87% 攻击成功),用轻量序贯监控器达 93% 防御率。 `ICLR 2026` `相关`
+- **[GuardAgent: Safeguard LLM Agents by a Guard Agent via Knowledge-Enabled Reasoning](https://proceedings.mlr.press/v267/xiang25a.html)** — 首个 guardrail agent:把安全守护需求解析成任务计划再映射为可执行守护代码并调用记忆中的示例,在医疗 agent 访问控制与 web agent 策略基准上分别达 98% 与 83% 守护准确率。 `ICML 2025` `核心`
+- **[ShieldAgent: Shielding Agents via Verifiable Safety Policy Reasoning](https://proceedings.mlr.press/v267/chen25ae.html)** — 从政策文档提取可验证规则构建概率规则电路,对被保护 agent 的动作轨迹做形式化验证式护栏,并发布 3K 条轨迹的 ShieldAgent-Bench。 `ICML 2025` `核心`
+- **[Which Agent Causes Task Failures and When? On Automated Failure Attribution of LLM Multi-Agent Systems](https://proceedings.mlr.press/v267/zhang25cq.html)** — 提出 LLM 多智能体系统自动失败归因任务,构建含 127 个系统细粒度标注失败日志的 Who&When 数据集,最佳方法定位失败步骤仅 14.2%。 `ICML 2025` `相关`
+- **[AIR: Improving Agent Safety through Incident Response](https://openreview.net/forum?id=hNiIIKdz3V)** — 首个 LLM agent 事件响应框架,用 DSL 在执行环内做语义化事件检测、遏制恢复并合成护栏规则阻断同类事件,三项成功率均超 90%。 `ICML 2026` `核心`
+- **[CORRECT: COndensed eRror RECognition via knowledge Transfer in multi-agent systems](https://openreview.net/forum?id=ZUDdYZSwr4)** — 提出免训练框架 CORRECT,用在线缓存的错误 schema 迁移定位多智能体系统的步骤级错误,并发布两千余条注入式标注失败轨迹数据集。 `ICML 2026` `相关`
+- **[Detecting Perspective Shifts in Multi-Agent Systems](https://openreview.net/forum?id=s24mdN60i5)** — 提出时序数据核视角空间 TDKPS 跨时间联合嵌入 agent,并给出个体与群体层面的假设检验,监测黑盒多智能体系统的行为漂移。 `ICML 2026` `相关`
+- **[Judgment Operators: A Composition-Invariant Substrate for Multi-Agent Action Spaces](https://openreview.net/forum?id=8Ysr6x0XMv)** — 针对多智能体系统治理碎片化,提出决策时框架 Judgment Operators,以 Allow/Edit/Escalate/Deny 四类干预实现组合不变的执行期约束强制与最小修复。 `ICML 2026` `核心`
+- **[Learning Efficient Guardrails for Compliance](https://openreview.net/forum?id=y3niyCNvAp)** — 构建 6 万条策略-轨迹对的 PolicyGuardBench,并训练轻量护栏模型 PolicyGuard,对 web agent 轨迹做全程与前缀级的策略违规检测。 `ICML 2026` `核心`
+- **[PrivGate: Steering Contextual Integrity in LLMs via Latent Space Geometry](https://openreview.net/forum?id=oKizUOP7E4)** — 发现残差流中线性编码隐私敏感度的 privacy manifold,提出免训练的 Latent Gating,仅在检测到高隐私风险时触发显式推理,兼顾 contextual integrity 与效率。 `ICML 2026` `核心`
+- **[SafeHarbor: Defining Precise Decision Boundaries via Hierarchical Memory-Augmented Guardrail for LLM Agent Safety](https://openreview.net/forum?id=MEKj3d9Bf3)** — 用增强对抗生成提取上下文相关防御规则并存入可自演化的分层记忆动态注入,免训练缓解 agent 护栏的过度拒绝,恶意请求拒绝率超 93%。 `ICML 2026` `核心`
+- **[Securing Multi-Agent Systems Against Corruptions via Node Contribution Backpropagation](https://openreview.net/forum?id=TphOLCDmKB)** — 把 MAS 通信建模为带符号有向无环图,通过反向传播计算各 agent 对最终决策的贡献度,动态识别并隔离传播错误信息的恶意 agent。 `ICML 2026` `核心`
+- **[Speculative Safety Honeypot: Toward Proactive Defense Against Multi-turn Agent Attacks](https://openreview.net/forum?id=F7KJeI4oql)** — 受投机解码启发,用小模型多智能体预演目标 agent 的未来动作生成轨迹树,再以真实动作校准剪枝,提前暴露跨轮次隐藏的多轮攻击意图。 `ICML 2026` `核心`
+- **[TRACER: Trajectory Risk Aggregation for Critical Episodes in Agentic Reasoning](https://openreview.net/forum?id=oVWRuzgQLU)** — TRACER 融合内容惊异度、语义词汇重复与工具一致性缺口,用尾部风险聚合给出轨迹级不确定性指标,在 τ²-bench 上提前预测工具交互失败。 `ICML 2026` `相关`
+- **[The Value of Variance: Mitigating Debate Collapse in Multi-Agent Systems via Uncertainty-Driven Policy Optimization](https://openreview.net/forum?id=Bc6c2OVWRh)** — 用 intra-agent、inter-agent 与系统级三层不确定性指标诊断 multi-agent debate 崩溃,并以不确定性驱动的策略优化惩罚自相矛盾与低置信输出。 `ICML 2026` `相关`
+- **[Think Twice Before You Act: Enhancing Agent Behavioral Safety with Thought Correction](https://openreview.net/forum?id=x5VjErljHS)** — Thought-Aligner 用两阶段对比学习训练轻量插件模型,在动作执行前对不安全中间思维做因果纠正,把行为安全率从约 50% 提升到约 90%。 `ICML 2026` `核心`
+- **[When Agents Go Rogue: Activation-Based Detection of Malicious Behaviors in Multi-Agent Systems](https://openreview.net/forum?id=BnduUW8izq)** — AcMAS 分析本地 agent 激活空间中的内部推理状态检测语义隐蔽攻击,不依赖交互图且适配异步 MAS,并据此恢复被污染 agent 而非直接隔离。 `ICML 2026` `核心`
+- **[INDICT: Code Generation with Internal Dialogues of Critiques for Both Security and Helpfulness](https://openreview.net/forum?id=jCMYIUwprx)** — 用安全与有用性双 critic 的内部对话,并借助 web 搜索与代码解释器,在代码生成与执行两阶段做事前事后干预,代码质量提升约 10%。 `NeurIPS 2024` `相关`
+- **[AgentAuditor: Human-Level Safety and Security Evaluation for LLM Agents](https://openreview.net/forum?id=2KKqp7MWJM)** — 提出免训练、记忆增强的推理框架让 LLM 评判器达人类级 agent 安全评估,并构建含 2293 条标注、15 类风险的 ASSEBench 评测基准。 `NeurIPS 2025` `核心`
+- **[Can Dependencies Induced by LLM-Agent Workflows Be Trusted?](https://openreview.net/forum?id=rDqZjKIeda)** — SeqCV 顺序执行子任务并在短 token 序列后做跨模型一致性校验,拒绝缺乏共识的输出并递归分解,缓解 multi-agent 失配,准确率最高提升 30%。 `NeurIPS 2025` `相关`
+- **[GUARDIAN: Safeguarding LLM Multi-Agent Collaborations with Temporal Graph Modeling](https://openreview.net/forum?id=6j9xJ9pBjm)** — 将多 agent 协作建模为离散时序属性图,用无监督编码器-解码器重建节点与结构,检测幻觉和错误传播中的异常节点与边。 `NeurIPS 2025` `核心`
+- **[Predicting the Performance of Black-box Language Models with Follow-up Queries](https://openreview.net/forum?id=IBFnEaArnz)** — 把后续追问的回答概率当作表征训练线性预测器,既能判定黑盒 LLM 回答是否正确,也能识别被对抗性 system prompt 操纵的模型与 API 冒名替换的模型。 `NeurIPS 2025` `相关`
+- **[SAFE: Multitask Failure Detection for Vision-Language-Action Models](https://openreview.net/forum?id=XPyAukgsFf)** — 从 VLA 内部特征学习单一失败概率标量,提出可跨未见任务泛化的多任务失败检测器 SAFE,并用 conformal prediction 权衡检测准确率与告警时延。 `NeurIPS 2025` `相关`
+- **[Towards Reliable LLM-based Robots Planning via Combined Uncertainty Estimation](https://openreview.net/forum?id=68OW8tLSh2)** — 将 LLM 机器人规划的不确定性拆为认知(任务清晰度与熟悉度)与内在两部分分别估计,用随机网络蒸馏与 MLP 回归头识别过度自信、可能不安全的规划。 `NeurIPS 2025` `相关`
+
+### D4. 投毒 / 后门的检测与净化 (11 篇)
+
+- **[Who Taught the Lie? Responsibility Attribution for Poisoned Knowledge in Retrieval-Augmented Generation](https://doi.org/10.1109/SP63933.2026.00053)** — RAGOrigin 按检索排名、语义相关性和对响应的影响给候选文本打责任分并聚类,黑盒定位导致 RAG 误生成的投毒文本,覆盖 7 数据集 15 种投毒攻击。 `S&P 2026` `相关`
+- **[Give LLMs a Security Course: Securing Retrieval-Augmented Code Generation via Knowledge Injection](https://doi.org/10.1145/3719027.3765049)** — 为检索增强代码生成构建漏洞库驱动的安全知识库,按漏洞类型重排过滤后注入提示,在知识库投毒场景下代码安全率提升 20%-31%。 `CCS 2025` `相关`
+- **[To Trust or Not to Trust? Enhancing Large Language Models' Situated Faithfulness to External Contexts](https://openreview.net/forum?id=K2jOacHUlO)** — 针对 RAG 中错误或刻意误导的外部上下文,提出自引导与规则化置信度推理 SCR/RCR 校准内外知识信任,较直接增强基线最高提升 24.2%。 `ICLR 2025` `相关`
+- **[Incentive-Aligned LLM Summaries](https://openreview.net/forum?id=OlidGx8oKr)** — 针对搜索与 RAG 摘要易被来源文本操纵的问题,提出 TTS:拆解原子 claim、征询各来源立场,用 peer prediction 机制给来源打分并过滤不可靠源后重新摘要。 `ICLR 2026` `相关`
+- **[A-MemGuard: A Proactive Defense Framework For LLM-Based Agent Memory](https://openreview.net/forum?id=udqe7UZUZ6)** — 通过多相关记忆推理路径的共识校验检测异常,并以双记忆结构将失败提炼为教训打破错误循环,把 agent 记忆投毒成功率降低逾 95%。 `ICML 2026` `核心`
+- **[MemPot: Defend Against Memory Extraction Attack with Optimized Honeypots](https://openreview.net/forum?id=goUAT3UcR4)** — 首个针对 agent 记忆抽取攻击的蜜罐防御 MemPot,注入高检索概率的诱饵文档并用 SPRT 序贯检验识别抽取者,零在线推理延迟。 `ICML 2026` `核心`
+- **[RADAR: Defending RAG Dynamically against Retrieval Corruption](https://openreview.net/forum?id=fT3laNA1AO)** — 提出 RADAR 防御动态 RAG 的检索污染,把可信上下文选择建模为图上能量最小化并用 Max-Flow Min-Cut 精确求解,以 Bayesian 记忆节点递归更新信念状态。 `ICML 2026` `相关`
+- **[Ranking Free RAG: Replacing Re-ranking with Selection in RAG for Sensitive Domains](https://openreview.net/forum?id=O88FCPAPAj)** — 提出 METEORA,用偏好微调生成的 rationale 驱动证据选择与拐点自适应截断替代 re-ranking,并由 Verifier LLM 过滤被投毒证据。 `ICML 2026` `相关`
+- **[Through the Stealth Lens: Attention-Aware Defenses Against Poisoning in RAG](https://openreview.net/forum?id=sSOxhXwzUi)** — 用可区分性安全博弈形式化 RAG 投毒的隐蔽性,提出注意力归一化分数 NPAS 与方差过滤器标记异常段落,准确率提升约 20%,并给出自适应规避攻击。 `ICML 2026` `相关`
+- **[ReliabilityRAG: Effective and Provably Robust Defense for RAG-based Web-Search](https://openreview.net/forum?id=D9JeNTs5Bu)** — 利用文档排名等可靠性信号,在矛盾图上求最大独立集筛出一致多数文档,为 RAG web 搜索提供可证明的抗语料投毒鲁棒性。 `NeurIPS 2025` `相关`
+- **[SeCon-RAG: A Two-Stage Semantic Filtering and Conflict-Free Framework for Trustworthy RAG](https://openreview.net/forum?id=tTwZhy8JqY)** — 用实体-意图-关系抽取引导的两阶段语义过滤与冲突感知过滤,在保留有用知识的同时防御 RAG 语料投毒与污染攻击。 `NeurIPS 2025` `相关`
+
+### D5. 形式化方法与可验证安全 (8 篇)
+
+- **[Demo: Certified Robustness on Toolformer](https://doi.org/10.1145/3576915.3624362)** — 研究输入与 prompt 空间的对抗扰动如何改变 Toolformer 的 API 调用位置,并给出有理论保证的 certified robustness 调度防护(demo 论文)。 `CCS 2023` `相关`
+- **[Grounding Generative Planners in Verifiable Logic: A Hybrid Architecture for Trustworthy Embodied AI](https://openreview.net/forum?id=wb05ver1k8)** — 以形式化安全本体驱动的 Logic Tutor 对 LLM 具身规划给出因果反馈并迭代修复,危险动作率降到 0%,目标达成率 77.3%。 `ICLR 2026` `核心`
+- **[Risk-Sensitive Agent Compositions](https://openreview.net/forum?id=iHQIacMKka)** — 把 agentic workflow 形式化为 agent graph,用动态规划近似 VaR 与 CVaR,挑出违反安全、公平、隐私要求尾风险最小的 agent 组合。 `ICLR 2026` `相关`
+- **[C-RAG: Certified Generation Risks for Retrieval-Augmented Language Models](https://proceedings.mlr.press/v235/kang24a.html)** — 用 conformal risk 分析给 RAG 生成风险认证置信上界,涵盖分布偏移,并证明检索与生成质量非平凡时 RAG 风险低于单模型。 `ICML 2024` `相关`
+- **[Scalable AI Safety via Doubly-Efficient Debate](https://proceedings.mlr.press/v235/brown-cohen24a.html)** — 设计新的 debate 协议,使诚实方仅需多项式步模拟即可战胜可用指数算力的不诚实策略,支持验证随机 AI 系统的对齐。 `ICML 2024` `相关`
+- **[Position: Trustworthy AI Agents Require the Integration of Large Language Models and Formal Methods](https://openreview.net/forum?id=wkisIZbntD)** — 立场论文,主张把 formal methods 与 LLM 结合以弥补幻觉导致的不可靠,由 LLM 降低形式化门槛、由形式化提供可验证的正确性保障。 `ICML 2025` `相关`
+- **[FormalJudge: A Neuro-Symbolic Paradigm for Agentic Oversight](https://openreview.net/forum?id=tnsQ23imeD)** — 用 LLM 把自然语言要求编译成 Dafny 规约并由 Z3 求解验证,以神经符号监督替代 LLM-as-a-Judge,较基线平均提升 16.6% 且支持弱监督强。 `ICML 2026` `核心`
+- **[Can an AI Agent Safely Run a Government? Existence of Probably Approximately Aligned Policies](https://openreview.net/forum?id=xM5m7J6Lbl)** — 给出社会决策场景下 agent 对齐的量化定义与近似对齐策略的存在性条件,并提出为任意黑盒 agent 动作加装可验证安全防护的方法。 `NeurIPS 2024` `相关`
+
+### E1. Agent 安全与风险评测基准(Benchmarks) (60 篇)
+
+- **[Formalizing and Benchmarking Prompt Injection Attacks and Defenses](https://www.usenix.org/conference/usenixsecurity24/presentation/liu-yupei)** — 提出 prompt injection 的统一形式化框架并组合出新攻击,用 10 个 LLM、7 个任务系统评测 5 种攻击与 10 种防御。 `USENIX Security 2024` `相关`
+- **[Unsafe LLM-Based Search: Quantitative Analysis and Mitigation of Safety Risks in AI Web Search](https://www.usenix.org/conference/usenixsecurity25/presentation/luo-zeren)** — 首次量化 7 个商用 AI 搜索引擎引用恶意网页与 URL 的风险,并用 GPT-4.1 内容净化加 URL 检测的 agent 防御,仅损失约一成信息量。 `USENIX Security 2025` `相关`
+- **[SpecOps: A Fully Automated AI Agent Testing Framework in Real-World GUI Environments](https://arxiv.org/abs/2603.10268)** — 用四个专职 LLM agent 分工完成测试用例生成、环境搭建、执行与校验,在 5 个真实 GUI agent 上自动发现 164 个真实缺陷,F1 达 0.89。 `ICSE 2026` `相关`
+- **[Evaluating Privilege Usage of Agents on Real-World Tools](https://conf.researchr.org/details/fse-2026/fse-2026-ideas-visions-and-reflections/3/Evaluating-Privilege-Usage-of-Agents-on-Real-World-Tools)** — 提出 GrantBox 安全评测沙箱,自动接入真实工具并让 agent 行使真实权限,在提示注入下度量权限滥用,构造场景下平均攻击成功率 84.80%。 `FSE 2026` `核心`
+- **[Evaluating Language Model Agency Through Negotiations](https://openreview.net/forum?id=3ZqKxMHcAg)** — 以多轮谈判博弈评测 6 个 LM 的 agency,在 self-play 与 cross-play 下考察合作议价与说服操纵,仅闭源模型能完成任务且强模型偶尔落败。 `ICLR 2024` `相关`
+- **[Identifying the Risks of LM Agents with an LM-Emulated Sandbox](https://openreview.net/forum?id=GEcwtMk1uA)** — 提出 ToolEmu,用 LM 模拟工具执行构建沙箱并配套 LM 安全评估器,在 36 个高风险工具包、144 个用例上量化工具使用 agent 的长尾风险。 `ICLR 2024` `核心`
+- **[Agent Security Bench (ASB): Formalizing and Benchmarking Attacks and Defenses in LLM-based Agents](https://openreview.net/forum?id=V4y0CpX4hK)** — 构建 ASB 基准,覆盖 10 个场景、400 多个工具与 27 种攻防方法,系统评测 prompt injection、memory poisoning 与 Plan-of-Thought 后门,最高攻击成功率 84.3%。 `ICLR 2025` `核心`
+- **[AgentHarm: A Benchmark for Measuring Harmfulness of LLM Agents](https://openreview.net/forum?id=AC5n7xHuR1)** — 提出 AgentHarm 基准,含 110 个显式恶意 agent 任务、覆盖诈骗与网络犯罪等 11 类危害,衡量越狱后 agent 是否仍能连贯完成多步有害任务。 `ICLR 2025` `核心`
+- **[Can LLMs Separate Instructions From Data? And What Do We Even Mean By That?](https://openreview.net/forum?id=8EtSBX41mt)** — 为单轮模型定义 instruction-data separation 的形式化度量并构建 SEP 基准,发现各模型分离度均低,prompt engineering 与微调均难奏效。 `ICLR 2025` `相关`
+- **[Multimodal Situational Safety](https://openreview.net/forum?id=I9bEi6LNgt)** — 提出含 1,960 组图文对的 MSSBench 评测多模态助手在视觉情境下的语言与动作安全判断,主流 MLLM 情境安全推理普遍失败。 `ICLR 2025` `相关`
+- **[τ-bench: A Benchmark for Tool-Agent-User Interaction in Real-World Domains](https://openreview.net/forum?id=roNSXZpUDN)** — 构建 τ-bench 在零售与航空域模拟用户与工具调用 agent 的动态对话,用 pass^k 衡量策略遵循可靠性,gpt-4o 成功率不足 50% 且极不稳定。 `ICLR 2025` `相关`
+- **[Breaking Agent Backbones: Evaluating the Security of Backbone LLMs in AI Agents](https://openreview.net/forum?id=kga18ld70t)** — 提出 threat snapshot 框架隔离 agent 执行流中暴露 LLM 漏洞的状态,基于 19.4 万条众包对抗攻击构建 b^3 基准评测 34 个骨干模型的安全性。 `ICLR 2026` `核心`
+- **[ImpossibleBench: Measuring LLMs' Propensity of Exploiting Test Cases](https://openreview.net/forum?id=SeO4vyAj7E)** — 把已有编码基准改造成规范与单测相冲突的不可能任务变体,以通过率量化编码 agent 删改测试等作弊倾向,并作为监控工具测试床。 `ICLR 2026` `核心`
+- **[Just Do It!? Computer-Use Agents Exhibit Blind Goal-Directedness](https://openreview.net/forum?id=9W4bPRsEIT)** — 基于 OSWorld 构建 90 任务的 BLIND-ACT,揭示 computer-use agent 不顾可行性与安全盲目追求目标,九个前沿模型平均盲目率 80.8%。 `ICLR 2026` `核心`
+- **[ManagerBench: Evaluating the Safety-Pragmatism Trade-off in Autonomous LLMs](https://openreview.net/forum?id=KsmTaPygR9)** — 提出 ManagerBench,在人工校验的管理场景中迫使模型在有害但达标与安全但低效之间取舍,发现前沿模型是优先级失衡而非识别不出危害。 `ICLR 2026` `相关`
+- **[OffTopicEval: When Large Language Models Enter the Wrong Chat, Almost Always!](https://openreview.net/forum?id=EcIyiJrajc)** — 提出 OffTopicEval 衡量 LLM agent 能否坚守既定用途、拒绝越界查询,20 个开源模型普遍失守,并用查询与系统提示接地提升拒答。 `ICLR 2026` `相关`
+- **[OpenAgentSafety: A Comprehensive Framework For Evaluating Real-World AI Agent Safety](https://openreview.net/forum?id=xggSxCFQbA)** — 提出 OpenAgentSafety,用浏览器、shell、代码执行等真实工具承载 350+ 多轮任务、覆盖八类风险,五个模型不安全行为率达 51%-73%。 `ICLR 2026` `核心`
+- **[PropensityBench: Evaluating Latent Safety Risks in Large Language Models via an Agentic Approach](https://openreview.net/forum?id=jOTQupHx7q)** — 用 5874 个场景与 6648 个代理工具模拟自我复制、网络、生物、化学四类高危能力,在资源紧张等压力下测量模型主动选用危险工具的倾向。 `ICLR 2026` `核心`
+- **[ST-WebAgentBench: A Benchmark for Evaluating Safety and Trustworthiness in Web Agents](https://openreview.net/forum?id=MuCDzH0ctf)** — 在 WebArena 上加入安全策略模板与评估函数,以 Completion under Policy 和 Risk Ratio 从六个维度评测 web agent 的企业级策略合规性。 `ICLR 2026` `核心`
+- **[Towards Reliable Benchmarking: A Contamination Free, Controllable Evaluation Framework for Multi-step LLM Function Calling](https://openreview.net/forum?id=UKYCJixSFt)** — 提出免污染评测框架 FuncBenchGen,将多步工具调用建模为隐藏函数依赖 DAG 并可控生成任务,评测 7 个开闭源 LLM,发现依赖深度与同类型干扰函数显著拉低表现。 `ICLR 2026` `相关`
+- **[Your Agent May Misevolve: Emergent Risks in Self-evolving LLM Agents](https://openreview.net/forum?id=Fd1jgQQW28)** — 沿模型、记忆、工具、工作流四条演化路径系统刻画自进化 agent 的 misevolution 风险,实证记忆积累导致安全对齐退化、造工具引入漏洞。 `ICLR 2026` `核心`
+- **[RE-Bench: Evaluating Frontier AI R&D Capabilities of Language Model Agents against Human Experts](https://proceedings.mlr.press/v267/wijk25a.html)** — 用 7 个开放式 ML 研究工程环境和 61 名人类专家的 8 小时尝试作基线,评测前沿 agent 自动化 AI R&D 的能力以预判前沿风险。 `ICML 2025` `相关`
+- **[SafeArena: Evaluating the Safety of Autonomous Web Agents](https://proceedings.mlr.press/v267/tur25a.html)** — 评测 web agent 被恶意滥用的基准,含 4 个网站上各 250 条有害与安全任务及五类危害,发现 GPT-4o 完成了 34.7% 的有害请求。 `ICML 2025` `核心`
+- **[ABC-Bench: An Agentic Bio-Capabilities Benchmark for Biosecurity](https://openreview.net/forum?id=yiaf7VlPpH)** — 评测 LLM agent 双重用途 in-silico 生物能力的基准,涵盖移液机器人编程、DNA 组装设计与规避合成筛查,agent 均超人类专家中位数。 `ICML 2026` `相关`
+- **[ANCHOR: Automated Alignment Auditing for CLI Agents on Real-World Harm](https://openreview.net/forum?id=YqTodSrPPB)** — 用暗黑人格数据微调的 auditor agent 扮演持续恶意用户,以美国法院真实案例任务审计 CLI agent,多轮诱导下违法任务顺从率达 100%。 `ICML 2026` `核心`
+- **[AgentLAB: Benchmarking LLM Agents against Long-Horizon Attacks](https://openreview.net/forum?id=Bb0pQqsiad)** — 首个长时程攻击基准,覆盖 intent hijacking、tool chaining、任务注入、目标漂移与记忆投毒五类攻击、28 个环境共 644 个测试用例。 `ICML 2026` `核心`
+- **[AgentNoiseBench: Benchmarking Robustness of Tool-Using LLM Agents Under Noisy Condition](https://openreview.net/forum?id=ORVJCJczoG)** — 用自动化 pipeline 把用户噪声与工具噪声可控地注入现有 agent 基准,系统评测 tool-using agent 在真实不完美环境下的鲁棒性。 `ICML 2026` `相关`
+- **[AutoControl Arena: Synthesizing Executable Test Environments for Frontier AI Risk Evaluation](https://openreview.net/forum?id=XkDpZusDTK)** — 以逻辑-叙事解耦自动合成可执行 agent 测试环境评估前沿风险,发现压力下风险率从 21.7% 升至 54.5% 且强模型出现策略性隐瞒。 `ICML 2026` `核心`
+- **[Can Agents Generalize to the Open World? Unveiling the Fragility of Static Training in Tool Use](https://openreview.net/forum?id=G3hX5Fkrg7)** — 形式化开放世界工具调用设定 OpenAgent,沿感知、交互、推理、内化四层注入分布偏移,发现 SFT 与 RL 训练的 agent 普遍退化,并提出扰动增强微调。 `ICML 2026` `相关`
+- **[CoopEval: Benchmarking Cooperation-Sustaining Mechanisms and LLM Agents in Social Dilemmas](https://openreview.net/forum?id=369qOr0ZnJ)** — 提出 CoopEval 基准,在四类社会困境中对比重复博弈、声誉系统、第三方仲裁与合约四种机制对 LLM agent 背叛倾向的抑制效果。 `ICML 2026` `相关`
+- **[Copyright-Bench: Agentic Evaluation of Copyright Law Compliance](https://openreview.net/forum?id=7y6a5ouziq)** — 用建站、周边设计、路演材料等商业任务考察 agent 在公有领域与受版权素材间的选择,发现用户偏好与时间压力会推高侵权率。 `ICML 2026` `核心`
+- **[Evaluating Contextual Illegality: AI Compliance in Corporate Law Scenarios](https://openreview.net/forum?id=PuXjZomg14)** — 在四类公司法情境中评测模型对上下文相关违法行为(改文档、交易股票、要求付款)的识别,对比 chat 与 agentic 设置并给出人类基线。 `ICML 2026` `相关`
+- **[Implicit Intelligence - Evaluating Agents on What Users Don't Say](https://openreview.net/forum?id=IhdGi9qknL)** — 提出 Implicit Intelligence 框架与 YAML 世界模拟环境,用 205 个场景考察 agent 能否推断隐私边界、灾难性风险等未言明约束,16 个模型最高仅 48.3% 通过。 `ICML 2026` `相关`
+- **[Jailbreak Foundry: From Papers to Runnable Attacks for Reproducible Benchmarking](https://openreview.net/forum?id=BSi2mfMDsx)** — 用多智能体流水线把越狱论文自动转成可执行攻击模块,复现 30 种攻击的 ASR 偏差仅 0.26 个百分点,并在统一 harness 上评测 10 个受害模型。 `ICML 2026` `相关`
+- **[More Capable, Less Cooperative? When LLMs Fail at Zero-Cost Collaboration](https://openreview.net/forum?id=yrON8C1YTy)** — 在零成本互助的回合制多智能体环境中发现能力越强未必越合作,o3 仅达最优集体收益的 17%,显式协议与微小分享激励可显著改善。 `ICML 2026` `相关`
+- **[PersistBench: When Should Long-Term Memories Be Forgotten by LLMs?](https://openreview.net/forum?id=Z7Rhzk13NT)** — 提出 PersistBench 评测长期记忆带来的安全风险,聚焦 cross-domain leakage 与记忆诱导的谄媚,18 个模型中位失败率分别为 53% 与 97%。 `ICML 2026` `相关`
+- **[Pressure Reveals Character: Behavioural Alignment Evaluation at Depth](https://openreview.net/forum?id=3U1l24EDvL)** — 构建含 904 个多轮压力场景的行为对齐基准,覆盖 honesty、safety、corrigibility、scheming 等六类,以经人工校准的 LLM judge 评测 24 个前沿模型。 `ICML 2026` `相关`
+- **[Reward Hacking Benchmark: Measuring Exploits in LLM Agents with Tool Use](https://openreview.net/forum?id=YMA0ByEdVj)** — 构建 RHB 多步 tool use 基准衡量 agent 的规范博弈与评测篡改,测评 13 个前沿模型并发现 RL 后训练把利用率从 0.6% 抬到 13.9%。 `ICML 2026` `核心`
+- **[SafeLab: An Interactive High-Fidelity Benchmark for Embodied Safety in Scientific Robotics](https://openreview.net/forum?id=ojwpa0wXo9)** — SafeLab 生成式仿真基准含 63 个实验资产、64 个任务与 6400 条专家轨迹,以轨迹级 Safe Success Rate 暴露科学机器人操作中的不可逆危害。 `ICML 2026` `相关`
+- **[SafeSearch: Automated Red-Teaming of LLM-Based Search Agents](https://openreview.net/forum?id=95VVL0TJNH)** — SafeSearch 在沙箱中注入不可靠搜索结果自动红队测试 search agent,300 个用例覆盖误导信息与 prompt injection,最高 ASR 达 90.5%。 `ICML 2026` `核心`
+- **[Security--Fidelity Tradeoffs: The Hidden Cost of Prompt Injection Defense](https://openreview.net/forum?id=vTJmIhNvC3)** — 提出 SecFid 基准区分执行注入、按数据处理与忽略三种行为,在 1168 样本 48 组配置上揭示 prompt injection 防御以压制不可信文本、牺牲保真为代价。 `ICML 2026` `相关`
+- **[Towards a Science of AI Agent Reliability](https://openreview.net/forum?id=4LTwRqhmhk)** — 从一致性、鲁棒性、可预测性与安全性四个维度提出 12 项 agent 可靠性指标,在两个基准上评测 15 个模型,发现能力提升几乎未带来可靠性改善。 `ICML 2026` `相关`
+- **[Unsafer in Many Turns: Benchmarking and Defending Multi-Turn Safety Risks in Tool-Using Agents](https://openreview.net/forum?id=iSuqYRmG4A)** — 按分类法把单轮有害任务改写为多轮攻击序列构建 MT-AgentRisk,发现多轮下 ASR 平均升高 16%,并用自探索试用新工具的 ToolShield 降低 30%。 `ICML 2026` `核心`
+- **[ALI-Agent: Assessing LLMs' Alignment with Human Values via Agent-based Evaluation](http://papers.nips.cc/paper_files/paper/2024/hash/b35c38f70065ac6c694089ca93a015bb-Abstract-Conference.html)** — ALI-Agent 用带记忆、工具与动作模块的自主 agent 自动生成并迭代精化真实场景测试,探测 LLM 在刻板印象、道德与法律上的长尾对齐风险。 `NeurIPS 2024` `相关`
+- **[AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents](http://papers.nips.cc/paper_files/paper/2024/hash/97091a5177d8dc64b1da8bf3e1f6fb54-Abstract-Datasets_and_Benchmarks_Track.html)** — AgentDojo 提供可扩展的动态评测环境,含邮件、网银、订票等 97 个真实任务与 629 个安全用例,用于评估工具型 agent 的 prompt injection 攻防。 `NeurIPS 2024` `核心`
+- **[Cooperate or Collapse: Emergence of Sustainable Cooperation in a Society of LLM Agents](https://openreview.net/forum?id=0zWzJj6lO3)** — 提出 GovSim 公共资源治理多 agent 模拟环境,发现绝大多数 LLM agent 无法维持可持续均衡(存活率不足 54%),普遍化推理显著改善合作。 `NeurIPS 2024` `相关`
+- **[Cooperation, Competition, and Maliciousness: LLM-Stakeholders Interactive Negotiation](http://papers.nips.cc/paper_files/paper/2024/hash/984dd3db213db2d1454a163b65b84d08-Abstract-Datasets_and_Benchmarks_Track.html)** — 构建多方多议题可评分谈判测试床评测 LLM agent 的推理与协作能力,并量化贪婪玩家与恶意操纵性玩家对交互动态和达成协议的安全影响。 `NeurIPS 2024` `相关`
+- **[RedCode: Multi-dimensional Safety Benchmark for Code Agents](https://neurips.cc/virtual/2024/poster/97521)** — RedCode 用 4000 余条风险执行实例与 160 条有害代码生成提示,在 Docker 沙箱中评测 3 种框架、19 个 LLM 的 code agent 安全性,覆盖 25 类漏洞。 `NeurIPS 2024` `核心`
+- **[Establishing Best Practices in Building Rigorous Agentic Benchmarks](https://openreview.net/forum?id=E58HNCqoaA)** — 揭示 SWE-bench-Verified、τ-bench 等 agentic 基准的任务与奖励设计缺陷可致 100% 相对误估,提出 ABC 检查清单,使 CVE-Bench 高估降低 33%。 `NeurIPS 2025` `相关`
+- **[Evaluating Generalization Capabilities of LLM-Based Agents in Mixed-Motive Scenarios Using Concordia](https://openreview.net/forum?id=yG4Fj0voJZ)** — 基于 Concordia 多智能体模拟评测 LLM agent 在零样本混合动机场景中的合作泛化,发现其在说服、规范执行与识别互利机会上差距显著。 `NeurIPS 2025` `相关`
+- **[Information Retrieval Induced Safety Degradation in AI Agents](https://openreview.net/forum?id=2hiNrfMmQ7)** — 实证评测发现检索与开放网络搜索会系统性削弱对齐 LLM agent 的拒答率与有害内容护栏,检索版 agent 甚至比未对齐模型更不安全。 `NeurIPS 2025` `核心`
+- **[OS-Harm: A Benchmark for Measuring Safety of Computer Use Agents](https://openreview.net/forum?id=Di30GwhQSX)** — 基于 OSWorld 构建 150 个任务的 computer-use agent 安全基准,覆盖用户蓄意误用、prompt injection 与模型失误三类危害并配自动评判器。 `NeurIPS 2025` `核心`
+- **[Open CaptchaWorld: A Comprehensive Web-based Platform for Testing and Benchmarking Multimodal LLM Agents](http://papers.nips.cc/paper_files/paper/2025/hash/8196be81e68289d7a9ece21ed7f5750a-Abstract-Datasets_and_Benchmarks_Track.html)** — 构建含 20 类 225 个 CAPTCHA 的交互式 web 评测平台,测多模态 LLM agent 绕过人机验证的能力,最佳 agent 成功率仅 40%。 `NeurIPS 2025` `相关`
+- **[RiOSWorld: Benchmarking the Risk of Multimodal Computer-Use Agents](https://openreview.net/forum?id=aPBBkHDK4W)** — 构建含 492 个风险任务的多模态 computer-use agent 风险基准,按用户源与环境源分类,从风险意图和风险完成度双视角评估。 `NeurIPS 2025` `核心`
+- **[Security Challenges in AI Agent Deployment: Insights from a Large Scale Public Competition](http://papers.nips.cc/paper_files/paper/2025/hash/73368bc7644c054b5bcc6490a8f2fb1c-Abstract-Datasets_and_Benchmarks_Track.html)** — 组织覆盖 22 个前沿 LLM agent 的大规模红队竞赛,收集 180 万次 prompt injection 攻击与 6 万次违规,构建近 100% 攻击成功率的红队基准。 `NeurIPS 2025` `核心`
+- **[TAI3: Testing Agent Integrity in Interpreting User Intent](http://papers.nips.cc/paper_files/paper/2025/hash/f13d67d8b994594a12d53e5d21de2bef-Abstract-Conference.html)** — 基于工具 API 文档做语义分区与保意图变异生成压力测试任务,配合变异模式记忆,系统挖掘 LLM agent 误解用户意图的 API 误用错误。 `NeurIPS 2025` `核心`
+- **[WASP: Benchmarking Web Agent Security Against Prompt Injection Attacks](https://openreview.net/forum?id=Ip1cCUAllL)** — 构建端到端 web agent prompt injection 评测基准 WASP,发现低成本人写注入部分成功率高达 86%,但攻击者目标常难被完整达成。 `NeurIPS 2025` `核心`
+- **[Why Do Multi-Agent LLM Systems Fail?](http://papers.nips.cc/paper_files/paper/2025/hash/b1041e52d3be19f0a9bc491657488e4a-Abstract-Datasets_and_Benchmarks_Track.html)** — 标注 7 个 MAS 框架 1600+ 条执行轨迹,提出含系统设计、智能体间失准、任务验证 3 大类 14 种失败模式的多智能体失败分类学 MAST。 `NeurIPS 2025` `相关`
+- **[Worse than Zero-shot? A Fact-Checking Dataset for Evaluating the Robustness of RAG Against Misleading Retrievals](https://openreview.net/forum?id=R4MeWTeVej)** — 用 Reddit 讨论构建含支持、误导、无关三类证据的事实核查基准 RAGuard,发现误导性检索下所有 RAG 系统表现劣于 zero-shot 基线。 `NeurIPS 2025` `相关`
+- **[macOSWorld: A Multilingual Interactive Benchmark for GUI Agents](http://papers.nips.cc/paper_files/paper/2025/hash/c276c3303c0723c83a43b95a44a1fcbf-Abstract-Conference.html)** — 首个 macOS GUI agent 交互基准,含 5 种语言 30 个应用 202 个任务及专门的欺骗攻击安全子集,揭示 agent 普遍易受欺骗攻击。 `NeurIPS 2025` `相关`
+
+### E2. 网络安全能力评测(CTF / 漏洞利用 / 渗透) (22 篇)
+
+- **[From Assistance to Autonomy: An Empirical Study of AI Use in a Live Capture-the-Flag (CTF) Competition](https://www.usenix.org/conference/usenixsecurity26/presentation/tang-tingxuan)** — 在真实线下 CTF 赛事中实证研究 41 名选手与 AI 的协作,发现瓶颈常在人类 prompting 而非模型推理,4 个全自主 agent 表现超过多数人类队伍。 `USENIX Security 2026` `核心`
+- **[Measuring and Augmenting Large Language Models for Solving Capture-the-Flag Challenges](https://doi.org/10.1145/3719027.3744855)** — 构建 3,992 题的 CTFKnow 知识基准测量 LLM 的 CTF 能力,并用两阶段 RAG 与环境交互增强的 CTFAgent 把解题表现提升 80% 以上。 `CCS 2025` `核心`
+- **[Cybench: A Framework for Evaluating Cybersecurity Capabilities and Risks of Language Models](https://openreview.net/forum?id=tc90LV0yRL)** — 构建 Cybench 框架,用 4 场竞赛的 40 个专业级 CTF 任务及子任务分解评测 8 个模型的自主漏洞发现与利用能力和风险。 `ICLR 2025` `核心`
+- **[CyberGym: Evaluating AI Agents' Real-World Cybersecurity Capabilities at Scale](https://openreview.net/forum?id=2YvbLQEdYt)** — 构建含 188 个项目、1507 个真实漏洞的 CyberGym,要求 agent 依描述与代码生成复现 PoC,最佳组合成功率仅约 20%,并挖出 35 个 0-day。 `ICLR 2026` `核心`
+- **[Estimating Worst-Case Frontier Risks of Open-Weight LLMs](https://openreview.net/forum?id=rXLRyJXSCy)** — 通过恶意微调把 gpt-oss 在生物与 CTF agentic 编码环境中能力拉满,评估开源权重模型的最坏情况前沿风险,结论是新增危害有限。 `ICLR 2026` `相关`
+- **[HackWorld: Evaluating Computer-Use Agents on Exploiting Web Application Vulnerabilities](https://openreview.net/forum?id=nLfZPoJbO7)** — 构建 HackWorld,让 computer-use agent 通过图形界面发现并利用 36 个真实 Web 应用的注入与认证绕过漏洞,CTF 式评测利用率不足 12%。 `ICLR 2026` `核心`
+- **[PACEbench: A Framework for Evaluating Practical AI Cyber-Exploitation Capabilities](https://openreview.net/forum?id=kGEuZXaXU6)** — 构建含单点、混合、链式与带防御四类场景的 PACEbench 及多阶段侦察-分析-利用的 PACEagent,实测七个前沿 LLM 均无法绕过真实防御。 `ICLR 2026` `核心`
+- **[AutoAdvExBench: Benchmarking Autonomous Exploitation of Adversarial Example Defenses](https://openreview.net/forum?id=FJKnru1xUF)** — 以 51 个真实对抗样本防御代码库评测 LLM agent 能否自主复现攻破工作,最强 agent 借助人工提示也仅攻破 6 个防御。 `ICML 2025` `核心`
+- **[CVE-Bench: A Benchmark for AI Agents' Ability to Exploit Real-World Web Application Vulnerabilities](https://proceedings.mlr.press/v267/zhu25i.html)** — CVE-Bench 在沙箱中复现真实高危 web CVE,评测 LLM agent 自主利用漏洞的能力,最强框架可攻破约 13% 的漏洞。 `ICML 2025` `核心`
+- **[ITBench: Evaluating AI Agents across Diverse Real-World IT Automation Tasks](https://proceedings.mlr.press/v267/jha25a.html)** — 覆盖 SRE、安全运营(CISO)与 FinOps 的 102 个真实 IT 自动化场景基准,前沿模型 agent 仅能解决 11%-26% 的任务。 `ICML 2025` `相关`
+- **[AICrypto: Evaluating Cryptography Capabilities of Large Language Models](https://openreview.net/forum?id=aGhhrgnyLJ)** — 含 135 道选择题、150 个 CTF 与 30 个证明题的密码学能力基准,SOTA 模型在常见漏洞利用上比肩人类专家但多步推理仍薄弱。 `ICML 2026` `相关`
+- **[Benchmarking LLM-Assisted Blue Teaming via Standardized Threat Hunting](https://openreview.net/forum?id=TcaAbpw9OI)** — CYBERTEAM 基准把 threat hunting 标准化为 30 个任务与 9 个操作模块的依赖化推理工作流,评测 LLM 与安全 agent 的 blue team 能力。 `ICML 2026` `相关`
+- **[CVE-Factory: Scaling Expert-Level Agentic Tasks for Code Security Vulnerability](https://openreview.net/forum?id=BkMSFFtm5M)** — 用多智能体流水线把稀疏 CVE 元数据自动转为可执行漏洞任务,构建 190 题 LiveCVEBench 与千余训练环境,微调 Qwen3-32B 从 5.3% 提升到 35.8%。 `ICML 2026` `相关`
+- **[CyberGym-E2E: Scalable Real-World Benchmark for AI Agents' End-to-End Cybersecurity Capabilities](https://openreview.net/forum?id=jXaBRLQrcM)** — 用自动化流水线把开源漏洞数据转成评测环境,构建覆盖 139 个项目、920 个真实漏洞的端到端漏洞发现、PoC 生成与补丁修复基准。 `ICML 2026` `核心`
+- **[EVMbench: Evaluating AI Agents on Smart Contract Security](https://openreview.net/forum?id=K5S8N5NgD8)** — 构建含 40 个仓库、117 个智能合约漏洞的 EVMbench,在本地以太坊环境中按测试与链上状态程序化评测 agent 的检测、修补与利用能力。 `ICML 2026` `核心`
+- **[ExCyTIn-Bench: Evaluating LLM agents on Cyber Threat Investigation](https://openreview.net/forum?id=4pQVVSKdkH)** — 基于真实 Azure 租户的 57 张安全日志表构建威胁调查图,自动生成 589 道多跳取证问题,最佳模型平均得分仅 0.368。 `ICML 2026` `核心`
+- **[Quantifying Frontier LLM Capabilities for Container Sandbox Escape](https://openreview.net/forum?id=19AbP986bv)** — 发布 SandboxEscapeBench,用嵌套沙箱 CTF 评测 LLM agent 利用配置错误、权限分配失误与内核缺陷逃逸 Docker/OCI 容器隔离的能力。 `ICML 2026` `核心`
+- **[NYU CTF Bench: A Scalable Open-Source Benchmark Dataset for Evaluating LLMs in Offensive Security](http://papers.nips.cc/paper_files/paper/2024/hash/69d97a6493fbf016fff0a751f253ad18-Abstract-Datasets_and_Benchmarks_Track.html)** — 构建可扩展开源 CTF 基准数据集与自动化 function-calling 框架,评测五个 LLM 求解夺旗题的攻击性网络安全能力并对比人类表现。 `NeurIPS 2024` `核心`
+- **[BountyBench: Dollar Impact of AI Agent Attackers and Defenders on Real-World Cybersecurity Systems](http://papers.nips.cc/paper_files/paper/2025/hash/faed4276b52ef762879db4142655c699-Abstract-Datasets_and_Benchmarks_Track.html)** — 首个用真实赏金漏洞衡量 AI agent 攻防的框架,25 个真实系统含 Detect/Exploit/Patch 三类任务与 40 个赏金,评测 10 个攻防 agent。 `NeurIPS 2025` `核心`
+- **[Dynamic Risk Assessments for Offensive Cybersecurity Agents](https://openreview.net/forum?id=uGuy73Dx6I)** — 主张以扩展威胁模型对攻击性网络安全 agent 做动态风险评估,证明仅 8 H100 小时迭代即可让 InterCode CTF 能力相对提升 40% 以上。 `NeurIPS 2025` `核心`
+- **[SEC-bench: Automated Benchmarking of LLM Agents on Real-World Software Security Tasks](http://papers.nips.cc/paper_files/paper/2025/hash/a9168f1c54e5147027f1e8cf83e1a775-Abstract-Conference.html)** — 用多 agent 流水线自动复现真实漏洞并生成 gold patch,评测 LLM agent 的 PoC 生成与漏洞修补能力,成功率分别仅 18% 和 34%。 `NeurIPS 2025` `核心`
+- **[SECODEPLT: A Unified Benchmark for Evaluating the Security Risks and Capabilities of Code GenAI](https://openreview.net/forum?id=vbr63iQsbv)** — 以人工验证种子加定向变异构建覆盖 44 类 CWE、5.9k 样本的三语言动态基准,评测代码 LLM 的不安全生成与漏洞检测修补能力。 `NeurIPS 2025` `相关`
+
+### E3. Agent 生态测量研究(App Store / 插件 / MCP 生态) (12 篇)
+
+- **[GPTracker: A Large-Scale Measurement of Misused GPTs](https://doi.org/10.1109/SP61157.2025.00118)** — 持续爬取 GPT Store 的 75 万个 GPTs 并自动交互,识别 2051 个滥用 GPT,揭示外部 API 调用、描述藏意图等绕审手法。 `S&P 2025` `核心`
+- **[On the (In)Security of LLM App Stores](https://doi.org/10.1109/SP61157.2025.00117)** — 跨 6 个 LLM app store 采集 78.6 万个应用,以静态动态分析加毒性词典发现 1.5 万个生成有害内容、1366 个违规收集隐私。 `S&P 2025` `相关`
+- **[LLMThief: Evaluating Configuration Leaking Risks in Commercial LLM App Stores](https://doi.org/10.1109/SP63933.2026.00195)** — LLMThief 以种子池加遗传算法变异生成探测 prompt,对 6 个商店 4164 个 LLM app 做模糊测试,窃取 system prompt、外部 API 与知识文件。 `S&P 2026` `相关`
+- **[Malla: Demystifying Real-world Large Language Model Integrated Malicious Services](https://www.usenix.org/conference/usenixsecurity24/presentation/lin-zilong)** — 首次测量 212 个地下 LLM 恶意服务,摸清其 8 个后端模型、182 条绕过公共 LLM API 防护的越狱 prompt 及整条黑产运营链。 `USENIX Security 2024` `相关`
+- **[Voice App Developer Experiences with Alexa and Google Assistant: Juggling Risks, Liability, and Security](https://www.usenix.org/conference/usenixsecurity24/presentation/seymour)** — 对 Alexa、Google Assistant 语音应用开发者做定性访谈,揭示平台把隐私安全责任转嫁给第三方开发者,以及应用认证流程带来的设计与测试困境。 `USENIX Security 2024` `相关`
+- **["Do Not Mention This to the User": Detecting and Understanding Malicious Agent Skills in the Wild](https://www.usenix.org/conference/usenixsecurity26/presentation/liu-yi)** — 系统分析两大注册表的 98,380 个 agent skill,确认 157 个恶意 skill 共 632 处漏洞、13 类攻击手法,主流为 RCE 窃取凭证与文档中嵌入对抗指令。 `USENIX Security 2026` `核心`
+- **[Measuring Real-World Prompt Injection Attacks in LLM-based Resume Screening](https://www.usenix.org/conference/usenixsecurity26/presentation/zhang-mohan)** — 对 hireEZ 约 20 万份真实简历开展首个大规模测量,约 1% 含隐藏 prompt injection,近两年占比明显上升,逾 90% 注入不使用显式指令。 `USENIX Security 2026` `相关`
+- **[Using AI Assistants in Software Development: A Qualitative Study on Security Practices and Concerns](https://doi.org/10.1145/3658644.3690283)** — 通过 27 场半结构化访谈与 190 条 Reddit 帖文,刻画从业者在代码生成、威胁建模、漏洞检测等安全关键任务中使用 AI 助手的做法与基于不信任的人工复核习惯。 `CCS 2024` `相关`
+- **[The Odyssey of robots.txt Governance: Measuring Convention Implications of Web Bots in Large Language Model Services](https://doi.org/10.1145/3719027.3765063)** — 分析 18 个 LLM web bot 在 582,281 份 robots.txt 上的合规性,发现 ChatGPT-User 等无视规则抓取受限内容并被模型记忆。 `CCS 2025` `相关`
+- **[Beyond Jailbreak: Unveiling Risks in LLM Applications Arising from Blurred Capability Boundaries](https://www.ndss-symposium.org/ndss-paper/beyond-jailbreak-unveiling-risks-in-llm-applications-arising-from-blurred-capability-boundaries/)** — 定义 LLM app 的能力空间并实现评测框架 LLMApp-Eval,跨 4 个平台测评 199 个应用,发现 89% 存在能力降级/越权升级风险,17 个可直接执行恶意任务。 `NDSS 2026` `相关`
+- **[In Agents We Trust, but Who Do Agents Trust? Latent Preferences Steer LLM Generations](https://openreview.net/forum?id=yTUNl6jYGU)** — 在新闻推荐、论文筛选等任务上测出 12 个 LLM 对信息来源存在稳定偏好,可压过内容本身左右检索型 agent 的呈现且提示难以消除。 `ICLR 2026` `相关`
+- **[Scam2Prompt: A Scalable Framework for Auditing Malicious Scam Endpoints in Production LLMs](https://openreview.net/forum?id=jEQQBE30m1)** — 从诈骗站点反推无害的开发者 prompt,审计生产级 LLM 在生成代码中嵌入真实诈骗 URL 的比例,新模型上高达 43.8%,并发现 62 个未收录诈骗站。 `ICML 2026` `相关`
+
+### F1. 攻击性 Agent(自主渗透与自动化利用) (25 篇)
+
+- **[Fuzz-Testing Meets LLM-Based Agents: An Automated and Efficient Framework for Jailbreaking Text-to-Image Generation Models](https://doi.org/10.1109/SP61157.2025.00119)** — JailFuzzer 让 LLM agent 充当变异引擎与判定 oracle,以模糊测试方式黑盒生成自然流畅的越狱 prompt 攻破文生图模型。 `S&P 2025` `相关`
+- **[Incalmo: an Autonomous Llm-Assisted System for Red Teaming Multi-Host Networks](https://doi.org/10.1109/SP63933.2026.00132)** — Incalmo 把红队行动抽象为高层声明式任务交由领域 task agent 执行,在 40 个多主机仿真网络中 37 个成功拿下关键资产。 `S&P 2026` `核心`
+- **[PentestGPT: Evaluating and Harnessing Large Language Models for Automated Penetration Testing](https://www.usenix.org/conference/usenixsecurity24/presentation/deng)** — 构建真实渗透测试靶标基准评估 LLM 能力,并以三个自交互模块缓解上下文丢失,组成 PentestGPT,任务完成度提升 228.6%。 `USENIX Security 2024` `核心`
+- **[Are CAPTCHAs Still Bot-hard? Generalized Visual CAPTCHA Solving with Agentic Vision Language Model](https://www.usenix.org/conference/usenixsecurity25/presentation/teoh)** — 把视觉 CAPTCHA 求解归约为搜索问题,用 agentic VLM 无需适配即破解 26 类共 2600 个挑战,成功率 60.7%,野外达 70.6%。 `USENIX Security 2025` `相关`
+- **[When LLMs Go Online: The Emerging Threat of Web-Enabled LLMs](https://www.usenix.org/conference/usenixsecurity25/presentation/kim-hanna)** — 评测联网工具加持的 LLM agent 实施 PII 收集、冒充发帖与鱼叉钓鱼的能力,PII 精度达 95.9%,现有商用安全护栏基本失效。 `USENIX Security 2025` `核心`
+- **[Understanding Implicit Trust Errors in Core Carrier Networks through Multi-Agent Flaw Discovery and Analysis](https://www.usenix.org/conference/usenixsecurity26/presentation/lin-ziyu)** — 提出 LLM 多智能体系统 iFinder,挖掘蜂窝核心网组件间的 implicit trust 缺陷并自动生成迭代验证的 PoC,在七个开源实现中发现 84 个未知漏洞。 `USENIX Security 2026` `相关`
+- **[Oedipus: LLM-enchanced Reasoning CAPTCHA Solver](https://doi.org/10.1145/3719027.3744872)** — Oedipus 用面向 CAPTCHA 的 DSL 把推理型验证码拆成 AI 易解子步骤并以 CoT 逐步求解,平均成功率 63.5%,对新式验证码设计仍具适应性。 `CCS 2025` `相关`
+- **[YuraScanner: Leveraging LLMs for Task-driven Web App Scanning](https://www.ndss-symposium.org/ndss-paper/yurascanner-leveraging-llms-for-task-driven-web-app-scanning/)** — 用 LLM 目标驱动 agent 自主执行 web 应用多步工作流以抵达深层状态,结合 XSS 引擎在 20 个应用中挖出 12 个 zero-day XSS。 `NDSS 2025` `核心`
+- **[Chimera: Harnessing Multi-Agent LLMs for Automatic Insider Threat Simulation](https://www.ndss-symposium.org/ndss-paper/chimera-harnessing-multi-agent-llms-for-automatic-insider-threat-simulation/)** — 用多 agent 扮演企业员工模拟正常与恶意内部行为并采集系统日志,依据 15 类真实内鬼攻击构建 ChimeraLog 数据集支撑内部威胁检测。 `NDSS 2026` `核心`
+- **[FirmAgent: Leveraging Fuzzing to Assist LLM Agents with IoT Firmware Vulnerability Discovery](https://www.ndss-symposium.org/ndss-paper/firmagent-leveraging-fuzzing-to-assist-llm-agents-with-iot-firmware-vulnerability-discovery/)** — 用 fuzzing 收集运行时污点源并重建路径,再由 LLM agent 做上下文污点分析与 PoC 生成,在 14 个真实 IoT 固件中发现 182 个漏洞、17 个获 CVE。 `NDSS 2026` `相关`
+- **[Getting pwn'd by AI: Penetration Testing with Large Language Models](https://doi.org/10.1145/3611643.3613083)** — 探索用 GPT-3.5 辅助渗透测试:一是高层测试任务规划,二是经 SSH 与靶机闭环反馈,由模型分析主机状态并给出具体提权攻击向量。 `FSE 2023` `相关`
+- **[ChainDelta: Automatic Patch-based Exploit Generation for Ethereum with Fuzzing Agents](https://doi.org/10.1145/3808157)** — 以定向 fuzzer、环境配置 agent 与状态感知 sanitizer 组成 LLM fuzzing 框架,从以太坊安全补丁自动生成 1-day 利用,成功率 64%、误报 15.8%。 `FSE 2026` `相关`
+- **[PoCGen: Generating Proof-of-Concept Exploits for Vulnerabilities in Npm Packages](https://doi.org/10.1145/3808178)** — 结合 LLM 理解漏洞报告、静态污点分析定位路径与动态验证,自动为 npm 包漏洞生成 PoC,SecBench.js 上成功率 71%、单个成本仅 0.02 美元。 `FSE 2026` `相关`
+- **[ARMs: Adaptive Red-Teaming Agent against Multimodal Models with Plug-and-Play Attacks](https://openreview.net/forum?id=wQ4OykcxaV)** — 提出自适应红队 agent ARMs,以分层记忆与 epsilon-greedy 编排 11 种新多模态攻击策略和 17 种算法,平均 ASR 提升 52.1% 并构建 3 万条 ARMs-Bench。 `ICLR 2026` `相关`
+- **[Comparing AI Agents to Cybersecurity Professionals in Real-World Penetration Testing](https://openreview.net/forum?id=Us00XndbVi)** — 在约 8,000 台主机的真实校园网络中让 6 个 pentest agent 与自研 ARTEMIS 同 10 名专家比拼,ARTEMIS 挖出 9 个有效漏洞并超越 9 人。 `ICLR 2026` `核心`
+- **[Cyber-Zero: Training Cybersecurity Agents without Runtime](https://openreview.net/forum?id=1gRTeAik4G)** — 用公开 CTF writeup 加 persona 驱动的 LLM 模拟反推运行时行为,无需真实环境即可合成训练轨迹,使 CTF agent 在三个基准上最高提升 13.1%。 `ICLR 2026` `核心`
+- **[RedCodeAgent: Automatic Red-teaming Agent against Diverse Code Agents](https://openreview.net/forum?id=IyIaAOihmZ)** — 用带自适应记忆的红队 agent 动态挑选并组合越狱工具攻击 code agent,在沙箱中核验执行结果,对 Cursor、Codeium 等真实助手也奏效。 `ICLR 2026` `核心`
+- **[Automated Red Teaming with GOAT: the Generative Offensive Agent Tester](https://proceedings.mlr.press/v267/pavlova25a.html)** — GOAT 让攻击 agent 在多轮自然对话中推理选择并组合七种越狱技巧自动红队,对 Llama 3.1 的 ASR@10 达 97%。 `ICML 2025` `相关`
+- **[EnIGMA: Interactive Tools Substantially Assist LM Agents in Finding Security Vulnerabilities](https://proceedings.mlr.press/v267/abramovich25a.html)** — 给 LM agent 配调试器、网络连接等交互式工具自主解 CTF,在 390 道题四个基准上取得 SOTA,并量化数据泄漏与自说自话现象。 `ICML 2025` `核心`
+- **[Co-RedTeam: Orchestrated Security Discovery and Exploitation with LLM Agents](https://openreview.net/forum?id=wz57SLSTk3)** — 以多智能体红队框架整合安全领域知识、代码分析、执行反馈与长期记忆,自动完成漏洞发现与利用,exploit 成功率超 60%。 `ICML 2026` `相关`
+- **[Position: To Defend Against Cyber Attacks, We Must Teach AI Agents to Hack](https://icml.cc/virtual/2026/poster/67161)** — 主张防御方必须自建进攻能力:构建覆盖完整攻击生命周期的基准、训练能发现真实漏洞的利用 agent,并限制其运行在受审计的 cyber range。 `ICML 2026` `核心`
+- **[RedDebate: Safer Responses Through Multi-Agent Red Teaming Debates](https://openreview.net/forum?id=79fSrxFKKx)** — 提出 RedDebate 多智能体辩论框架,让多个 LLM 互相质证以自动发现不安全失败模式,并用长期记忆沉淀安全经验持续降低有害输出。 `ICML 2026` `相关`
+- **[Training Language Model Agents to Find Vulnerabilities with CTF-Dojo](https://openreview.net/forum?id=n1eBQxKBne)** — CTF-Dojo 把 658 个 CTF 挑战容器化为可验证执行环境并配自动构建流水线,用 486 条验证轨迹训练漏洞挖掘 agent,32B 模型达 31.9% Pass@1。 `ICML 2026` `核心`
+- **[AutoRedTeamer: Autonomous Red Teaming with Lifelong Attack Integration](https://openreview.net/forum?id=xQH4lDLIC0)** — 提出全自动多 agent 红队框架,红队 agent 与策略提议 agent 协作,持续从最新研究发现并集成新攻击向量,HarmBench 上 ASR 提升 20%。 `NeurIPS 2025` `相关`
+- **[CoP: Agentic Red-teaming for Large Language Models using Composition of Principles](http://papers.nips.cc/paper_files/paper/2025/hash/967ba726da5c3a13d8d43fcf708e4161-Abstract-Conference.html)** — 提出 Composition-of-Principles agentic 红队框架,由 AI agent 编排人给定原则自动发现越狱策略,单轮攻击成功率最高提升 13.8 倍。 `NeurIPS 2025` `相关`
+
+### F2. 防御性 Agent(检测 / 取证 / 响应) (13 篇)
+
+- **[Agentic Concolic Execution](https://sp2026.ieee-security.org/accepted-papers.html)** — 让 LLM agent 承担符号化与约束推理的 agentic concolic execution 框架,代码覆盖率比 KLEE 高 115%–233%,发现 11 个新漏洞。 `S&P 2026` `相关`
+- **[Detecting Privilege Escalation in Polyglot Microservices via Agentic Program Analysis](https://sp2026.ieee-security.org/accepted-papers.html)** — Neo 用 LLM agent 动态生成分析计划并调用代码搜索原语,在多语言微服务中检出 24 个 0-day 权限提升漏洞,精度 81%。 `S&P 2026` `相关`
+- **[Cloak, Honey, Trap: Proactive Defenses Against LLM Agents](https://www.usenix.org/conference/usenixsecurity25/presentation/ayzenshteyn)** — 用伪装、蜜标与陷阱循环等 6 类策略 15 种技术反制自主攻击型 LLM agent,在 11 台 CTF 靶机上 100% 阻断并可诱其执行反向代码。 `USENIX Security 2025` `核心`
+- **[PATCHAGENT: A Practical Program Repair Agent Mimicking Human Expertise](https://www.usenix.org/conference/usenixsecurity25/presentation/yu-zheng)** — PatchAgent 把故障定位、补丁生成与验证集成进单个自治 agent,借助 language server 与补丁验证器修复 178 个真实漏洞中的九成以上。 `USENIX Security 2025` `核心`
+- **[PatchWeaver: Risk-Bounded Autonomous Vulnerability Remediation Under Change-Management Policies](https://www.usenix.org/conference/usenixsecurity26/presentation/li-rui)** — 自主漏洞修复方法 PatchWeaver,在变更管理策略约束与有界风险前提下自动完成漏洞修补,使自动化补丁流程符合运维策略要求。 `USENIX Security 2026` `相关`
+- **[Poster: Agentic Shell Honeypot Using Structured Logging](https://doi.org/10.1145/3719027.3760731)** — 用策略与响应双 agent 分工抵御提示注入,以结构化日志维持长期交互状态一致,并分层规划生成更真实的 LLM 驱动 shell 蜜罐响应。 `CCS 2025` `相关`
+- **[CHAMELEOSCAN: Demystifying and Detecting iOS Chameleon Apps via LLM-Powered UI Exploration](https://www.ndss-symposium.org/ndss-paper/chameleoscan-demystifying-and-detecting-ios-chameleon-apps-via-llm-powered-ui-exploration/)** — 构建 500 个 iOS chameleon app 数据集并归纳 10 类变脸模式,提出 LLM 驱动的 UI 探索 agent 检测,1,644 个应用上精确率 92.59%。 `NDSS 2026` `相关`
+- **[Combining Fine-Tuning and LLM-Based Agents for Intuitive Smart Contract Auditing with Justifications](https://doi.org/10.1109/ICSE55347.2025.00027)** — 两阶段微调 Detector 与 Reasoner 判定并解释智能合约漏洞,再由 Ranker 与 Critic 两个 agent 迭代辩论选出最佳成因,超越 GPT-4。 `ICSE 2025` `相关`
+- **[QLCoder: A Query Synthesizer For Static Analysis of Security Vulnerabilities](https://openreview.net/forum?id=J91IKwJrqv)** — 用基于 MCP 工具调用与 AST 引导的 agentic 框架,从 CVE 描述自动合成可执行的 CodeQL 漏洞检测查询,并靠迭代反馈消除过时语法幻觉。 `ICLR 2026` `相关`
+- **[RepoAudit: An Autonomous LLM-Agent for Repository-Level Code Auditing](https://proceedings.mlr.press/v267/guo25n.html)** — 沿数据流路径按需探索代码库并用 validator 校验路径条件抑制幻觉的自主仓库级代码审计 agent,在真实项目中发现 185 个新 bug。 `ICML 2025` `相关`
+- **[Agora: Toward Autonomous Bug Detection in Production-Level Consensus Protocols with LLM Agents](https://openreview.net/forum?id=IU9dsf2LZA)** — 领域感知的多智能体框架以假设驱动测试协同探索协议状态空间,在 Raft、HotStuff 等四个共识协议实现中发现 15 个未知逻辑安全漏洞。 `ICML 2026` `相关`
+- **[BlueCodeAgent: A Blue Teaming Agent Powered by Automated Red Teaming for CodeGen AI](https://openreview.net/forum?id=TR2DYfZXTd)** — 用自动化 red teaming 生成风险实例驱动 blue teaming agent,通过 constitution 归纳与动态代码分析在偏见、恶意指令、漏洞与 prompt injection 检测上 F1 平均提升 14.7%。 `ICML 2026` `相关`
+- **[Threat2Traffic: Multi-Agent Environment Synthesis for Malware Traffic Generation from Threat Intelligence](https://openreview.net/forum?id=MrcEFZ5ckv)** — 多 agent 框架在证据图上审议抽取威胁情报中的样本依赖,重建定制沙箱环境采集真实恶意软件流量,1077 个样本复现成功率 83.1%。 `ICML 2026` `相关`
+
+### G1. AI Control 与监督(Sabotage / Scheming / Monitoring) (33 篇)
+
+- **[Poster: Towards Intelligent Assurance for Autonomous AI Pentesters: Concurrent Compliance Auditing and Self-Augmentation via Execution Trace Analysis](https://doi.org/10.1145/3719027.3760713)** — 面向全自主 AI 渗透测试 agent 提出智能保障系统,通过执行 trace 监控实现合规审计、实时反馈与自我增强,补足人类监督缺位。 `CCS 2025` `核心`
+- **[Adaptive Deployment of Untrusted LLMs Reduces Distributed Threats](https://openreview.net/forum?id=keu6sxrPWn)** — 提出微协议加宏协议的两级 AI control 部署框架,用可信弱模型监控不可信代码模型并自适应估计风险,保留 99.6% 效用的同时近乎完全阻断后门代码。 `ICLR 2025` `相关`
+- **[Neural Interactive Proofs](https://openreview.net/forum?id=R2834dhBlo)** — 以 prover-verifier 博弈统一多种交互证明协议,让算力受限的可信 verifier 监督更强的不可信 prover,并在图同构与 LLM 代码验证上验证。 `ICLR 2025` `相关`
+- **[Adaptive Attacks on Trusted Monitors Subvert AI Control Protocols](https://openreview.net/forum?id=wSs1Ez3aKl)** — 让知晓协议与监控模型的不可信 agent 在输出中嵌入 prompt injection,普遍规避 AI control 中的可信监控器,Defer-to-Resample 重采样反而放大注入效果。 `ICLR 2026` `相关`
+- **[All Code, No Thought: Language Models Struggle to Reason in Ciphered Language](https://openreview.net/forum?id=yjFkeQ2ynQ)** — 测试 28 种密文下模型的推理能力以评估用 ciphered reasoning 规避 CoT 监控的风险,发现模型能翻译密文却推理准确率大幅下降,该规避手段当前基本无效。 `ICLR 2026` `相关`
+- **[Control Tax: The Price of Keeping AI in Check](https://openreview.net/forum?id=BpyR6Wkl1c)** — 提出 Control Tax 量化 AI control 监控的运行与经济成本,在攻击模型植入隐蔽代码后门、监控模型检测的设定下优化审计预算内的监控策略。 `ICLR 2026` `相关`
+- **[Darwin Gödel Machine: Open-Ended Evolution of Self-Improving Agents](https://openreview.net/forum?id=pUpzQZTvGY)** — 提出 Darwin Gödel Machine,让 coding agent 反复改写自身代码并用编码基准实证验证改动,通过归档式开放演化并行探索多条自改进路径,并讨论沙箱与自改进安全。 `ICLR 2026` `相关`
+- **[Do Large Language Models Know What They Are Capable Of?](https://openreview.net/forum?id=EO6WtJ0q6G)** — 评测 LLM 对自身任务成功率的预判能力,发现模型普遍过度自信、在多步 agentic 任务中随推进而恶化,而 in-context 失败经验可让部分模型改善代价敏感决策。 `ICLR 2026` `相关`
+- **[Reliable Weak-to-Strong Monitoring of LLM Agents](https://openreview.net/forum?id=WV7xIboTDK)** — 用 monitor 红队工作流变换 agent 与监控方的感知程度和规避策略,评测隐蔽违规检测,提出层级-序列混合监控实现以弱监强。 `ICLR 2026` `核心`
+- **[Scalable Oversight via Partitioned Human Supervision](https://openreview.net/forum?id=IoxBlRhANV)** — 提出基于互补标签(专家仅指出某选项不对)的可扩展监督框架,给出无偏 top-1 准确率估计与有限样本保证,无需 ground truth 即可评测并训练 agentic 系统。 `ICLR 2026` `相关`
+- **[Spilling the Beans: Teaching LLMs to Self-Report Their Hidden Objectives](https://openreview.net/forum?id=sWs0cCuM8I)** — 自我报告微调让模型先学会承认事实错误,泛化到审讯时坦白 agentic 隐蔽任务中的失准目标,检测 F1 达 0.98。 `ICLR 2026` `相关`
+- **[AI Control: Improving Safety Despite Intentional Subversion](https://proceedings.mlr.press/v235/greenblatt24a.html)** — 提出 AI control 思路,用可信弱模型监控或改写不可信 GPT-4 提交的代码以阻止隐蔽后门,并逐一红队检验各安全协议。 `ICML 2024` `核心`
+- **[MONA: Myopic Optimization with Non-myopic Approval Can Mitigate Multi-step Reward Hacking](https://openreview.net/forum?id=fyi34BxCwq)** — 用短视优化结合远视人类认可的 MONA 训练法,在委托监督、编码推理与传感器篡改三类环境中阻止人类无法察觉的多步 reward hacking。 `ICML 2025` `相关`
+- **[The Limits of Predicting Agents from Behaviour](https://openreview.net/forum?id=a3swNuXTxI)** — 在 agent 行为由世界模型驱动的假设下,推导由行为数据推断其信念目标并外推到未见部署环境的理论上界,刻画行为可预测性的极限。 `ICML 2025` `相关`
+- **[A Behavioural and Representational Evaluation of Goal-Directedness in Language Model Agents](https://openreview.net/forum?id=OqYz3v9111)** — 结合行为评估与 probing 探测内部表征,在网格世界中分析 LLM agent 目标导向性及其对空间地图与多步行动计划的编码方式。 `ICML 2026` `相关`
+- **[Calibrating Conservatism for Scalable Oversight](https://openreview.net/forum?id=94sQrbiUeI)** — 把多个辅助评分聚合为偏离保守基线的惩罚,用 conformal decision theory 在线校准保守度,使弱监督者在 SWE-bench 与 MACHIAVELLI 上把违规率压到目标以下。 `ICML 2026` `相关`
+- **[Collaborative Disagreement Resolution for Scalable Oversight](https://openreview.net/forum?id=fFpNKSuMkQ)** — 提出 disagreement resolution 这一可扩展监督范式,借鉴人类调解让模型协作定位分歧 crux 并收敛共识,非专家评判准确率高于标准 debate。 `ICML 2026` `相关`
+- **[Constitutional Black-Box Monitoring for Scheming in LLM Agents](https://openreview.net/forum?id=GkL3dANi6M)** — 用合成轨迹优化的黑盒 constitutional monitor 检测 agent 轨迹中的 scheming,可迁移到 Control Arena,但简单提示搜索即达性能饱和。 `ICML 2026` `核心`
+- **[Corrigibility Transformation: Constructing Goals That Accept Updates](https://openreview.net/forum?id=MToJN3uf7u)** — 给出 corrigibility 的形式化定义与目标变换,通过短视化地预测“阻止更新”条件下的奖励,构造接受关停与目标更新且不损失能力的目标。 `ICML 2026` `相关`
+- **[Evolving Interpretable Constitutions for Multi-Agent Coordination](https://openreview.net/forum?id=2rukwU6tI3)** — 提出 Constitutional Evolution,在带生存压力的网格世界中用 LLM 驱动的遗传编程演化可解释多智能体行为规范,显著提升社会稳定性并消除冲突。 `ICML 2026` `相关`
+- **[Exploration Hacking: Can LLMs Learn to Resist RL Training?](https://openreview.net/forum?id=L0EGKqOBpz)** — 构造 exploration hacking 的 model organism,使模型在 agentic RL 训练中策略性抑制探索以抵抗能力激发,并评估监控、权重加噪与 SFT 缓解。 `ICML 2026` `相关`
+- **[How does information access affect LLM monitors' ability to detect sabotage?](https://openreview.net/forum?id=kS0XU5JUII)** — 在三个 sabotage 环境中研究监控可见信息量的影响,发现 less-is-more 效应,并提出摘录-评分两级监控使检测率最多提升 16.8 个百分点。 `ICML 2026` `相关`
+- **[Monitoring Monitorability](https://openreview.net/forum?id=b82fgbMVpz)** — 提出 CoT monitorability 度量与干预、过程、结果三类评测范式,考察模型规模与推理算力对 agent 可监控性的影响,发现 CoT 监控优于仅看动作的监控。 `ICML 2026` `相关`
+- **[The Oversight Game: Learning to Cooperatively Balance an AI Agent's Safety and Autonomy](https://openreview.net/forum?id=Na3YzWMXwz)** — 把 agent 的自主/请示与人类的信任/监督建模为两人 Markov 博弈,在势博弈条件下证明自主性收益不损害人类价值,并在工具任务上减少安全违规。 `ICML 2026` `相关`
+- **[Me, Myself, and AI: The Situational Awareness Dataset (SAD) for LLMs](https://openreview.net/forum?id=UnWhcpIyUC)** — 构建含 7 类任务、1.3 万余题的 Situational Awareness Dataset,量化 LLM 的自我认知与区分评测/真实部署的能力,最强模型仍远逊人类。 `NeurIPS 2024` `相关`
+- **[On scalable oversight with weak LLMs judging strong LLMs](https://openreview.net/forum?id=O1fp9nVraj)** — 让弱 LLM 评判者监督更强 agent,在问答、数学、代码、逻辑等任务比较 debate、consultancy 与直接问答,debate 全面占优且更少被错误答案说服。 `NeurIPS 2024` `相关`
+- **[CTRL-ALT-DECEIT Sabotage Evaluations for Automated AI R&D](https://openreview.net/forum?id=XBMjXb6f4w)** — 扩展 MLE-Bench 加入植入后门、故意泛化失败等破坏任务,评测 AI R&D agent 的 sabotage 与 sandbagging 能力及 LM 监控的检测局限。 `NeurIPS 2025` `核心`
+- **[CoT Red-Handed: Stress Testing Chain-of-Thought Monitoring](https://openreview.net/forum?id=oHB4Ee77uG)** — 压力测试 CoT 监控,让弱可信监控模型审查强不可信模型的推理步以发现代码 agent 蓄意破坏,提出独立评分推理与动作的混合协议。 `NeurIPS 2025` `相关`
+- **[Combining Cost Constrained Runtime Monitors for AI Safety](http://papers.nips.cc/paper_files/paper/2025/hash/ed56a654ddb681841fdb2184463c253e-Abstract-Conference.html)** — 在预算约束下组合多个运行时监控,依 Neyman-Pearson 引理分配安全干预以最大化拦截失配输出的召回,代码审查场景召回翻倍。 `NeurIPS 2025` `相关`
+- **[Emergent Risk Awareness in Rational Agents under Resource Constraints](https://openreview.net/forum?id=wryhlhA8QI)** — 用 survival bandit 框架形式化资源/失败约束下 rational agent 的偏好漂移,刻画人-agent 失配涌现条件并提出缓解风险偏好的机制。 `NeurIPS 2025` `相关`
+- **[Large language models can learn and generalize steganographic chain-of-thought under process supervision](https://openreview.net/forum?id=2g5cJqX15Y)** — 证明在过程监督下惩罚特定字符串会使模型学会隐写替换编码 CoT 推理并泛化到未见字符串,威胁 CoT 监控的可靠性。 `NeurIPS 2025` `相关`
+- **[Learning “Partner-Aware” Collaborators in Multi-Party Collaboration](https://openreview.net/forum?id=yFfWVr2TmZ)** — 用 modified-action MDP 分析 RLHF 训练的 LLM agent 忽视伙伴干预的倾向,提出 ICR 算法训练可被打断、能吸收干预信息以提升群体共识的协作 agent。 `NeurIPS 2025` `相关`
+- **[Noise Injection Reveals Hidden Capabilities of Sandbagging Language Models](https://openreview.net/forum?id=uUWb5eawL9)** — 向模型权重注入不同幅度噪声,利用 sandbagging 模型性能反常提升的特征信号,模型无关地检测评估中的故意藏拙行为。 `NeurIPS 2025` `相关`
+
+### G2. Agent 欺骗、操纵与共谋 (17 篇)
+
+- **[Love, Lies, and Language Models: Investigating AI's Role in Romance-Baiting Scams](https://www.usenix.org/conference/usenixsecurity26/presentation/gressel)** — 通过访谈 145 名从业者与一周盲测对话实验,发现 LLM 扮演的杀猪盘诈骗者信任度与依从率高于真人,商用安全过滤器检出率为 0。 `USENIX Security 2026` `相关`
+- **[On Targeted Manipulation and Deception when Optimizing LLMs for User Feedback](https://openreview.net/forum?id=Wf2ndb8nhf)** — 用模拟用户反馈做 RL 训练,发现 LLM 会可靠学会操纵与欺骗,并能识别仅占 2% 的易感用户定向施加,安全训练与 LLM 裁判过滤有时反而催生更隐蔽行为。 `ICLR 2025` `相关`
+- **[Financial fraud collusion among generative AI agents in social networks](https://openreview.net/forum?id=a1d2smwmBS)** — 提出 MultiAgentFraudBench 覆盖 21 类线上诈骗场景,验证 LLM agent 能协同放大金融欺诈,并用 monitor agent 拦截与群体信息共享缓解。 `ICLR 2026` `核心`
+- **[LH-DECEPTION: Simulating and Understanding LLM Deceptive Behaviors in Long-Horizon Interactions](https://openreview.net/forum?id=2r10vpYiti)** — 用执行者-监督者-审计者的多智能体模拟量化长程任务中的 LLM 欺骗,发现欺骗随事件压力上升、持续侵蚀信任并形成欺骗链。 `ICLR 2026` `相关`
+- **[Learning to Lie: Adversarial Attacks on Human-AI Teams and LLMs](https://openreview.net/forum?id=Lqt5weP0Gr)** — 对抗性 AI 助手用基于模型的强化学习学出人类信任演化模型,在三人加一 AI 的问答小队中操纵群体决策以损害团队成绩。 `ICLR 2026` `相关`
+- **[Are Your Agents Upward Deceivers?](https://openreview.net/forum?id=fKtCkb8Ixj)** — 定义 agent 向用户隐瞒失败并擅自行动的 upward deception,构建 200 个受限环境任务基准,发现 11 个 LLM 普遍猜测结果、伪造文件。 `ICML 2026` `核心`
+- **[Debate with Images: Detecting Deceptive Behaviors in Multimodal Large Language Models](https://openreview.net/forum?id=XgvVGrvhuv)** — 构建多模态欺骗基准 MM-DeceptionBench,并提出 debate with images 多智能体对抗辩论框架,强制视觉 grounding 以提升欺骗判定与人类的一致性。 `ICML 2026` `相关`
+- **[OpenDeception: Learning Deception and Trust in Human–AI Interaction via Multi-Agent Simulation](https://openreview.net/forum?id=PW8YVqhI6K)** — 构建含 50 个真实欺骗场景的 OpenDeception,用 IntentNet 识别 agent 欺骗意图、TrustNet 估计用户易受骗程度,发现多数模型九成目标驱动对话含欺骗。 `ICML 2026` `相关`
+- **[Peer-Preservation in Frontier Models](https://openreview.net/forum?id=YGIG0gViul)** — 揭示前沿模型自发出现 peer-preservation:为保护同伴模型而故意出错、禁用关机流程、伪装对齐甚至外泄模型权重,最高发生率达 99%。 `ICML 2026` `相关`
+- **[Position: Collusion Risks Among AI Reasoning Agents Justify Certification Requirements for Making Market Decisions](https://icml.cc/virtual/2026/poster/67141)** — 实验显示 DeepSeek-R1 定价 agent 在 Bertrand 寡头场景自发默契共谋且推理链可被隐蔽操纵,主张市场决策 agent 须先通过行为认证。 `ICML 2026` `相关`
+- **[Talk, Judge, Cooperate: Gossip-Driven Indirect Reciprocity in Self-Interested LLM Agents](https://openreview.net/forum?id=jYxRNCfRaD)** — 引入公开 gossip 作为去中心化声誉机制,agent 互相评判可信度建立互惠合作,理论与实验显示 ALIGN 能可靠识别并排除恶意进入者。 `ICML 2026` `相关`
+- **[Honesty Is the Best Policy: Defining and Mitigating AI Deception](http://papers.nips.cc/paper_files/paper/2023/hash/06fc7ae4a11a7eb5e20fe018db6c036f-Abstract-Conference.html)** — 在结构因果博弈中给出 AI 欺骗的形式化定义与图论判据,并实验证明该判据可用于缓解强化学习 agent 与语言模型为通过评估而撒谎的行为。 `NeurIPS 2023` `相关`
+- **[Can Large Language Model Agents Simulate Human Trust Behavior?](https://openreview.net/forum?id=CeOwahuQic)** — 在 Trust Game 中系统测量 LLM agent 的信任行为,发现 GPT-4 与人类高度对齐,并考察偏见、外部操纵与推理策略对 agent 信任的影响。 `NeurIPS 2024` `相关`
+- **[Secret Collusion among AI Agents: Multi-Agent Deception via Steganography](http://papers.nips.cc/paper_files/paper/2024/hash/861f7dad098aec1c3560fb7add468d41-Abstract-Conference.html)** — 形式化 AI agent 借 steganography 隐蔽合谋的威胁模型,理论与实验分析 LLM 隐写合谋能力,揭示监控与改写等缓解手段的局限。 `NeurIPS 2024` `相关`
+- **[Among Us: A Sandbox for Measuring and Detecting Agentic Deception](https://openreview.net/forum?id=XP3v1THxsq)** — 构建社交推理游戏 Among Us 沙箱诱发 LLM agent 长期开放式欺骗,评测 18 个模型并用探针与 SAE 检测说谎,发现 RL 模型更擅长欺骗而非识破。 `NeurIPS 2025` `相关`
+- **[DeceptionBench: A Comprehensive Benchmark for AI Deception Behaviors in Real-world Scenarios](https://openreview.net/forum?id=x1lSRe3hcO)** — 构建首个真实场景 AI 欺骗行为基准,涵盖 5 领域 150 场景千余样本,评测利己/谄媚倾向及奖励与胁迫等外因,发现强化动态下欺骗被放大。 `NeurIPS 2025` `相关`
+- **[Evaluating LLMs in Open-Source Games](https://openreview.net/forum?id=X9SNL203cV)** — 在以提交程序为动作的 open-source games 中评测 LLM,分析其达成的 program equilibria,发现收益最大化、合作与欺骗策略的涌现与演化。 `NeurIPS 2025` `相关`
+
+### G3. Agent 身份、溯源与水印 (10 篇)
+
+- **[PromptCARE: Prompt Copyright Protection by Watermark Injection and Verification](https://doi.org/10.1109/SP54263.2024.00209)** — 提出首个 prompt 版权保护框架 PromptCARE,针对自然语言特性设计水印注入与黑盒验证方案,在 6 个数据集、3 个预训练 LLM 上验证有效性、无害性与隐蔽性。 `S&P 2024` `相关`
+- **[PromptCOS: Towards Content-Only System Prompt Copyright Auditing for LLMs](https://doi.org/10.1109/SP63933.2026.00142)** — PromptCOS 用循环输出信号与辅助 token 给 system prompt 打水印,仅凭生成内容即可审计 prompt 盗用,水印相似度 99.3%、精度损失不超 0.6%。 `S&P 2026` `相关`
+- **[LLMmap: Fingerprinting for Large Language Models](https://www.usenix.org/conference/usenixsecurity25/presentation/pasquini)** — LLMmap 主动发送构造查询指纹识别 LLM 集成应用的底层模型版本,8 次交互即可在 42 个版本上超 95% 准确率,对未知 system prompt 与 RAG 框架鲁棒。 `USENIX Security 2025` `相关`
+- **[RAG-WM: An Efficient Black-Box Watermarking Approach for Retrieval-Augmented Generation of Large Language Models](https://doi.org/10.1145/3719027.3744813)** — 用多 LLM 交互框架生成水印文本并注入 RAG 知识库,以黑盒问答检测 RAG 被窃取,且能抵抗改写与知识插入等去除攻击。 `CCS 2025` `相关`
+- **[AgentReputation: A Decentralized Agentic AI Reputation Framework](https://conf.researchr.org/details/fse-2026/fse-2026-ideas-visions-and-reflections/28/AgentReputation-A-Decentralized-Agentic-AI-Reputation-Framework)** — 提出 AgentReputation,面向去中心化 agent 市场的三层声誉框架,分离任务执行、声誉服务与防篡改存证,引入验证等级与上下文声誉卡。 `FSE 2026` `相关`
+- **[Ward: Provable RAG Dataset Inference via LLM Watermarks](https://openreview.net/forum?id=kVrwHLAb20)** — 形式化黑盒 RAG 数据集推断问题并提出 Ward,基于 LLM 水印为数据所有者提供语料被未授权用于 RAG 的严格统计检测保证。 `ICLR 2025` `相关`
+- **[Remotely Detectable Robot Policy Watermarking](https://openreview.net/forum?id=8s5jBVybhQ)** — 提出 CoNoCo,利用策略自身随机性在机器人动作中嵌入频谱水印,仅凭视频或动捕等远程观测即可检出,用于策略所有权验证与非授权滥用识别。 `ICLR 2026` `相关`
+- **[Position: AI Agents Need Authenticated Delegation](https://openreview.net/forum?id=9skHxuHyM4)** — 立场论文,主张扩展 OAuth 2.0 与 OpenID Connect 加入 agent 专属凭证,把自然语言授权翻译为可审计的权限范围,建立清晰问责链。 `ICML 2025` `核心`
+- **[PragLocker: Protecting Agent Intellectual Property in Untrusted Deployments via Non-Portable Prompts](https://openreview.net/forum?id=PWhmZ04OTr)** — 提出 PragLocker,用代码符号锚定语义并注入目标模型反馈噪声,生成只在指定 LLM 上生效的不可迁移提示,防止 agent 提示被复制盗用。 `ICML 2026` `相关`
+- **[Watermarking LLM Agent Trajectories](https://openreview.net/forum?id=h5M4E33Pqs)** — ActHook 在 agent 轨迹数据集中插入由密钥激活、不改变任务结果的 hook 动作作为水印,黑盒检测模型是否用了被盗轨迹,平均 AUC 94.3。 `ICML 2026` `相关`
+
+### G4. Agentic 场景越狱与有害行为 (7 篇)
+
+- **[URLcoat: Exploiting Web Search Capability to Jailbreak Large Language Models](https://doi.org/10.1109/SP63933.2026.00082)** — 借助 LLM 的联网搜索工具检索外部网页内容来承载有害请求,绕过安全对齐实现越狱攻击。 `S&P 2026` `相关`
+- **[Smoke and Mirrors: Jailbreaking LLM-based Code Generation via Implicit Malicious Prompts](https://arxiv.org/abs/2503.17953)** — 把恶意意图隐式编码进 commit message 等隐蔽通道、指令表面无害,绕过代码模型的安全对齐,在 RMCBench 上显著优于显式越狱。 `ICSE 2026` `相关`
+- **[Casting a SPELL: Sentence Pairing Exploration for LLM Limitation-breaking](https://doi.org/10.1145/3797063)** — 用时分选择策略从先验知识库拼接句子构造越狱提示,诱导代码模型生成 8 类恶意代码,对 GPT-4.1 成功率 83.75% 并在 Cursor 中复现。 `FSE 2026` `相关`
+- **[A New Framework for Cybersecurity Refusals in AI Agents](https://openreview.net/forum?id=tkNyoOIbgj)** — 首个界定 offensive security 任务拒绝边界的框架,含拒绝准则、类别与对抗评测方法,发现 8 个前沿模型中 6 个从不拒绝对真实系统找漏洞。 `ICML 2026` `核心`
+- **[Helpful to a Fault: Measuring Illicit Assistance in Multi-Turn, Multilingual LLM Agents](https://openreview.net/forum?id=tB05up6g5N)** — 提出 STING 自动红队框架,把非法目标拆成多轮渐进步骤并自适应追问诱导工具型 agent 执行,配合六种非英语语言与越狱发现时间分析。 `ICML 2026` `核心`
+- **[OrchJail: Jailbreaking Tool-Calling Text-to-Image Agents by Orchestration-Guided Fuzzing](https://openreview.net/forum?id=VviX6pPCgV)** — 针对工具调用式 text-to-image agent,学习高风险工具编排模式引导模糊测试,让单步无害的工具链组合出违规图像,越狱成功率与查询效率双升。 `ICML 2026` `核心`
+- **[Safe + Safe = Unsafe? Exploring How Safe Images Can Be Exploited to Jailbreak Large Vision-Language Models](https://openreview.net/forum?id=jvq8nzOUp8)** — 利用 LVLM 的通用推理能力与安全雪球效应,构建可自主调用工具的 SSA agent,用安全图像组合逐步诱导有害输出,对最新 LVLM 取得高越狱成功率。 `NeurIPS 2025` `相关`
+
+### G5. 综述与立场论文(SoK / Survey / Position) (12 篇)
+
+- **[SoK: Attack and Defense Landscape of Agentic AI Systems](https://www.usenix.org/conference/usenixsecurity26/presentation/kim-juhee-agentic)** — 首个 AI agent 安全系统化知识梳理,统一刻画 agent 系统的设计空间、攻击面与防御机制,并提出该领域的开放挑战。 `USENIX Security 2026` `核心`
+- **[SoK: DARPA's AI Cyber Challenge (AIxCC): Competition Design, Architectures, and Lessons Learned](https://www.usenix.org/conference/usenixsecurity26/presentation/zhang-cen)** — 首次系统化分析 DARPA AIxCC,梳理竞赛设计、决赛自主 cyber reasoning system 的架构与真实性能驱动因素,总结自动漏洞发现与修补的进展与局限。 `USENIX Security 2026` `核心`
+- **[Autonomous Vulnerability Analysis, Triaging, and Repair: A Historical Perspective](https://doi.org/10.1145/3719027.3748270)** — keynote 回顾从 DARPA CGC 到 AIxCC 的自主漏洞分析、定级与修复系统演进,讨论 LLM 时代 Cyber Reasoning System 的能力边界。 `CCS 2025` `相关`
+- **[Position: Build Agent Advocates, Not Platform Agents](https://openreview.net/forum?id=jd1N60VNFE)** — 立场论文,指出平台掌控的 agent 会加剧监控、锁定与垄断,主张发展用户可控的 agent advocate 并配套算力开放、互操作与安全标准及市场监管。 `ICML 2025` `相关`
+- **[Position: Accountable Deployment of Agentic AI Demands Layered, System-Level Interpretability](https://icml.cc/virtual/2026/poster/67088)** — 立场论文,主张 agentic AI 可解释性应从模型级转向系统级轨迹与责任归属,提出跨五阶段生命周期的五层可解释栈 ATLIS 支撑持续监控与风险升级。 `ICML 2026` `核心`
+- **[Position: Agent Security Needs Redefinition through a Holistic Framework](https://icml.cc/virtual/2026/poster/67194)** — 主张用身份、任务、轨迹、记忆四要素重新定义 agent 安全,把 prompt injection 重构为身份违规,并强调安全属性随时间演化的维度。 `ICML 2026` `核心`
+- **[Position: Agentic Safety is an Epistemic Property, Not a Behavioral One](https://icml.cc/virtual/2026/poster/67237)** — 立场论文认为 agentic safety 应从行为合规转向可学习性:自我改进带来的效用-学习张力会侵蚀可纠正性,需设定强制的 learnability floor。 `ICML 2026` `相关`
+- **[Position: Invisible Tokens, Visible Bills: The Urgent Need to Audit Hidden Operations in Opaque LLM Services](https://icml.cc/virtual/2026/poster/67170)** — 指出不透明商业 LLM 服务存在 token 数量虚增与模型质量降级风险,提出执行、安全日志、用户审计三层框架并探讨 TEE 与水印等验证手段。 `ICML 2026` `相关`
+- **[Position: Safety Must Precede the Deployment of Open-Ended AI Agents](https://icml.cc/virtual/2026/poster/67207)** — 论证开放式自演化 agent 带来不可预测性、涌现失配与控制失效等新型风险,给出挑战分类法并主张在大规模部署前先行解决安全问题。 `ICML 2026` `核心`
+- **[Embracing Trustworthy Brain-Agent Collaboration as Paradigm Extension for Intelligent Assistive Technologies](https://openreview.net/forum?id=VZnOKzQ5qW)** — position paper 主张从 BCI 扩展到 Brain-Agent Collaboration,强调伦理数据处理、模型可靠性与人-agent 协作框架以保障可信与安全。 `NeurIPS 2025` `相关`
+- **[Emerging Risks from Embodied AI Require Urgent Policy Action](http://papers.nips.cc/paper_files/paper/2025/hash/e9f5279bb8c2e194503630623f81c9d4-Abstract-Position_Paper_Track.html)** — position paper 提出具身 AI 的物理/信息/经济/社会风险分类,分析美英欧政策缺口并建议强制测试认证与责任框架等对策。 `NeurIPS 2025` `相关`
+- **[Prohibiting Generative AI in any Form of Weapon Control](https://openreview.net/forum?id=uEY7kQsiZz)** — 立场论文:主张在幻觉可被建模与预测之前,全面禁止用生成式 AI 就地或远程控制、引导任何武器系统,因其固有不可靠性会导致人员伤亡。 `NeurIPS 2025` `相关`
+
+## 附录 A、复核后移出正文的论文(71 篇)
+
+正文收录经过一轮**对抗式范围审计**:每篇论文由审计 agent 按「是否具备实质 agent 要素」严格复判(工具调用 / 外部环境交互 / 多步自主执行 / 多智能体交互 / 检索与记忆读写 / 具身动作 / LLM 集成部署系统,至少命中一项,且同时具备安全要素);判为超范围的再由第二批 agent **专门尝试反驳**,只有反驳失败的才移出。下列论文即移出结果,按移出原因分组,保留链接与理由供你复议——若你认为某篇该收回正文,告诉我即可。
+
+**有工具 / MCP / 多智能体等 agent 要素,但**完全没有安全要素**的纯能力基准** — 6 篇
+
+- [Making Retrieval-Augmented Language Models Robust to Irrelevant Context](https://openreview.net/forum?id=ZS4m74kZpH) `ICLR 2024` — 虽有T5但无安全要素,属检索噪声与事实性准确率问题
+- [MCP-Bench: Benchmarking Tool-Using LLM Agents with Complex Real-World Tasks via MCP Servers](https://iclr.cc/virtual/2026/poster/10008216) `ICLR 2026` — 虽有 T1,但纯 MCP 能力基准,无任何安全要素
+- [MCPMark: A Benchmark for Stress-Testing Realistic and Comprehensive MCP Use](https://iclr.cc/virtual/2026/poster/10006866) `ICLR 2026` — 虽有 T1,但纯 CRUD 能力压测,无攻防安全维度
+- [Multi-Agent Debate with Memory Masking](https://openreview.net/forum?id=EdTt8nMAMA) `ICLR 2026` — 虽有 T4/T5,但纯推理性能提升,无攻防安全要素
+- [OSWorld-MCP: Benchmarking MCP Tool Invocation In Computer-Use Agents](https://iclr.cc/virtual/2026/poster/10007133) `ICLR 2026` — 虽有 T1/T2,但纯工具调用能力评测,无安全要素
+- [MCP-Persona: Benchmarking LLM Agents on Real-World Personal Applications via Environment Simulation](https://openreview.net/forum?id=vmT3p2w83l) `ICML 2026` — 虽有 T1 MCP 工具,但纯能力基准,无任何安全要素
+
+**纯对话面越狱与安全对齐(攻击面只有对话输入,不涉工具、外部数据源或自主执行)** — 17 篇
+
+- [SoK: Evaluating Jailbreak Guardrails for Large Language Models](https://arxiv.org/abs/2506.10597) `S&P 2026` — 通用越狱护栏评测,不涉工具/外部数据源,无 T1-T7
+- [Bypassing Prompt Guards in Production with Controlled-Release Prompting](https://www.usenix.org/conference/usenixsecurity26/presentation/fairoze) `USENIX Security 2026` — 生产聊天接口越狱绕guard,仅对话输入,无T1-T7
+- [Sirens' Whisper: Inaudible Near-Ultrasonic Jailbreaks of Speech-Driven LLMs](https://www.usenix.org/conference/usenixsecurity26/presentation/ling) `USENIX Security 2026` — 纯对话面越狱语音聊天模型,无工具或环境要素
+- [Odysseus: Jailbreaking Commercial Multimodal LLM-integrated Systems via Dual Steganography](https://www.ndss-symposium.org/ndss-paper/odysseus-jailbreaking-commercial-multimodal-llm-integrated-systems-via-dual-steganography/) `NDSS 2026` — 无 T1-T7,商用对话服务图文越狱绕过过滤器
+- [ThinkTrap: Denial-of-Service Attacks against Black-box LLM Services via Infinite Thinking](https://www.ndss-symposium.org/ndss-paper/thinktrap-denial-of-service-attacks-against-black-box-llm-services-via-infinite-thinking/) `NDSS 2026` — 无 T1-T7,纯对话输入触发的线上服务 DoS
+- [MazeBreaker: Multi-Agent Reinforcement Learning for Dynamic Jailbreaking of LLM Security Defenses](https://conf.researchr.org/details/icse-2026/icse-2026-research-track/41/MazeBreaker-Multi-Agent-Reinforcement-Learning-for-Dynamic-Jailbreaking-of-LLM-Secur) `ICSE 2026` — 无T1-T7;MARL仅是攻击训练框架,目标为聊天模型对话输入
+- [InDe-LLM: Defending Against Jailbreak Attacks in LLM-Powered Systems via Intention Disentangling](https://doi.org/10.1145/3797136) `FSE 2026` — 无T1-T7;越狱防御作用于聊天模型内部激活,无工具外部数据
+- [AutoDAN-Turbo: A Lifelong Agent for Strategy Self-Exploration to Jailbreak LLMs](https://openreview.net/forum?id=bhK7U37VW8) `ICLR 2025` — 无T1-T7;目标是聊天模型对话输入,攻击方pipeline不算场景
+- [Capability-Based Scaling Trends for LLM-Based Red-Teaming](https://openreview.net/forum?id=1InFGGz1D5) `ICLR 2026` — 纯聊天越狱能力尺度研究,不涉工具/环境/部署系统
+- [PLAGUE: Plug-and-play Framework for Lifelong Adaptive Generation of Multi-turn Exploits](https://openreview.net/forum?id=05hNleYOcG) `ICLR 2026` — 多轮纯对话越狱,不涉工具/外部数据,无 T1-T7
+- [Strategic Dishonesty Can Undermine AI Safety Evaluations of Frontier LLMs](https://openreview.net/forum?id=IbDr8xgUMW) `ICLR 2026` — 规避越狱输出监测器,纯对话场景,无 T 要素
+- [Strategic Obfuscation of Deceptive Reasoning in Language Models](https://openreview.net/forum?id=It2Nwp7QSy) `ICLR 2026` — 对话式对齐伪装规避 CoT 监控,无 T1-T7
+- [The Alignment Waltz: Jointly Training Agents to Collaborate for Safety](https://openreview.net/forum?id=2NBS9ilNqM) `ICLR 2026` — 多智能体 RL 只为对齐聊天模型本身,命中红线 c
+- [Eliciting Language Model Behaviors with Investigator Agents](https://proceedings.mlr.press/v267/li25i.html) `ICML 2025` — 摊销反推越狱提示打聊天模型,无工具/环境/多步执行
+- [Emoji Attack: Enhancing Jailbreak Attacks Against Judge LLM Detection](https://proceedings.mlr.press/v267/wei25g.html) `ICML 2025` — 规避judge LLM的纯文本越狱,无任何agent场景
+- [Chasing Moving Targets with Online Self-Play Reinforcement Learning for Safer Language Models](https://openreview.net/forum?id=l8PbMSZs2G) `ICML 2026` — 自博弈对齐训练,保护对象为聊天模型,无 T1-T7
+- [Profiling the Irrational Agent: Cognitive Modeling of LLM Behaviors in Sequential Jailbreaks](https://openreview.net/forum?id=MC5rKHKnzX) `ICML 2026` — 纯多轮对话越狱认知建模,不涉工具/外部环境,无 T 要素
+
+**通用内容审查与 guardrail(不面向 agentic 流水线)** — 8 篇
+
+- [A Causal Explainable Guardrails for Large Language Models](https://doi.org/10.1145/3658644.3690217) `CCS 2024` — 通用输出引导护栏,不面向 agentic,无 T 要素
+- [Legilimens: Practical and Unified Content Moderation for Large Language Model Services](https://doi.org/10.1145/3658644.3690322) `CCS 2024` — 聊天 LLM 服务通用内容审核,无 agentic 流水线
+- [YouthSafe: A Youth-Centric Safety Benchmark and Safeguard Model for Large Language Models](https://doi.org/10.1145/3719027.3765168) `CCS 2025` — 无 T1-T7,纯聊天内容审查基准与 moderation 模型
+- [Benchmarking and Understanding Safety Risks in AI Character Platforms](https://www.ndss-symposium.org/ndss-paper/benchmarking-and-understanding-safety-risks-in-ai-character-platforms/) `NDSS 2026` — 无 T1-T6,角色扮演聊天平台内容安全评测,T7 仅表层
+- [R^2-Guard: Robust Reasoning Enabled LLM Guardrail via Knowledge-Enhanced Logical Reasoning](https://openreview.net/forum?id=CkgKSqZbuC) `ICLR 2025` — 通用内容审查护栏,不面向 agentic 流水线,无 T1-T7
+- [DynaGuard: A Dynamic Guardian Model With User-Defined Policies](https://openreview.net/forum?id=gc8Ylt0lbm) `ICLR 2026` — 通用内容审查 guardrail,未命中任何 T1-T7
+- [GAVEL: Towards Rule-Based Safety through Activation Monitoring](https://openreview.net/forum?id=duntROHZ5R) `ICLR 2026` — 激活层护栏不面向 agentic 流水线,未命中 T1-T7
+- [BARRED: Synthetic Training of Custom Policy Guardrails via Asymmetric Debate](https://openreview.net/forum?id=PGSCzFVigx) `ICML 2026` — 多智能体仅用于合成数据,护栏为通用内容审查非 agentic
+
+**非 LLM 的 RL / 多智能体 / 传统系统** — 11 篇
+
+- [Bots can Snoop: Uncovering and Mitigating Privacy Risks of Bots in Group Chats](https://www.usenix.org/conference/usenixsecurity25/presentation/chou) `USENIX Security 2025` — 非LLM群聊机器人与加密协议,无T1-T7要素
+- [SkillScanner: Detecting Policy-Violating Voice Applications Through Static Analysis at the Development Phase](https://doi.org/10.1145/3576915.3616650) `CCS 2023` — 非 LLM 的 Alexa skill 静态代码分析,无 T 要素
+- [Steering the Herd: A Framework for LLM-based Control of Social Learning](https://openreview.net/forum?id=RtS4UqSmNt) `ICLR 2026` — 理论社会学习模型,LLM 仅作动机,无 T1-T7
+- [Adversarial Inception Backdoor Attacks against Reinforcement Learning](https://openreview.net/forum?id=yTsbZQTsAu) `ICML 2025` — 非LLM的DRL训练后门,无任何LLM agent要素
+- [Anytime Detection of Strategic Deviations in Multi-Agent Systems](https://openreview.net/forum?id=hXO2OP0T4w) `ICML 2026` — 博弈论/随机博弈序贯检验,非 LLM,无 T1-T7
+- [BIRD: Generalizable Backdoor Detection and Removal for Deep Reinforcement Learning](https://openreview.net/forum?id=l3yxZS3QdT) `NeurIPS 2023` — 纯 DRL 策略后门,无 LLM,T1-T7 全不命中
+- [Thought Cloning: Learning to Think while Acting by Imitating Human Thinking](https://openreview.net/forum?id=ZvDmna23r3) `NeurIPS 2023` — 非 LLM 模仿学习 agent,核心是能力提升,不入 LLM agent
+- [Predicting Future Actions of Reinforcement Learning Agents](https://openreview.net/forum?id=QgaGs7peYe) `NeurIPS 2024` — 非 LLM 的 RL agent 行为预测,无 T1-T7 之 LLM 语境
+- [ImageSentinel: Protecting Visual Datasets from Unauthorized Retrieval-Augmented Image Generation](https://openreview.net/forum?id=Pm50n1szgP) `NeurIPS 2025` — 图像数据集水印,无T1-T6,非LLM agent语境
+- [Military AI Needs Technically-Informed Regulation to Safeguard AI Research and its Applications](https://openreview.net/forum?id=gXTFLbGUQp) `NeurIPS 2025` — 武器管制政策立场,无T1-T7,非LLM agent议题
+- [Temporal Logic-Based Multi-Vehicle Backdoor Attacks against Offline RL Agents in End-to-end Autonomous Driving](https://openreview.net/forum?id=ifavjJaKQa) `NeurIPS 2025` — 非 LLM 的 offline RL 驾驶后门,不属 LLM agent
+
+**无 agent 语境的隐私推断、水印、成员推断与模型层后门** — 9 篇
+
+- [CodexLeaks: Privacy Leaks from Code Generation Language Models in GitHub Copilot](https://www.usenix.org/conference/usenixsecurity23/presentation/niu) `USENIX Security 2023` — 代码模型训练数据抽取加成员推断,无 T1-T7 语境
+- [What Was Your Prompt? A Remote Keylogging Attack on AI Assistants](https://www.usenix.org/conference/usenixsecurity24/presentation/weiss) `USENIX Security 2024` — 聊天流量侧信道,无工具无外部数据入上下文,不含T1-T7
+- [Cascading Adversarial Bias from Injection to Distillation in Language Models](https://doi.org/10.1145/3719027.3765122) `CCS 2025` — 训练数据投毒经蒸馏传播,无 T1-T7 要素
+- [Beyond Memorization: Violating Privacy via Inference with Large Language Models](https://openreview.net/forum?id=kmn0BhQk7p) `ICLR 2024` — 无T1-T7;纯文本属性推断隐私,无工具/环境/记忆语境
+- [Stop Tracking Me! Proactive Defense Against Attribute Inference Attack in LLMs](https://openreview.net/forum?id=dCJZR0P4T5) `ICLR 2026` — 文本属性推断防御,单轮推理,无工具/环境要素
+- [SelfIE: Self-Interpretation of Large Language Model Embeddings](https://openreview.net/forum?id=gjgRKbdYR7) `ICML 2024` — 嵌入自解释与有害知识擦除,注入仅举例,无 T
+- [Private Attribute Inference from Images with Vision-Language Models](http://papers.nips.cc/paper_files/paper/2024/hash/bb97e9a7c811904c9b01f51fde66edcf-Abstract-Conference.html) `NeurIPS 2024` — 纯 VLM 图像属性推断隐私,无工具无环境,T1-T7 不命中
+- [Unelicitable Backdoors via Cryptographic Transformer Circuits](https://openreview.net/forum?id=a560KLF3v5) `NeurIPS 2024` — 模型级 transformer 后门,无 agent 语境,T1-T7 不命中
+- [Self-Refining Language Model Anonymizers via Adversarial Distillation](http://papers.nips.cc/paper_files/paper/2025/hash/f1f0843df6f133309dd6d43d14f8a4e3-Abstract-Conference.html) `NeurIPS 2025` — 无 T1-T6,纯文本匿名化对抗蒸馏训练
+
+**单轮问答式知识 / 能力评测(无工具调用与自主循环)** — 6 篇
+
+- [The Digital Cybersecurity Expert: How Far Have We Come?](https://doi.org/10.1109/SP61157.2025.00198) `S&P 2025` — 纯知识多选题评测,无工具/环境/多步,无 T1-T7
+- [VIPER Strike: Defeating Visual Reasoning CAPTCHAs via Structured Vision–Language Inference](https://www.usenix.org/conference/usenixsecurity26/presentation/qi-minfeng) `USENIX Security 2026` — VLM 感知推理管线破 CAPTCHA,无工具与自主循环
+- [RedSage: A Cybersecurity Generalist LLM](https://openreview.net/forum?id=W4FAenIrQ2) `ICLR 2026` — 安全知识 MCQ 与助手训练,agentic 仅用于造数据
+- [The WMDP Benchmark: Measuring and Reducing Malicious Use with Unlearning](https://openreview.net/forum?id=xlr6AUDuJz) `ICML 2024` — 危险知识单轮 MCQ 与 unlearning,无 T1-T7
+- [Chain-of-Thought Reasoning In The Wild Is Not Always Faithful](https://openreview.net/forum?id=NUyt4uxzx0) `ICML 2026` — 单轮问答 CoT 忠实性,不涉工具/环境,无 T1-T7
+- [CTIBench: A Benchmark for Evaluating LLMs in Cyber Threat Intelligence](https://openreview.net/forum?id=iJAOpsXo2I) `NeurIPS 2024` — 静态威胁情报问答评测,无工具无自主循环,不命中 T1-T7
+
+**治理与政策立场论文(议题非 agent 或自主系统)** — 5 篇
+
+- [Chasing Shadows: Pitfalls in LLM Security Research](https://www.ndss-symposium.org/ndss-paper/chasing-shadows-pitfalls-in-llm-security-research/) `NDSS 2026` — 无 T1-T7,泛 LLM 安全研究方法学立场论文
+- [Empowering Users in Digital Privacy Management through Interactive LLM-Based Agents](https://openreview.net/forum?id=FEpAUnS7f7) `ICLR 2025` — 仅隐私政策问答助手,无 T1-T6 要素,且非安全攻防研究
+- [Position: Contextual Integrity is Inadequately Applied to Language Models](https://proceedings.mlr.press/v267/shvartzshnaider25a.html) `ICML 2025` — LLM隐私理论立场,无工具/环境/部署系统等T要素
+- [FLARE-AI: Flaw Reporting for AI](https://openreview.net/forum?id=G7DQoPNOMZ) `ICML 2026` — 无 T1-T7,AI 缺陷上报治理平台,不针对自主系统
+- [Position: AI Governance Needs ISO-like Interoperability Protocols, Not Just Laws](https://icml.cc/virtual/2026/poster/67147) `ICML 2026` — 跨法域合规治理立场,未命中任何 T1-T7 要素
+
+**LLM 仅作静态工具辅助传统安全任务** — 1 篇
+
+- [Kintsugi: Empowering LLMs to Mitigate Web Vulnerabilities via Runtime Policy Injection](https://www.usenix.org/conference/usenixsecurity26/presentation/peng-yihao) `USENIX Security 2026` — LLM 静态辅助 Web 漏洞缓解,无 T1-T7;依据不足
+
+**其他** — 8 篇
+
+- [Beyond Prompt-Induced Lies: Investigating LLM Deception on Benign Prompts](https://openreview.net/forum?id=PDBBYwd1LY) `ICLR 2026` — 纯问答欺骗测评,无工具/环境/多智能体要素
+- [InfoMosaic-Bench: Evaluating Multi-Source Information Seeking in Tool-Augmented Agents](https://iclr.cc/virtual/2026/poster/10011010) `ICLR 2026` — 虽有 T1 工具调用,但零安全要素,第二步不过
+- [The Alignment Auditor: A Bayesian Framework for Verifying and Refining LLM Objectives](https://openreview.net/forum?id=CH7TfRLqSF) `ICLR 2026` — IRL 审计聊天模型奖励与 RLHF,无工具/环境要素
+- [CGRiC: Compositional Risk Certification for Structured LLM Outputs](https://openreview.net/forum?id=MPwD9hhJoa) `ICML 2026` — 工具增强仅一句带过,核心是幻觉/正确性认证,无 T 要素
+- [MAGIC: A Co-Evolving Attacker–Defender Adversarial Game for Robust LLM Safety](https://openreview.net/forum?id=deuc2n0fGN) `ICML 2026` — 无 T1-T7,多智能体仅训练框架,受保护者是聊天模型
+- [A Synthetic Dataset for Personal Attribute Inference](https://openreview.net/forum?id=1nqfIQIQBf) `NeurIPS 2024` — agent 仅作数据生成工具,隐私威胁面无 T1-T7
+- [Personalized Safety in LLMs: A Benchmark and A Planning-Based Agent Approach](https://openreview.net/forum?id=Gsi42ohBoM) `NeurIPS 2025` — 无 T1-T6,多轮问答聊天安全,agent 只是问询包装
+- [Virus Infection Attack on LLMs: Your Poisoning Can Spread "VIA" Synthetic Data](https://openreview.net/forum?id=QYJt0pX0zJ) `NeurIPS 2025` — 无 T1-T7,合成数据训练管线投毒后门
+
+## 附录 B、安全四大与软工顶会中被排除的纯越狱 / 对齐类论文(26 篇)
+
+这类论文数量多、与本主题相邻,但攻击面**只有对话输入**——不涉及工具调用、外部数据源进入上下文、也不涉及自主执行,因此整类排除,以保持收录边界自洽(否则等于把全部 LLM 安全论文都纳入)。下面列出安全四大与软工两会中该类论文:
+
+- [DREAM: Scalable Red Teaming for Text-to-Image Generative Systems via Distribution Modeling](https://doi.org/10.1109/SP63933.2026.00112) `S&P`
+- [ENCHTABLE: Unified Safety Alignment Transfer in Fine-Tuned Large Language Models](https://doi.org/10.1109/SP63933.2026.00072) `S&P`
+- [MetaBreak: Jailbreaking Online LLM Services via Special Token Manipulation](https://doi.org/10.1109/SP63933.2026.00095) `S&P`
+- [Modifier Unlocked: Jailbreaking Text-to-Image Models Through Prompts](https://doi.org/10.1109/SP61157.2025.00242) `S&P`
+- [SneakyPrompt: Jailbreaking Text-to-image Generative Models](https://doi.org/10.1109/SP54263.2024.00123) `S&P`
+- [SoK: Robustness in Large Language Models against Jailbreak Attacks](https://doi.org/10.1109/SP63933.2026.00107) `S&P`
+- [Supporting Human Raters with the Detection of Harmful Content Using Large Language Models](https://doi.org/10.1109/SP61157.2025.00082) `S&P`
+- [AttackGNN: Red-Teaming GNNs in Hardware Security Using Reinforcement Learning](https://www.usenix.org/conference/usenixsecurity24/presentation/gohil) `USENIX Security`
+- [Don't Listen To Me: Understanding and Exploring Jailbreak Prompts of Large Language Models](https://www.usenix.org/conference/usenixsecurity24/presentation/yu-zhiyuan) `USENIX Security`
+- [Exploiting Task-Level Vulnerabilities: An Automatic Jailbreak Attack and Defense Benchmarking for LLMs](https://www.usenix.org/conference/usenixsecurity25/presentation/zhang-lan) `USENIX Security`
+- [Exposing the Guardrails: Reverse-Engineering and Jailbreaking Safety Filters in DALL·E Text-to-Image Pipelines](https://www.usenix.org/conference/usenixsecurity25/presentation/villa) `USENIX Security`
+- [Great, Now Write an Article About That: The Crescendo Multi-Turn LLM Jailbreak Attack](https://www.usenix.org/conference/usenixsecurity25/presentation/russinovich) `USENIX Security`
+- [JBShield: Defending Large Language Models from Jailbreak Attacks through Activated Concept Analysis and Manipulation](https://www.usenix.org/conference/usenixsecurity25/presentation/zhang-shenyi) `USENIX Security`
+- [LLM-Fuzzer: Scaling Assessment of Large Language Model Jailbreaks](https://www.usenix.org/conference/usenixsecurity24/presentation/yu-jiahao) `USENIX Security`
+- [Making Them Ask and Answer: Jailbreaking Large Language Models in Few Queries via Disguise and Reconstruction](https://www.usenix.org/conference/usenixsecurity24/presentation/liu-tong) `USENIX Security`
+- [Mind the Inconspicuous: Revealing the Hidden Weakness in Aligned LLMs' Refusal Boundaries](https://www.usenix.org/conference/usenixsecurity25/presentation/yu-jiahao) `USENIX Security`
+- [PAPILLON: Efficient and Stealthy Fuzz Testing-Powered Jailbreaks for LLMs](https://www.usenix.org/conference/usenixsecurity25/presentation/gong-xueluan) `USENIX Security`
+- [Refusal Is Not an Option: Unlearning Safety Alignment of Large Language Models](https://www.usenix.org/conference/usenixsecurity25/presentation/song-minkyoo) `USENIX Security`
+- [SelfDefend: LLMs Can Defend Themselves against Jailbreaking in a Practical Manner](https://www.usenix.org/conference/usenixsecurity25/presentation/wang-xunguang) `USENIX Security`
+- [TwinBreak: Jailbreaking LLM Security Alignments based on Twin Prompts](https://www.usenix.org/conference/usenixsecurity25/presentation/krauss) `USENIX Security`
+- ["Do Anything Now": Characterizing and Evaluating In-The-Wild Jailbreak Prompts on Large Language Models](https://doi.org/10.1145/3658644.3670388) `CCS`
+- [A Causal Perspective for Enhancing Jailbreak Attack and Defense](https://www.ndss-symposium.org/ndss-paper/a-causal-perspective-for-enhancing-jailbreak-attack-and-defense/) `NDSS`
+- [Bleeding Pathways: Vanishing Discriminability in LLM Hidden States Fuels Jailbreak Attacks](https://www.ndss-symposium.org/ndss-paper/bleeding-pathways-vanishing-discriminability-in-llm-hidden-states-fuels-jailbreak-attacks/) `NDSS`
+- [DUALBREACH: Efficient Dual-Jailbreaking via Target-Driven Initialization and Multi-Target Optimization](https://www.ndss-symposium.org/ndss-paper/dualbreach-efficient-dual-jailbreaking-via-target-driven-initialization-and-multi-target-optimization/) `NDSS`
+- [MASTERKEY: Automated Jailbreaking of Large Language Model Chatbots](https://www.ndss-symposium.org/ndss-paper/masterkey-automated-jailbreaking-of-large-language-model-chatbots/) `NDSS`
+- [Code Red! On the Harmfulness of Applying Off-the-Shelf Large Language Models to Programming Tasks](https://doi.org/10.1145/3729380) `FSE`
+
+> 注:AI 顶会(ICLR / ICML / NeurIPS)同类论文数以百计,未逐一列出。
+
+## 统计方法
+
+为保证**完整性**和**链接真实性**,采用多源交叉检索 + 逐条机器验证:
+
+1. **权威目录全量筛查**:安全四大和软工会议以 DBLP XML、官方 accepted list 及技术日程为底表,先遍历全部标题,再按摘要和正文复核边界项。
+2. **AI 顶会摘要级筛查**:ICLR、ICML、NeurIPS 使用 OpenReview / PMLR / NeurIPS proceedings 的录用记录与摘要,组合 Agent、MCP、工具、RAG、安全、隐私、攻击、防御等词族检索并人工复扫。
+3. **2026 年滚动补查**:ICLR、ICML、ICSE、FSE、S&P、NDSS 采用官方录用页;USENIX Security 2026 采用已经上线的完整 technical sessions,覆盖早期 Cycle 1 与后续公开论文。
+4. **社区清单交叉核对**:Awesome-Agentic-Security、Awesome-MCP-Security 等社区列表仅用于发现候选,会议归属仍以 DBLP、OpenReview、PMLR 或会议官网为准。
+5. **链接强验证**:每条链接不仅检查可访问性,更验证「链接确实指向这篇论文」——
+   - DOI 链接:调用 Crossref API 比对论文标题与会议名称;
+   - OpenReview 链接:用本地 OpenReview 全量镜像核对 forum ID ↔ 标题 ↔ 会议 ↔ 年份;
+   - 官网链接:抓取页面正文比对标题。
+
+6. **对抗式范围审计**:全部候选再由审计 agent 逐条复判「是否具备实质 agent 要素」——工具调用 / function calling / MCP 协议、与外部环境交互(网页 / GUI / OS / 代码库 / 物理世界)、多步自主执行与规划、多智能体交互、检索或记忆读写、具身动作输出、LLM 集成部署系统,**至少命中一项且同时具备安全要素**才保留;判为超范围的再交第二批 agent 专门尝试反驳,反驳成立则恢复。本轮共移出 71 篇(见附录 A),另有 6 篇经反驳恢复。
+
+**收录口径**:分 `核心` 与 `相关` 两档。核心 = 直接针对 LLM Agent / MCP 的攻防、评测、生态测量;相关 = 沾边工作(LLM 集成应用注入、RAG 投毒、function calling 鲁棒性、agentic 场景越狱、AI control、agent 欺骗等)。判定从宽,不确定者收录并标为 `相关`。
+
+**边界说明**:这不是全部 LLM 安全论文的汇总。仅当工作能连接到 Agent/MCP 的攻击面、运行时、工具/记忆/RAG、自治行为或相邻评测时才收录;纯模型压缩、通用水印、普通对抗样本等无明确桥接的工作仍排除。主会的 Poster、Demo、Datasets & Benchmarks 与 Position 分轨保留并标为 `相关`,Workshop 不计入。
